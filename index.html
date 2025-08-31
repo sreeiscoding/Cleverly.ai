@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleverly</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <nav class="navbar">
+      <div class="navbar-left">
+        <span class="nav-name">
+            <img src="Cleverly AI.png" alt="logo" width="150">
+        </span>
+      </div>
+      <div class="navbar-center">
+        <a href="index.html" class="active">Home</a>
+        <a href="about.html">About</a>
+        <a href="contact.html">Contact</a>
+        <a href="terms.html">Terms</a>
+        <a href="privacy.html">Privacy</a>
+        <div class="dropdown">
+          <a href="#downloads" class="dropbtn">Downloads</a>
+          <div class="dropdown-content">
+            <a href="#extensions">Extensions</a>
+            <a href="#desktop-app">Desktop App</a>
+            <a href="#mobile-app">Mobile App</a>
+          </div>
+        </div>
+        <div class="dropdown">
+          <a href="#faqs" class="dropbtn">FAQs</a>
+          <div class="dropdown-content">
+            <a href="#faq1">How do I install the app?</a>
+            <a href="#faq2">Is there a mobile version?</a>
+            <a href="#faq3">How do I get support?</a>
+            <a href="#faq4">Can I use extensions?</a>
+          </div>
+        </div>
+      </div>
+      <div class="navbar-right">
+        <a href="#get-started" class="btn">Get Started</a>
+        <a href="#signin" class="btn">Sign In</a>
+      </div>
+    </nav>
+    <section class="section hero">
+      <div>
+        <span class="hero-badge">✨ New</span>
+        <span class="hero-feature">Smarter way to learn and work with AI</span>
+      </div>
+      <h1 class="hero-title">
+        Smarter <span class="hero-highlight">Productivity</span> for students and professionals
+      </h1>
+      <p class="hero-subtitle">
+        Turn PDFs, files, or ideas into ready-to-use notes, assignments, or presentations in seconds.
+      </p>
+      <div class="hero-btn-group">
+        <button class="hero-btn">Start 14-day free trial</button>
+        <button class="hero-btn">Watch demo</button>
+      </div>
+    </section>
+    <section class="section features-preview">
+      <h2 class="features-title">Feature Preview</h2>
+      <div class="features-cards sticky-flow">
+        <div class="animated-block feature-card sticky-card sticky-left sticky-orange">
+          <div class="sticky-pin sticky-pin-orange"></div>
+          <div class="sticky-content">
+            <div class="sticky-number">01</div>
+            <h3 class="sticky-title">AI Image Generator</h3>
+            <p class="sticky-desc">Generate diagrams, flowcharts, infographics.</p>
+          </div>
+        </div>
+        <div class="animated-block feature-card sticky-card sticky-right sticky-blue">
+          <div class="sticky-pin sticky-pin-blue"></div>
+          <div class="sticky-content">
+            <div class="sticky-number">02</div>
+            <h3 class="sticky-title">MCQ Generator</h3>
+            <p class="sticky-desc">Auto-generate questions from text/PDFs, Save to “My Questions.”, Practice with/without timer.</p>
+          </div>
+        </div>
+        <div class="animated-block feature-card sticky-card sticky-left sticky-purple">
+          <div class="sticky-pin sticky-pin-purple"></div>
+          <div class="sticky-content">
+            <div class="sticky-number">03</div>
+            <h3 class="sticky-title">Assignments & Presentations </h3>
+            <p class="sticky-desc">From notes/PDF → AI creates slide outline (titles + bullet points), Option to export to PowerPoint (.pptx) or Google Slides.</p>
+          </div>
+        </div>
+        <div class="animated-block feature-card sticky-card sticky-right sticky-orange">
+          <div class="sticky-pin sticky-pin-orange"></div>
+          <div class="sticky-content">
+            <div class="sticky-number">04</div>
+            <h3 class="sticky-title">Notes Breakdown</h3>
+            <p class="sticky-desc">Quick key-point extraction from text, Turn paragraphs into key points.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section class="section usecases-section">
+      <div class="usecases-header">
+        <h2 class="usecases-title">Who is Cleverly.ai for?</h2>
+        <p class="usecases-subtitle">Tailored for every need — students, businesses, and institutions.</p>
+      </div>
+      <div class="usecases-cards">
+        <div class="animated-block usecase-card">
+          <div class="usecase-icon" aria-label="Students">📚</div>
+          <h3 class="usecase-title">Students</h3>
+          <p class="usecase-desc">Summarize lectures, create notes, and prep for exams in minutes.</p>
+        </div>
+        <div class="animated-block usecase-card">
+          <div class="usecase-icon" aria-label="Businesses">🏢</div>
+          <h3 class="usecase-title">Businesses</h3>
+          <p class="usecase-desc">Generate quick reports, emails, and marketing ideas with AI.</p>
+        </div>
+        <div class="animated-block usecase-card">
+          <div class="usecase-icon" aria-label="Institutions">🎓</div>
+          <h3 class="usecase-title">Institutions</h3>
+          <p class="usecase-desc">Manage events, automate content, and support smarter collaboration.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- How It Works Section -->
+    <section class="section howitworks-section">
+      <div class="howitworks-header">
+        <h2 class="howitworks-title">How Cleverly.ai Works</h2>
+        <p class="howitworks-subtitle">Get started in just 3 easy steps.</p>
+      </div>
+      <div class="howitworks-steps">
+        <div class="howitworks-step">
+          <div class="howitworks-stepnum">1️</div>
+          <div class="howitworks-stepicon" aria-label="Upload or Ask">
+            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="6" y="10" width="26" height="18" rx="4" stroke="#14807a" stroke-width="2"/><path d="M19 14v8" stroke="#14807a" stroke-width="2" stroke-linecap="round"/><path d="M15 18l4 4 4-4" stroke="#14807a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="howitworks-steptext">Upload or Ask<br><span class="howitworks-stepdesc">Type your request or add content.</span></div>
+        </div>
+        <div class="howitworks-step">
+          <div class="howitworks-stepnum">2️</div>
+          <div class="howitworks-stepicon" aria-label="AI Generates">
+            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="19" cy="19" r="12" stroke="#14807a" stroke-width="2"/><path d="M19 13v6l4 2" stroke="#14807a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="howitworks-steptext">AI Generates<br><span class="howitworks-stepdesc">Cleverly.ai instantly processes and creates output.</span></div>
+        </div>
+        <div class="howitworks-step">
+          <div class="howitworks-stepnum">3️</div>
+          <div class="howitworks-stepicon" aria-label="Use & Share">
+            <svg width="38" height="38" viewBox="0 0 38 38" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="18" height="18" rx="4" stroke="#14807a" stroke-width="2"/><path d="M19 14v10" stroke="#14807a" stroke-width="2" stroke-linecap="round"/><path d="M15 22l4 4 4-4" stroke="#14807a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="howitworks-steptext">Use & Share<br><span class="howitworks-stepdesc">Download, copy, or share results — ready to use anywhere.</span></div>
+        </div>
+      </div>
+    </section>
+
+      <!-- Demo / Screenshot Section -->
+    <section class="section demo-section">
+      <div class="demo-container">
+        <div class="demo-left">
+          <h2 class="demo-title">See Cleverly in Action</h2>
+          <p class="demo-subtitle">An AI assistant that helps you plan, organize, and execute smarter — all in one place.</p>
+          <a href="#demo" class="demo-btn">Try a Demo</a>
+        </div>
+        <div class="demo-right">
+          <div class="demo-mockup">
+            <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80" alt="Cleverly Dashboard Screenshot" class="demo-screenshot">
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="section comparison-section">
+      <div class="comparison-container">
+        <h2 class="comparison-title">Why Switch to Cleverly?</h2>
+        <table class="comparison-table">
+          <thead>
+            <tr>
+              <th>Feature</th>
+              <th>Old Tools <span class="cross">❌</span></th>
+              <th>Cleverly.ai <span class="tick">✅</span></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Create tasks quickly</td>
+              <td>Manual, slow</td>
+              <td>One-click with AI</td>
+            </tr>
+            <tr>
+              <td>Organize projects</td>
+              <td>Scattered apps</td>
+              <td>All-in-one dashboard</td>
+            </tr>
+            <tr>
+              <td>Smart suggestions</td>
+              <td>None</td>
+              <td>AI-powered insights</td>
+            </tr>
+            <tr>
+              <td>Collaboration</td>
+              <td>Clunky</td>
+              <td>Smooth, real-time</td>
+            </tr>
+            <tr>
+              <td>Cost</td>
+              <td>Hidden fees</td>
+              <td>Simple, transparent</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="comparison-cta-row">
+          <p class="comparison-cta-text">👉 Make the switch today. Cleverly is built for modern teams.</p>
+          <a href="#get-early-access" class="comparison-cta-btn">Get Early Access</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section plans-preview">
+      <h2 class="plans-title">Simple Pricing for Every Learner</h2>
+      <p class="plans-subtitle">
+        Choose a plan that fits your study or business needs.
+      </p>
+      <div class="plans-toggle">
+        <button class="animated-block toggle-btn active" id="monthly-toggle">Monthly</button>
+        <button class="animated-block toggle-btn" id="yearly-toggle">Yearly</button>
+      </div>
+      <div class="plans-tiers">
+        <div class="animated-block plan-card">
+          <h3>🎓 Student Plan</h3>
+          <p class="plan-price monthly">₹199 / month</p>
+          <p class="plan-price yearly" style="display: none">₹3999 / year</p>
+          <ul>
+            <li>AI Image &amp; Text Generator (limited credits)</li>
+            <li>Breakdown notes from PDFs/paragraphs</li>
+            <li>Word meaning &amp; personal dictionary</li>
+            <li>Generate MCQs (limited per month)</li>
+            <li>Upload notes &amp; files (up to 50MB)</li>
+          </ul>
+          <div class="plan-desc">
+            📌 Best for students who need quick help with notes &amp;
+            assignments
+          </div>
+          <a href="#get-started" class="plan-btn">Get Started</a>
+        </div>
+        <div class="animated-block plan-card plan-popular">
+          <div class="popular-badge">🔥 Most Popular</div>
+          <h3>💼 Pro / Business Plan</h3>
+          <p class="plan-price monthly">₹999 / month</p>
+          <p class="plan-price yearly" style="display: none">₹9999 / year</p>
+          <ul>
+            <li>Everything in Student Plan +</li>
+            <li>Unlimited MCQs &amp; breakdowns</li>
+            <li>Presentation, Assignment &amp; Seminar Generator</li>
+            <li>Large file uploads (up to 500MB)</li>
+            <li>Export to PDF, PPT, DOCX</li>
+            <li>Priority Support</li>
+          </ul>
+          <div class="plan-desc">
+            📌 Best for professionals, researchers &amp; teams
+          </div>
+          <a href="#upgrade-pro" class="plan-btn plan-btn-popular"
+            >Upgrade to Pro</a
+          >
+        </div>
+        <div class="animated-block plan-card">
+          <h3>🏫 Institution Plan</h3>
+          <p class="plan-price">Custom Pricing<br />(₹50K–₹2L+ / year)</p>
+          <ul>
+            <li>Unlimited student accounts under one license</li>
+            <li>Teacher/Admin Dashboard</li>
+            <li>Centralized storage of study material</li>
+            <li>Analytics &amp; progress tracking</li>
+            <li>Custom branding with college logo</li>
+          </ul>
+          <div class="plan-desc">
+            📌 Best for schools, colleges &amp; coaching centers
+          </div>
+          <a href="#contact-sales" class="plan-btn">Contact Sales</a>
+        </div>
+      </div>
+      <div class="plans-footer">
+        <p class="plans-cta">
+          Start learning smarter today. No hidden fees, cancel anytime.
+        </p>
+        <a href="#get-started-free" class="animated-block cta-btn plans-cta-btn"
+          >Get Started Free</a
+        >
+      </div>
+    </section>
+
+      <section class="section faq-section">
+      <div class="faq-trusted">TRUSTED BY</div>
+      <h2 class="faq-title">Frequently <br> Asked Questions</h2>
+      <div class="faq-list">
+        <div class="animated-block faq-item">
+          <div class="faq-question-row" onclick="toggleFaq(this)">
+            <span class="faq-question">How do I install the app?</span>
+            <button class="faq-toggle-btn" aria-label="Close" tabindex="0">&times;</button>
+          </div>
+          <div class="faq-answer">Just download Cleverly.ai from our website or app store, follow the simple setup, and start using instantly.</div>
+        </div>
+        <div class="animated-block faq-item">
+          <div class="faq-question-row" onclick="toggleFaq(this)">
+            <span class="faq-question">Is there a mobile version?</span>
+            <button class="faq-toggle-btn" aria-label="Expand" tabindex="0">+</button>
+          </div>
+          <div class="faq-answer">Yes! Cleverly.ai is available for iOS and Android, so you can study and work on the go.</div>
+        </div>
+        <div class="animated-block faq-item">
+          <div class="faq-question-row" onclick="toggleFaq(this)">
+            <span class="faq-question">Can I use extensions?</span>
+            <button class="faq-toggle-btn" aria-label="Expand" tabindex="0">+</button>
+          </div>
+          <div class="faq-answer">Absolutely. Cleverly.ai supports browser extensions for Chrome, Edge, and Firefox.</div>
+        </div>
+        <div class="animated-block faq-item">
+          <div class="faq-question-row" onclick="toggleFaq(this)">
+            <span class="faq-question">Is my data safe?</span>
+            <button class="faq-toggle-btn" aria-label="Expand" tabindex="0">+</button>
+          </div>
+          <div class="faq-answer">Your privacy is our priority. All your files and notes are encrypted and never shared.</div>
+        </div>
+      </div>
+    </section>
+    <script>
+      function toggleFaqAnswer(btn) {
+        const answer = btn.nextElementSibling;
+        if (answer.style.maxHeight) {
+          answer.style.maxHeight = null;
+          btn.classList.remove('open');
+        } else {
+          document.querySelectorAll('.faq-timeline-answer').forEach(a => {
+            a.style.maxHeight = null;
+            a.previousElementSibling.classList.remove('open');
+          });
+          answer.style.maxHeight = answer.scrollHeight + 'px';
+          btn.classList.add('open');
+        }
+      }
+    </script>
+
+    <section class="section newsletter-section">
+      <h2 class="newsletter-title">✉️ Stay Updated with Cleverly.ai</h2>
+      <p class="newsletter-subtitle">
+        Be the first to know about new features, student tools, and exclusive early access updates.<br>
+        Join our newsletter and never miss a smarter way to study &amp; work.
+      </p>
+      <form class="newsletter-form" action="#" method="post">
+        <input type="email" class="newsletter-input" placeholder="Your email address" required />
+        <button type="submit" class="newsletter-btn">Subscribe</button>
+      </form>
+      <ul class="newsletter-benefits">
+        <li>✅ Get product updates</li>
+        <li>✅ Early access to beta features</li>
+        <li>✅ Special discounts for students &amp; teams</li>
+      </ul>
+    </section>
+
+    <!-- Final CTA Section -->
+    <section class="section finalcta-section">
+      <div class="finalcta-content">
+        <h2 class="finalcta-headline">Ready to work smarter with AI?</h2>
+        <p class="finalcta-subtitle">Join Cleverly.ai and be among the first to transform the way you study and work.</p>
+        <div class="finalcta-btns">
+          <a href="#get-early-access" class="finalcta-btn finalcta-btn-primary">🔵 Get Early Access</a>
+          <a href="#book-demo" class="finalcta-btn finalcta-btn-secondary">⚪ Book a Demo</a>
+        </div>
+        <div class="finalcta-trust">Simple pricing, no hidden fees.</div>
+      </div>
+    </section>
+
+    <!-- FAQ Section - Minimal Card Accordion Design -->
+ 
+
+    <script>
+      function toggleFaq(row) {
+        const item = row.parentElement;
+        const answer = item.querySelector('.faq-answer');
+        const btn = row.querySelector('.faq-toggle-btn');
+        const isOpen = item.classList.contains('open');
+        document.querySelectorAll('.faq-item').forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.faq-answer').style.display = 'none';
+          i.querySelector('.faq-toggle-btn').textContent = '+';
+          i.querySelector('.faq-toggle-btn').setAttribute('aria-label', 'Expand');
+        });
+        if (!isOpen) {
+          item.classList.add('open');
+          answer.style.display = 'block';
+          btn.textContent = '×';
+          btn.setAttribute('aria-label', 'Close');
+        }
+      }
+      // Initialize: only first FAQ open
+      document.addEventListener('DOMContentLoaded', function() {
+        const items = document.querySelectorAll('.faq-item');
+        items.forEach((item, idx) => {
+          const answer = item.querySelector('.faq-answer');
+          const btn = item.querySelector('.faq-toggle-btn');
+          if (idx === 0) {
+            item.classList.add('open');
+            answer.style.display = 'block';
+            btn.textContent = '×';
+            btn.setAttribute('aria-label', 'Close');
+          } else {
+            item.classList.remove('open');
+            answer.style.display = 'none';
+            btn.textContent = '+';
+            btn.setAttribute('aria-label', 'Expand');
+          }
+        });
+      });
+    </script>
+    <!-- Testimonials Section -->
+    <section class="section testimonials-section">
+      <div class="testimonials-container split-grid" style="position:relative;">
+        <svg class="animated-block testimonials-timeline" width="100%" height="340" viewBox="0 0 1100 340" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute;top:0;left:0;pointer-events:none;z-index:0;">
+          <path d="M 180 60 Q 320 120 320 180 Q 320 220 520 220 Q 720 220 720 180 Q 720 120 900 120" stroke="#5b7cff" stroke-width="4" stroke-dasharray="12 10" fill="none"/>
+        </svg>
+        <div class="testimonials-featured" style="position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;">
+          <div class="testimonial-card testimonial-featured">
+            <img src="avatar2.jpg" alt="Elizabeth Jeff" class="testimonial-avatar">
+            <div class="animated-block testimonial-info">
+              <div class="testimonial-name">Elizabeth Jeff</div>
+              <div class="testimonial-text">“Cleverly.ai helped me save hours every week while staying organized with my projects. It feels like having a personal assistant.”</div>
+            </div>
+          </div>
+          <div class="testimonials-bigtitle-wrapper">
+            <h2 class="testimonials-bigtitle">What Our <br> Customers Say</h2>
+          </div>
+        </div>
+        <div class="testimonials-stack" style="position:relative;z-index:1;">
+          <div class="animated-block testimonial-card">
+            <img src="avatar1.jpg" alt="Mehwish" class="testimonial-avatar">
+            <div class="testimonial-info">
+              <div class="testimonial-name">Mehwish</div>
+              <div class="testimonial-text">“Commitment interested discretion estimating on stimulated apartments oh.”</div>
+            </div>
+          </div>
+          <div class="animated-block testimonial-card">
+            <img src="avatar3.jpg" alt="Emily Thomas" class="testimonial-avatar">
+            <div class="testimonial-info">
+              <div class="testimonial-name">Emily Thomas</div>
+              <div class="testimonial-text">“Never at water me might. On formed merits hunted unable merely by mr whence or.”</div>
+            </div>
+          </div>
+          <div class="animated-block testimonial-card">
+            <img src="avatar4.jpg" alt="John Doe" class="testimonial-avatar">
+            <div class="testimonial-info">
+              <div class="testimonial-name">John Doe</div>
+              <div class="testimonial-text">“Absolutely love the workflow features. My team is more productive than ever!”</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script>
+      window.addEventListener('scroll', function() {
+        const navbar = document.querySelector('.navbar');
+        if (!navbar) return;
+        if (window.scrollY > 24) {
+          navbar.classList.add('scrolled');
+        } else {
+          navbar.classList.remove('scrolled');
+        }
+      });
+    </script>
+  </body>
+  <footer
+    class="site-footer"
+    style="
+      background: transparent;
+      padding: 0;
+      margin-top: 48px;
+      position: relative;
+    "
+  >
+    <svg
+      viewBox="0 0 1440 600"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      preserveAspectRatio="none"
+      style="display: block; width: 100%; height: 340px"
+    >
+      <path d="M0,300 C480,600 960,0 1440,300 L1440,600 L0,600 Z" fill="#222" />
+    </svg>
+    <div
+      style="
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 340px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-end;
+        pointer-events: none;
+      "
+    >
+      <nav style="margin-bottom: 24px; pointer-events: auto">
+        <a href="#about" style="color: #fff; margin: 0 18px; text-decoration: none; font-size: 1.1rem; opacity: 0.85;">About</a>
+        <a href="#contact" style="color: #fff; margin: 0 18px; text-decoration: none; font-size: 1.1rem; opacity: 0.85;">Contact</a>
+        <a href="#terms" style="color: #fff; margin: 0 18px; text-decoration: none; font-size: 1.1rem; opacity: 0.85;">Terms</a>
+        <a href="#privacy" style="color: #fff; margin: 0 18px; text-decoration: none; font-size: 1.1rem; opacity: 0.85;">Privacy</a>
+      </nav>
+      <div style="color: #fff; font-size: 0.95rem; opacity: 0.7; margin-bottom: 12px; pointer-events: auto;">
+        &copy; 2025 Cleverly. All rights reserved.
+      </div>
+    </div>
+  </footer>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cleverly | Dashboard</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body
+    style="
+      background: linear-gradient(120deg, #b7b8f3 0%, #f7e6f7 100%);
+      min-height: 100vh;
+    "
+  >
+    <div class="dashboard-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-logo"><i class="fa-solid fa-square"></i></span>
+          <span class="sidebar-title">Cleverly.ai</span>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <button class="home-btn">
+                <i class="fa-solid fa-house"></i> Home
+              </button>
+            </li>
+            <li class="nav-section">
+              Core Features
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-file-lines"></i> Notes Breakdown</a
+                  >
+                </li>
+                <li>
+                  <a href="#"><i class="fa-solid fa-palette"></i> AI Images</a>
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-bullseye"></i> MCQ Generator</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Resources
+              <ul>
+                <li>
+                  <a href="#"><i class="fa-solid fa-book"></i> My Dictionary</a>
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-question"></i> My Questions</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Uploads & Media
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-folder-open"></i> Upload Notes</a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-image"></i> Presentations</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Tasks & Events
+              <ul>
+                <li>
+                  <a href="#"><i class="fa-solid fa-pen"></i> Assignments</a>
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-microphone"></i> Seminars</a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <input type="text" class="search-bar" placeholder="Search..." />
+          <div class="profile-dropdown">
+            <button class="profile-btn">
+              <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="dropdown-content">
+              <a href="#settings">Settings</a>
+              <a href="#logout">Logout</a>
+            </div>
+          </div>
+        </header>
+        <section class="workspace">
+          <div class="announcement">
+            <span class="announcement-badge">Now live</span>
+            Cleverly.ai, built for academics and business.
+          </div>
+          <h1 class="dashboard-title">Meet Cleverly</h1>
+          <p class="dashboard-desc">
+            An Premium intelligent hub for students, teams, and professionals.
+          </p>
+          <div class="dashboard-features">
+            <h2>Why Cleverly.ai?</h2>
+            <div class="features-list">
+              <div class="feature-item">
+                <i class="fa-solid fa-pen"></i> <b>Smarter Learning, Faster</b
+                ><br />Turn paragraphs, notes, and PDFs into clear key points,
+                summaries, and MCQs in seconds — no more wasting hours on manual
+                prep.
+              </div>
+              <div class="feature-item">
+                <i class="fa-solid fa-layer-group"></i>
+                <b>All-in-One Workspace</b><br />Break down notes, generate
+                assignments, create presentations, and prepare seminars —
+                everything organized in one simple dashboard.
+              </div>
+              <div class="feature-item">
+                <i class="fa-solid fa-database"></i>
+                <b>AI-Powered Productivity</b><br />Generate diagrams,
+                flowcharts, and infographics for academic or business use.
+                Cleverly saves you time while keeping your work professional.
+              </div>
+              <div class="feature-item">
+                <i class="fa-solid fa-robot"></i>
+                <b>Study & Work Without Limits</b><br />From students to
+                businesses to institutions — Cleverly grows with you. Upload
+                files, practice with quizzes, and export work in PDF, DOCX, or
+                PPTX effortlessly.
+              </div>
+            </div>
+          </div>
+          <div class="prompt-area">
+            <button class="prompt-menu-btn">
+              <i class="fa-solid fa-plus"></i>
+            </button>
+            <div class="prompt-menu-dropup">
+              <button class="prompt-menu-item">
+                <i class="fa-solid fa-paperclip"></i> Attach
+              </button>
+            </div>
+            <input
+              type="text"
+              class="prompt-input"
+              placeholder="Ask me anything..."
+            />
+            <div class="prompt-actions">
+              <div class="custom-dropdown" tabindex="0">
+                <div class="custom-dropdown-selected">Select Source</div>
+                <ul class="custom-dropdown-list">
+                  <li data-value="Select Source" class="active">
+                    Select Source
+                  </li>
+                  <li data-value="Notes">Notes</li>
+                  <li data-value="Dictionary">Dictionary</li>
+                  <li data-value="Questions">Questions</li>
+                </ul>
+              </div>
+              <button class="prompt-btn">
+                <i class="fa-solid fa-microphone"></i>
+              </button>
+              <button class="prompt-send">
+                <i class="fa-solid fa-paper-plane"></i>
+              </button>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+  <script>
+    // Sidebar tab switching with fade-in animation
+    document.addEventListener("DOMContentLoaded", function () {
+      const sidebarLinks = document.querySelectorAll(
+        ".sidebar-nav ul li ul li a"
+      );
+      const homeBtn = document.querySelector(".home-btn");
+      const workspace = document.querySelector(".workspace");
+      // Tab content map: key = link text, value = HTML content
+      const tabContents = {
+        "Notes Breakdown": `
+                    <div class="notes-breakdown">
+                        <h2>Upload files</h2>
+                        <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:8px;">Select and upload the files of your choice</p>
+                        <div class="nb-upload-box">
+                            <span class="nb-upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
+                            <div class="nb-upload-text">Choose a file or drag & drop it here.</div>
+                            <div class="nb-upload-formats">JPEG, PNG, and PDF formats, up to 500 MB.</div>
+                            <button class="nb-browse-btn" onclick="document.getElementById('nb-file').click();">Browse File</button>
+                            <input type="file" id="nb-file" class="nb-file-input" multiple>
+                        </div>
+                        <div class="nb-file-list">
+                            <!-- Example file item (repeat for each file) -->
+                            <div class="nb-file-item">
+                                <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
+                                <span class="nb-file-name">my-cv.pdf</span>
+                                <span class="nb-file-status">Uploading...</span>
+                                <div class="nb-file-progress" style="width:40%;"></div>
+                                <div class="nb-file-actions">
+                                    <button class="nb-file-delete"><i class="fa-solid fa-xmark"></i></button>
+                                </div>
+                            </div>
+                            <div class="nb-file-item">
+                                <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
+                                <span class="nb-file-name">google-certificate.pdf</span>
+                                <span class="nb-file-status" style="color:#22c55e;">Completed</span>
+                                <div class="nb-file-progress" style="width:100%;"></div>
+                                <div class="nb-file-actions">
+                                    <button class="nb-file-delete"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="nb-or">OR</div>
+                        <div class="nb-url-import">
+                            <input type="text" class="nb-url-input" placeholder="Paste file URL">
+                            <button class="nb-url-btn">Import</button>
+                        </div>
+                    </div>
+                `,
+        "AI Images": `
+          <div class="ai-image-generator">
+            <h2>AI Image Generator</h2>
+            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:8px;">Enter a prompt to generate an academic or business styled image.</p>
+            <label class="ai-img-label" style="color:#232946; font-weight:500; margin-bottom:6px; display:block;">Prompt</label>
+            <div class="ai-img-input-area">
+              <input type="text" class="ai-img-input" placeholder="Generate a flowchart of climate policy decision-making.">
+              <button class="ai-img-generate-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Image</button>
+            </div>
+            <div class="ai-img-output-area">
+              <div class="ai-img-preview" style="transition:box-shadow 0.2s;">
+                <!-- Academic/business styled image will appear here -->
+                <div class="ai-img-spinner" style="display:none; justify-content:center; align-items:center; height:180px;">
+                  <span class="fa-solid fa-spinner fa-spin" style="font-size:2.2rem; color:#6c63ff;"></span>
+                </div>
+                <img src="" alt="Generated Image" style="display:none; max-width:100%; border-radius:18px; box-shadow:0 4px 24px rgba(44,62,80,0.13); transition:transform 0.2s;">
+              </div>
+              <div class="ai-img-actions" style="margin-top:18px; display:flex; gap:16px;">
+                <button class="ai-img-download-btn"><i class="fa-solid fa-download"></i> Download PNG</button>
+                <button class="ai-img-save-btn"><i class="fa-solid fa-bookmark"></i> Add to My Library</button>
+              </div>
+            </div>
+          </div>
+        `,
+        "MCQ Generator": `
+          <!-- Place this inside your workspace tab for MCQ Generator -->
+            <!-- Place inside your MCQ Generator tab content -->
+            <div class="mcq-generator">
+            <h2>MCQ Generator</h2>
+            <label class="mcq-label" for="mcq-topic">Topic or Paragraph</label>
+            <div class="mcq-input-blend">
+                <textarea id="mcq-topic" class="mcq-input" placeholder="Paste your topic or paragraph here..."></textarea>
+                <div class="mcq-options-row">
+                <label for="mcq-count" class="mcq-label">How many questions?</label>
+                <input type="number" id="mcq-count" class="mcq-count-input" min="5" max="50" value="10">
+                <button class="mcq-generate-btn">Generate MCQs</button>
+                </div>
+            </div>
+            <div class="mcq-output-area">
+                <h3>Generated MCQs</h3>
+                <ul class="mcq-list">
+                <li>
+                    <div class="mcq-question">What is the capital of France?</div>
+                    <ul class="mcq-answers">
+                    <li>Berlin</li>
+                    <li>Madrid</li>
+                    <li class="mcq-correct">Paris</li>
+                    <li>Rome</li>
+                    </ul>
+                </li>
+                <!-- More MCQs here -->
+                </ul>
+                <div class="mcq-actions">
+                <button class="mcq-save-btn">Save to My Questions</button>
+                <button class="mcq-practice-btn">Start Practice Session</button>
+                </div>
+            </div>
+        </div>
+        `,
+        "My Dictionary":
+          `<div class="dictionary-card-list">
+                <h2>My Dictionary</h2>
+                <div class="dictionary-cards">
+                    <div class="dict-entry-card">
+                    <div class="dict-entry-main">
+                        <div class="dict-word">Bonjour</div>
+                        <div class="dict-meaning">Hello</div>
+                        <div class="dict-translation">Hola</div>
+                        <div class="dict-date">2025-08-30</div>
+                    </div>
+                    <div class="dict-entry-actions">
+                        <button class="dict-action review"><i class="fa-solid fa-eye"></i> Review</button>
+                        <button class="dict-action delete"><i class="fa-solid fa-trash"></i> Delete</button>
+                        <button class="dict-action quiz"><i class="fa-solid fa-question"></i> Quiz Mode</button>
+                    </div>
+                    </div>
+                    <!-- Repeat .dict-entry-card for each word -->
+                </div>
+            </div>`,
+        "My Questions":
+          "<h2>My Questions</h2><p>View and manage your questions.</p>",
+        "Upload Notes":
+          "<h2>Upload Notes</h2><p>Upload your notes for processing.</p>",
+        Presentations:
+          "<h2>Presentations</h2><p>Create and view presentations.</p>",
+        Assignments: "<h2>Assignments</h2><p>Manage your assignments here.</p>",
+        Seminars: "<h2>Seminars</h2><p>Organize and track seminars.</p>",
+      };
+
+      // Save the default workspace content
+      const defaultContent = workspace.innerHTML;
+      // Set Home button as default active on page load
+      homeBtn.classList.add("active");
+      // Home button logic
+      homeBtn.addEventListener("click", function () {
+        // Remove active from all sidebar links
+        sidebarLinks.forEach((l) => l.classList.remove("active"));
+        // Set active on home button
+        homeBtn.classList.add("active");
+        // Fade out workspace
+        workspace.style.opacity = 0;
+        workspace.style.transform = "scale(0.98)";
+        setTimeout(() => {
+          workspace.innerHTML = defaultContent;
+          workspace.style.opacity = 1;
+          workspace.style.transform = "scale(1)";
+        }, 220);
+      });
+
+      sidebarLinks.forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          // Remove active from all links and home button
+          sidebarLinks.forEach((l) => l.classList.remove("active"));
+          homeBtn.classList.remove("active");
+          // Add active to clicked link
+          this.classList.add("active");
+          // Fade out workspace
+          workspace.style.opacity = 0;
+          workspace.style.transform = "scale(0.98)";
+          setTimeout(() => {
+            // Set content
+            const key = this.textContent.trim();
+            workspace.innerHTML =
+              tabContents[key] ||
+              "<h2>" + key + "</h2><p>No content available.</p>";
+            workspace.style.opacity = 1;
+            workspace.style.transform = "scale(1)";
+          }, 220);
+        });
+      });
+      // Initial state: show default workspace content, no active tab
+      workspace.style.opacity = 1;
+    });
+    // Prompt menu dropup logic
+    const promptMenuBtn = document.querySelector(".prompt-menu-btn");
+    const promptMenuDropup = document.querySelector(".prompt-menu-dropup");
+    if (promptMenuBtn && promptMenuDropup) {
+      promptMenuBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        promptMenuDropup.classList.toggle("show");
+      });
+      document.addEventListener("click", (e) => {
+        if (
+          !promptMenuBtn.contains(e.target) &&
+          !promptMenuDropup.contains(e.target)
+        ) {
+          promptMenuDropup.classList.remove("show");
+        }
+      });
+    }
+    // Profile dropdown toggles on button click
+    const profileDropdown = document.querySelector(".profile-dropdown");
+    const profileBtn = document.querySelector(".profile-btn");
+    if (profileDropdown && profileBtn) {
+      profileBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        profileDropdown.classList.toggle("show");
+      });
+      document.addEventListener("click", (e) => {
+        if (!profileDropdown.contains(e.target)) {
+          profileDropdown.classList.remove("show");
+        }
+      });
+    }
+
+    // Custom dropdown logic
+    const customDropdown = document.querySelector(".custom-dropdown");
+    const customDropdownSelected = document.querySelector(
+      ".custom-dropdown-selected"
+    );
+    const customDropdownList = document.querySelector(".custom-dropdown-list");
+    if (customDropdown && customDropdownSelected && customDropdownList) {
+      customDropdownSelected.addEventListener("click", (e) => {
+        e.stopPropagation();
+        customDropdown.classList.toggle("open");
+      });
+      customDropdown.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          customDropdown.classList.toggle("open");
+        }
+      });
+      customDropdownList.querySelectorAll("li").forEach((li) => {
+        li.addEventListener("click", (e) => {
+          customDropdownList
+            .querySelectorAll("li")
+            .forEach((item) => item.classList.remove("active"));
+          li.classList.add("active");
+          customDropdownSelected.textContent = li.textContent;
+          customDropdown.classList.remove("open");
+        });
+      });
+      document.addEventListener("click", (e) => {
+        if (!customDropdown.contains(e.target)) {
+          customDropdown.classList.remove("open");
+        }
+      });
+    }
+  </script>
+</html>
