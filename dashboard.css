@@ -1344,3 +1344,23 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* Beta Badge Styles */
+.beta-badge {
+    display: inline-block;
+    background-color: #6c63ff;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.beta-badge:hover {
+    background-color: #e6b800;
+    transform: scale(1.1);
+}
