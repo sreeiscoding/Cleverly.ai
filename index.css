@@ -897,6 +897,8 @@ p {
 
 .plan-popular {
     border: 2px solid #ffd700;
+    /* border: 2px solid #6c63ff; */
+    /* border: 2px solid rgb(20, 128, 122); */
     box-shadow: 0 4px 24px rgba(255,215,0,0.08);
     position: relative;
 }
@@ -1909,6 +1911,33 @@ p {
 .testimonials-btn:hover {
     background: linear-gradient(90deg, #ffb86c 0%, #ff6a5b 100%);
     color: #fff;
+}
+
+/* Coming Soon Badge Styles */
+.coming-soon-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #ffcc00;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-transform: uppercase;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Greyed-out Plan Card Styles */
+.plan-card.greyed-out {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.plan-card.greyed-out .plan-btn {
+    background-color: #ccc;
+    color: #666;
+    cursor: not-allowed;
 }
 
 /* Progressive Scroll Animations using CSS View Timeline API */
