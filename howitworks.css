@@ -35,11 +35,19 @@
 }
 
 .howitworks-stepnum {
-  font-size: 1.8rem;
+  font-size: 2.2rem;
   font-weight: 700;
-  color: #14807a;
+  color: #fff;
   margin-bottom: 24px;
   font-family: 'Geist', monospace;
+  text-shadow: 0 2px 4px rgba(20, 128, 122, 0.3);
+  background: linear-gradient(135deg, #14807a 0%, #1a9d95 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  position: relative;
+  display: inline-block;
+  padding: 12px 12px;
 }
 
 .step-icon {
@@ -76,6 +84,7 @@
   color: #666;
   font-size: 1rem;
   line-height: 1.5;
+  text-align: left;
   margin: 0;
 }
 
