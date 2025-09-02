@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Try Demo - Cleverly.ai</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .demo-page {
+            padding: 40px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .demo-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .demo-header h1 {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .demo-header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .demo-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 32px;
+            margin-bottom: 48px;
+        }
+
+        .demo-feature {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-feature-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .demo-feature-icon {
+            width: 48px;
+            height: 48px;
+            background: #14807a;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .demo-feature-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin: 0;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin: 16px 0;
+            font-size: 16px;
+        }
+
+        .demo-button {
+            background: #14807a;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .demo-button:hover {
+            background: #0f665f;
+        }
+
+        .demo-output {
+            margin-top: 16px;
+            padding: 16px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+
+        .demo-feature-desc {
+            color: #666;
+            margin-bottom: 16px;
+        }
+
+        .demo-cta {
+            text-align: center;
+            background: #f8f9fa;
+            padding: 48px;
+            border-radius: 16px;
+            margin-top: 48px;
+        }
+
+        .demo-cta h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .demo-cta p {
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .demo-cta-btn {
+            display: inline-block;
+            background: #14807a;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            transition: background 0.3s ease;
+        }
+
+        .demo-cta-btn:hover {
+            background: #0f665f;
+        }
+
+        #demoLoader {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .loading-dots {
+            display: inline-block;
+        }
+
+        .loading-dots::after {
+            content: '.';
+            animation: dots 1.5s steps(5, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60% { content: '...'; }
+            80% { content: '....'; }
+            100% { content: '.....'; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html">
+                <img src="Cleverly AI.png" alt="logo" width="150">
+            </a>
+        </div>
+        <div class="navbar-right">
+            <a href="get-started.html" class="btn">Get Started</a>
+            <a href="signin.html" class="btn">Sign In</a>
+        </div>
+    </nav>
+
+    <div class="demo-page">
+        <div class="demo-header">
+            <h1>Try Cleverly.ai Demo</h1>
+            <p>Experience the power of AI-assisted learning with these interactive demos</p>
+        </div>
+
+        <div class="demo-features">
+            <div class="demo-feature">
+                <div class="demo-feature-header">
+                    <div class="demo-feature-icon">📝</div>
+                    <h2 class="demo-feature-title">Notes Breakdown</h2>
+                </div>
+                <p class="demo-feature-desc">Convert any text into concise, organized notes with key points.</p>
+                <textarea class="demo-input" id="notesInput" rows="5" placeholder="Paste your text here (e.g., a paragraph from your study material)"></textarea>
+                <button class="demo-button" onclick="generateNotes()">Generate Notes</button>
+                <div id="notesLoader" class="loading-dots" style="display: none;">Processing</div>
+                <div class="demo-output" id="notesOutput"></div>
+            </div>
+
+            <div class="demo-feature">
+                <div class="demo-feature-header">
+                    <div class="demo-feature-icon">❓</div>
+                    <h2 class="demo-feature-title">MCQ Generator</h2>
+                </div>
+                <p class="demo-feature-desc">Create practice questions from any topic or text.</p>
+                <textarea class="demo-input" id="mcqInput" rows="5" placeholder="Enter a topic or paste text to generate questions"></textarea>
+                <button class="demo-button" onclick="generateMCQs()">Generate MCQs</button>
+                <div id="mcqLoader" class="loading-dots" style="display: none;">Processing</div>
+                <div class="demo-output" id="mcqOutput"></div>
+            </div>
+        </div>
+
+        <div class="demo-cta">
+            <h2>Ready to unlock your full potential?</h2>
+            <p>Sign up now to access all features and start learning smarter with Cleverly.ai</p>
+            <a href="get-started.html" class="demo-cta-btn">Start 7 days Free Trial</a>
+        </div>
+    </div>
+
+    <script>
+        function generateNotes() {
+            const input = document.getElementById('notesInput').value;
+            if (!input) return;
+
+            document.getElementById('notesLoader').style.display = 'block';
+            document.getElementById('notesOutput').innerHTML = '';
+
+            // Simulated API call with timeout
+            setTimeout(() => {
+                const points = input.split('.')
+                    .filter(sentence => sentence.trim())
+                    .map(sentence => `• ${sentence.trim()}`);
+                
+                document.getElementById('notesOutput').innerHTML = points.join('<br>');
+                document.getElementById('notesLoader').style.display = 'none';
+            }, 2000);
+        }
+
+        function generateMCQs() {
+            const input = document.getElementById('mcqInput').value;
+            if (!input) return;
+
+            document.getElementById('mcqLoader').style.display = 'block';
+            document.getElementById('mcqOutput').innerHTML = '';
+
+            // Simulated API call with timeout
+            setTimeout(() => {
+                const sampleMCQ = `
+                    <p><strong>Q1: Sample question based on the input?</strong></p>
+                    <p>a) Option 1</p>
+                    <p>b) Option 2</p>
+                    <p>c) Option 3</p>
+                    <p>d) Option 4</p>
+                `;
+                
+                document.getElementById('mcqOutput').innerHTML = sampleMCQ;
+                document.getElementById('mcqLoader').style.display = 'none';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>

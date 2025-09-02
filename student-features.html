@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Features - Cleverly.ai</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        .feature-header {
+            text-align: center;
+            padding: 80px 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        }
+
+        .feature-title {
+            font-size: 2.5rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .feature-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 16px;
+            padding: 32px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-name {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 16px;
+        }
+
+        .feature-desc {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature-benefits {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .feature-benefits li {
+            padding-left: 24px;
+            margin-bottom: 12px;
+            position: relative;
+            color: #555;
+        }
+
+        .feature-benefits li::before {
+            content: "✓";
+            color: #14807a;
+            position: absolute;
+            left: 0;
+        }
+
+        .try-now-btn {
+            display: inline-block;
+            background: #14807a;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .try-now-btn:hover {
+            background: #0f665f;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-left">
+            <a href="index.html">
+                <img src="Cleverly AI.png" alt="logo" width="150">
+            </a>
+        </div>
+        <div class="navbar-right">
+            <a href="get-started.html" class="btn">Get Started</a>
+            <a href="signin.html" class="btn">Sign In</a>
+        </div>
+    </nav>
+
+    <div class="feature-header">
+        <h1 class="feature-title">Student Features</h1>
+        <p class="feature-subtitle">Discover how Cleverly.ai empowers students to learn smarter and achieve more</p>
+    </div>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h3 class="feature-name">Smart Note Taking</h3>
+            <p class="feature-desc">Transform lengthy lectures and textbooks into concise, organized notes instantly.</p>
+            <ul class="feature-benefits">
+                <li>AI-powered text summarization</li>
+                <li>Key points extraction</li>
+                <li>Topic categorization</li>
+                <li>Custom note templates</li>
+            </ul>
+            <a href="get-started.html" class="try-now-btn">Try Now</a>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">✍️</div>
+            <h3 class="feature-name">Exam Preparation</h3>
+            <p class="feature-desc">Practice effectively with AI-generated questions and customized study plans.</p>
+            <ul class="feature-benefits">
+                <li>MCQ generation from notes</li>
+                <li>Practice tests with timing</li>
+                <li>Performance analytics</li>
+                <li>Spaced repetition</li>
+            </ul>
+            <a href="get-started.html" class="try-now-btn">Try Now</a>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📅</div>
+            <h3 class="feature-name">Study Planning</h3>
+            <p class="feature-desc">Organize your study schedule and track progress effectively.</p>
+            <ul class="feature-benefits">
+                <li>Smart study schedules</li>
+                <li>Progress tracking</li>
+                <li>Goal setting</li>
+                <li>Study reminders</li>
+            </ul>
+            <a href="get-started.html" class="try-now-btn">Try Now</a>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-name">Assignment Helper</h3>
+            <p class="feature-desc">Get AI assistance for research, writing, and presentations.</p>
+            <ul class="feature-benefits">
+                <li>Research summarization</li>
+                <li>Citation formatting</li>
+                <li>Presentation outlines</li>
+                <li>Writing suggestions</li>
+            </ul>
+            <a href="get-started.html" class="try-now-btn">Try Now</a>
+        </div>
+    </div>
+</body>
+</html>
