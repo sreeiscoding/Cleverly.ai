@@ -1671,12 +1671,13 @@ p {
     max-width: 520px;
     width: 100%;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: left;
     justify-content: center;
 }
 .demo-screenshot {
     width: 100%;
-    border-radius: 18px 18px 0 0;
+    border-radius: 0px 0px 0 0;
     box-shadow: 0 2px 12px rgba(34,56,90,0.07);
     object-fit: cover;
     display: block;
