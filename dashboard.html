@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="upload-notes.css" />
     <link rel="stylesheet" href="notes-breakdown.css" />
+    <link rel="stylesheet" href="ai-images.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -331,23 +332,96 @@
         "AI Images": `
           <div class="ai-image-generator">
             <h2>AI Image Generator</h2>
-            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:8px;">Enter a prompt to generate an academic or business styled image.</p>
-            <label class="ai-img-label" style="color:#232946; font-weight:500; margin-bottom:6px; display:block;">Prompt</label>
-            <div class="ai-img-input-area">
-              <input type="text" class="ai-img-input" placeholder="Generate a flowchart of climate policy decision-making.">
-              <button class="ai-img-generate-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Image</button>
-            </div>
-            <div class="ai-img-output-area">
-              <div class="ai-img-preview" style="transition:box-shadow 0.2s;">
-                <!-- Academic/business styled image will appear here -->
-                <div class="ai-img-spinner" style="display:none; justify-content:center; align-items:center; height:180px;">
-                  <span class="fa-solid fa-spinner fa-spin" style="font-size:2.2rem; color:#6c63ff;"></span>
+            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Create professional diagrams, flowcharts, and visual aids for your academic or business needs</p>
+            
+            <div class="ai-img-container">
+              <div class="ai-img-input-section">
+                <div class="ai-img-prompt-area">
+                  <label class="ai-img-prompt-label">What would you like to create?</label>
+                  <div class="ai-img-input-group">
+                    <input type="text" class="ai-img-input" placeholder="E.g., Generate a flowchart showing the water cycle process">
+                    <button class="ai-img-clear"><i class="fa-solid fa-xmark"></i></button>
+                  </div>
                 </div>
-                <img src="" alt="Generated Image" style="display:none; max-width:100%; border-radius:18px; box-shadow:0 4px 24px rgba(44,62,80,0.13); transition:transform 0.2s;">
+
+                <div class="ai-img-options">
+                  <div class="ai-img-option active">
+                    <span class="ai-img-option-label"><i class="fa-solid fa-diagram-project"></i> Flowchart</span>
+                    <span class="ai-img-option-desc">Process flows and decision trees</span>
+                  </div>
+                  <div class="ai-img-option">
+                    <span class="ai-img-option-label"><i class="fa-solid fa-chart-column"></i> Diagram</span>
+                    <span class="ai-img-option-desc">Technical and scientific diagrams</span>
+                  </div>
+                  <div class="ai-img-option">
+                    <span class="ai-img-option-label"><i class="fa-solid fa-mind-share"></i> Mind Map</span>
+                    <span class="ai-img-option-desc">Concept and topic relationships</span>
+                  </div>
+                  <div class="ai-img-option">
+                    <span class="ai-img-option-label"><i class="fa-solid fa-shapes"></i> Infographic</span>
+                    <span class="ai-img-option-desc">Visual data representation</span>
+                  </div>
+                </div>
+
+                <button class="ai-img-generate-btn">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  Generate Image
+                </button>
               </div>
-              <div class="ai-img-actions" style="margin-top:18px; display:flex; gap:16px;">
-                <button class="ai-img-download-btn"><i class="fa-solid fa-download"></i> Download PNG</button>
-                <button class="ai-img-save-btn"><i class="fa-solid fa-bookmark"></i> Add to My Library</button>
+
+              <div class="ai-img-preview-section">
+                <div class="ai-img-preview-header">
+                  <h3 class="ai-img-preview-title">Preview</h3>
+                  <div class="ai-img-style-switch">
+                    <button class="ai-img-style-btn active">Modern</button>
+                    <button class="ai-img-style-btn">Classic</button>
+                    <button class="ai-img-style-btn">Minimal</button>
+                  </div>
+                </div>
+
+                <div class="ai-img-preview-area">
+                  <div class="ai-img-preview-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                    <p>Your generated image will appear here</p>
+                    <small>Choose an option and enter your prompt to begin</small>
+                  </div>
+                </div>
+
+                <div class="ai-img-actions">
+                  <button class="ai-img-action-btn">
+                    <i class="fa-solid fa-download"></i>
+                    Download PNG
+                  </button>
+                  <button class="ai-img-action-btn">
+                    <i class="fa-solid fa-file-powerpoint"></i>
+                    Add to Slides
+                  </button>
+                  <button class="ai-img-action-btn">
+                    <i class="fa-solid fa-bookmark"></i>
+                    Save to Library
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="ai-img-history">
+              <div class="ai-img-history-header">
+                <h3 class="ai-img-history-title">Recent Generations</h3>
+                <button class="ai-img-action-btn">View All</button>
+              </div>
+              <div class="ai-img-grid">
+                <div class="ai-img-thumbnail">
+                  <img src="https://placehold.co/120x120/f8fffe/14807a?text=Flow" alt="Thumbnail">
+                </div>
+                <div class="ai-img-thumbnail">
+                  <img src="https://placehold.co/120x120/f8fffe/14807a?text=Mind" alt="Thumbnail">
+                </div>
+                <div class="ai-img-thumbnail">
+                  <img src="https://placehold.co/120x120/f8fffe/14807a?text=Chart" alt="Thumbnail">
+                </div>
+                <div class="ai-img-thumbnail">
+                  <img src="https://placehold.co/120x120/f8fffe/14807a?text=Info" alt="Thumbnail">
+                </div>
               </div>
             </div>
           </div>
