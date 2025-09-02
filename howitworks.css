@@ -1,0 +1,130 @@
+.howitworks-section {
+  background: linear-gradient(180deg, #fff 0%, #f8fffe 100%);
+  padding: 80px 24px;
+}
+
+.howitworks-steps {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-top: 64px;
+  position: relative;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin: 64px auto 0;
+}
+
+.howitworks-step {
+  flex: 1;
+  position: relative;
+  padding: 32px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.howitworks-step:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 48px rgba(20, 128, 122, 0.12);
+}
+
+.step-content {
+  position: relative;
+  z-index: 2;
+}
+
+.howitworks-stepnum {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #14807a;
+  margin-bottom: 24px;
+  font-family: 'Geist', monospace;
+}
+
+.step-icon {
+  width: 64px;
+  height: 64px;
+  margin-bottom: 24px;
+  transition: transform 0.3s ease;
+}
+
+.howitworks-step:hover .step-icon {
+  transform: scale(1.1);
+}
+
+.step-icon-stroke {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: draw 1.5s ease forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.step-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 12px 0;
+}
+
+.howitworks-stepdesc {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.step-features {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.step-feature {
+  background: #14807a15;
+  color: #14807a;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.step-connector {
+  position: absolute;
+  top: 50%;
+  right: -48px;
+  width: 64px;
+  height: 2px;
+  background: linear-gradient(90deg, #14807a 50%, transparent 50%);
+  background-size: 8px 2px;
+  opacity: 0.5;
+  z-index: 1;
+}
+
+.howitworks-step:last-child .step-connector {
+  display: none;
+}
+
+/* Responsive Styles */
+@media (max-width: 992px) {
+  .howitworks-steps {
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .step-connector {
+    display: none;
+  }
+
+  .howitworks-step {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+  }
+}
