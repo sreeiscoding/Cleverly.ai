@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="upload-notes.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -320,8 +321,70 @@
             </div>`,
         "My Questions":
           "<h2>My Questions</h2><p>View and manage your questions.</p>",
-        "Upload Notes":
-          "<h2>Upload Notes</h2><p>Upload your notes for processing.</p>",
+        "Upload Notes": `
+          <div class="upload-notes">
+            <h2>Upload Notes</h2>
+            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Transform your documents into smart study materials with AI</p>
+            
+            <div class="upload-container">
+              <div class="upload-zone">
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+                <h3>Drag & Drop your files here</h3>
+                <p>or</p>
+                <button class="upload-btn" onclick="document.getElementById('file-input').click()">
+                  <i class="fa-solid fa-folder-open"></i> Choose Files
+                </button>
+                <input type="file" id="file-input" hidden multiple accept=".pdf,.docx">
+                <p class="file-types">Supports PDF and Word documents</p>
+              </div>
+              
+              <div class="upload-features">
+                <h3>What our AI can do</h3>
+                <ul>
+                  <li><i class="fa-solid fa-wand-magic-sparkles"></i> Convert lectures into structured study notes</li>
+                  <li><i class="fa-solid fa-list-check"></i> Extract key topics and create summaries</li>
+                  <li><i class="fa-solid fa-brain"></i> Generate practice questions and flashcards</li>
+                  <li><i class="fa-solid fa-chart-simple"></i> Create visual mind maps and diagrams</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="file-list">
+              <!-- Files will be listed here -->
+            </div>
+
+            <div class="processing-options">
+              <h3>Process Documents</h3>
+              <div class="processing-grid">
+                <button class="process-btn" data-action="summarize">
+                  <i class="fa-solid fa-book-open"></i>
+                  <span>Summarize</span>
+                  <small>Create concise summaries</small>
+                </button>
+                <button class="process-btn" data-action="questions">
+                  <i class="fa-solid fa-question-circle"></i>
+                  <span>Generate Questions</span>
+                  <small>Create practice questions</small>
+                </button>
+                <button class="process-btn" data-action="assignment">
+                  <i class="fa-solid fa-pen-to-square"></i>
+                  <span>Generate Assignment</span>
+                  <small>Create structured assignments</small>
+                </button>
+                <button class="process-btn" data-action="presentation">
+                  <i class="fa-solid fa-presentation-screen"></i>
+                  <span>Generate Presentation</span>
+                  <small>Create slide deck</small>
+                </button>
+                <button class="process-btn" data-action="seminar">
+                  <i class="fa-solid fa-chalkboard-teacher"></i>
+                  <span>Generate Seminar</span>
+                  <small>Create seminar materials</small>
+                </button>
+              </div>
+            </div>
+          </div>
+        `,
         Presentations:
           "<h2>Presentations</h2><p>Create and view presentations.</p>",
         Assignments: "<h2>Assignments</h2><p>Manage your assignments here.</p>",

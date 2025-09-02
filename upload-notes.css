@@ -1,0 +1,267 @@
+.upload-notes {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.upload-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.upload-zone {
+  background: white;
+  border: 2px dashed #14807a;
+  border-radius: 16px;
+  padding: 40px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.upload-zone:hover {
+  border-color: #0f5c57;
+  background: #f8fffe;
+}
+
+.upload-zone.drag-over {
+  border-color: #14807a;
+  background: #f0fdfb;
+  transform: scale(1.02);
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: #14807a;
+  margin-bottom: 16px;
+}
+
+.upload-zone h3 {
+  color: #232946;
+  margin: 0 0 8px 0;
+  font-size: 1.2rem;
+}
+
+.upload-zone p {
+  color: #7b8fa1;
+  margin: 8px 0;
+}
+
+.upload-btn {
+  background: #14807a;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin: 16px 0;
+  transition: all 0.3s ease;
+}
+
+.upload-btn:hover {
+  background: #0f5c57;
+  transform: translateY(-2px);
+}
+
+.file-types {
+  font-size: 0.9rem;
+  color: #7b8fa1;
+}
+
+.upload-features {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.upload-features h3 {
+  color: #232946;
+  margin: 0 0 20px 0;
+  font-size: 1.2rem;
+}
+
+.upload-features ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.upload-features li {
+  display: flex;
+  align-items: center;
+  color: #424242;
+  margin-bottom: 16px;
+  font-size: 1rem;
+}
+
+.upload-features li i {
+  color: #14807a;
+  margin-right: 12px;
+  font-size: 1.1rem;
+}
+
+.file-list {
+  margin-top: 32px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.3s ease;
+}
+
+.file-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+}
+
+.file-icon {
+  font-size: 24px;
+  color: #14807a;
+  margin-right: 16px;
+}
+
+.file-info {
+  flex-grow: 1;
+}
+
+.file-name {
+  color: #232946;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.file-size {
+  color: #7b8fa1;
+  font-size: 0.9rem;
+}
+
+.file-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.file-action-btn {
+  background: none;
+  border: none;
+  color: #7b8fa1;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.file-action-btn:hover {
+  color: #14807a;
+  background: #f0fdfb;
+}
+
+.processing-options {
+  margin-top: 48px;
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.processing-options h3 {
+  color: #232946;
+  margin: 0 0 24px 0;
+  font-size: 1.2rem;
+}
+
+.processing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.process-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid rgba(20, 128, 122, 0.1);
+  border-radius: 12px;
+  padding: 24px 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+}
+
+.process-btn:hover {
+  transform: translateY(-4px);
+  border-color: #14807a;
+  box-shadow: 0 8px 24px rgba(20, 128, 122, 0.12);
+}
+
+.process-btn i {
+  font-size: 24px;
+  color: #14807a;
+  margin-bottom: 12px;
+}
+
+.process-btn span {
+  font-weight: 500;
+  color: #232946;
+  margin-bottom: 8px;
+}
+
+.process-btn small {
+  font-size: 0.85rem;
+  color: #7b8fa1;
+}
+
+.process-btn[data-action="summarize"]:hover {
+  background: linear-gradient(45deg, #f8fffe 0%, #fff 100%);
+}
+
+.process-btn[data-action="questions"]:hover {
+  background: linear-gradient(45deg, #f8fffe 0%, #fff 100%);
+}
+
+.process-btn[data-action="assignment"]:hover {
+  background: linear-gradient(45deg, #f8fffe 0%, #fff 100%);
+}
+
+.process-btn[data-action="presentation"]:hover {
+  background: linear-gradient(45deg, #f8fffe 0%, #fff 100%);
+}
+
+.process-btn[data-action="seminar"]:hover {
+  background: linear-gradient(45deg, #f8fffe 0%, #fff 100%);
+}
+
+@media (max-width: 768px) {
+  .upload-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .upload-zone {
+    padding: 24px;
+  }
+  
+  .upload-features {
+    padding: 24px;
+  }
+  
+  .processing-options {
+    padding: 24px;
+  }
+  
+  .processing-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .process-btn {
+    padding: 20px 16px;
+  }
+}
