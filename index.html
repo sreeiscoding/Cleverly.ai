@@ -633,15 +633,17 @@
         early access updates.<br />
         Join our newsletter and never miss a smarter way to study &amp; work.
       </p>
-      <form class="newsletter-form" action="#" method="post">
+      <form class="newsletter-form" id="newsletterForm" onsubmit="return handleNewsletterSubmit(event)">
         <input
           type="email"
           class="newsletter-input"
+          id="newsletterEmail"
           placeholder="Your email address"
           required
         />
-        <button type="submit" class="newsletter-btn">Subscribe</button>
+        <button type="submit" class="newsletter-btn" id="newsletterSubmitBtn">Subscribe</button>
       </form>
+      <div id="newsletterMessage" class="newsletter-message"></div>
       <ul class="newsletter-benefits">
         <li>✅ Get product updates</li>
         <li>✅ Early access to beta features</li>
@@ -658,16 +660,71 @@
           and work.
         </p>
         <div class="finalcta-btns">
-          <a href="#get-early-access" class="finalcta-btn finalcta-btn-primary"
-            >🔵 Get Early Access</a
-          >
-          <a href="#book-demo" class="finalcta-btn finalcta-btn-secondary"
-            >⚪ Book a Demo</a
-          >
+          <button onclick="openModal('earlyAccessModal')" class="finalcta-btn finalcta-btn-primary"
+            >🔵 Get Early Access</button>
+          <button onclick="openModal('bookDemoModal')" class="finalcta-btn finalcta-btn-secondary"
+            >⚪ Book a Demo</button>
         </div>
         <div class="finalcta-trust">Simple pricing, no hidden fees.</div>
       </div>
     </section>
+
+    <!-- Early Access Modal -->
+    <div id="earlyAccessModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('earlyAccessModal')">&times;</span>
+        <h2>🚀 Get Early Access</h2>
+        <p>Be among the first to experience Cleverly.ai</p>
+        <form id="earlyAccessForm" onsubmit="handleEarlyAccessSubmit(event)">
+          <div class="form-group">
+            <input type="text" id="earlyAccessName" placeholder="Your Name" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="earlyAccessEmail" placeholder="Your Email" required>
+          </div>
+          <div class="form-group">
+            <select id="earlyAccessType" required>
+              <option value="">Select User Type</option>
+              <option value="student">Student</option>
+              <option value="professional">Professional</option>
+              <option value="institution">Institution</option>
+            </select>
+          </div>
+          <button type="submit" class="modal-submit-btn">Request Early Access</button>
+        </form>
+        <div id="earlyAccessMessage" class="modal-message"></div>
+      </div>
+    </div>
+
+    <!-- Book Demo Modal -->
+    <div id="bookDemoModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeModal('bookDemoModal')">&times;</span>
+        <h2>📅 Book a Demo</h2>
+        <p>Schedule a personalized demo of Cleverly.ai</p>
+        <form id="bookDemoForm" onsubmit="handleBookDemoSubmit(event)">
+          <div class="form-group">
+            <input type="text" id="demoName" placeholder="Your Name" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="demoEmail" placeholder="Your Email" required>
+          </div>
+          <div class="form-group">
+            <select id="demoType" required>
+              <option value="">Select User Type</option>
+              <option value="student">Student</option>
+              <option value="professional">Professional</option>
+              <option value="institution">Institution</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="datetime-local" id="demoDateTime" required>
+          </div>
+          <button type="submit" class="modal-submit-btn">Schedule Demo</button>
+        </form>
+        <div id="bookDemoMessage" class="modal-message"></div>
+      </div>
+    </div>
 
     <!-- FAQ Section - Minimal Card Accordion Design -->
 
@@ -792,7 +849,281 @@
           navbar.classList.remove("scrolled");
         }
       });
+
+      // Modal Functions
+      function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+      }
+
+      // Close modal when clicking outside
+      window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+          event.target.style.display = 'none';
+          document.body.style.overflow = 'auto';
+        }
+      }
+
+      function handleEarlyAccessSubmit(event) {
+        event.preventDefault();
+        const name = document.getElementById('earlyAccessName').value;
+        const email = document.getElementById('earlyAccessEmail').value;
+        const type = document.getElementById('earlyAccessType').value;
+        const messageDiv = document.getElementById('earlyAccessMessage');
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Processing...';
+
+        // Send email using mailto link
+        const mailtoLink = `mailto:early-access@cleverly.ai?subject=Early Access Request&body=New early access request:%0A%0AName: ${name}%0AEmail: ${email}%0AUser Type: ${type}`;
+        
+        try {
+            window.location.href = mailtoLink;
+            
+            // Show success message
+            messageDiv.className = 'modal-message success';
+            messageDiv.textContent = 'Thank you for your interest! We will contact you soon with early access details.';
+            
+            // Clear the form
+            event.target.reset();
+        } catch (error) {
+            // Show error message
+            messageDiv.className = 'modal-message error';
+            messageDiv.textContent = 'Something went wrong. Please try again.';
+        }
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Request Early Access';
+
+        // Close modal after 3 seconds on success
+        if (messageDiv.classList.contains('success')) {
+            setTimeout(() => closeModal('earlyAccessModal'), 3000);
+        }
+      }
+
+      function handleBookDemoSubmit(event) {
+        event.preventDefault();
+        const name = document.getElementById('demoName').value;
+        const email = document.getElementById('demoEmail').value;
+        const type = document.getElementById('demoType').value;
+        const dateTime = document.getElementById('demoDateTime').value;
+        const messageDiv = document.getElementById('bookDemoMessage');
+        const submitBtn = event.target.querySelector('button[type="submit"]');
+
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Processing...';
+
+        // Format date and time for email
+        const formattedDateTime = new Date(dateTime).toLocaleString();
+
+        // Send email using mailto link
+        const mailtoLink = `mailto:demo@cleverly.ai?subject=Demo Request&body=New demo request:%0A%0AName: ${name}%0AEmail: ${email}%0AUser Type: ${type}%0APreferred Date/Time: ${formattedDateTime}`;
+        
+        try {
+            window.location.href = mailtoLink;
+            
+            // Show success message
+            messageDiv.className = 'modal-message success';
+            messageDiv.textContent = 'Demo request received! We will confirm your slot via email.';
+            
+            // Clear the form
+            event.target.reset();
+        } catch (error) {
+            // Show error message
+            messageDiv.className = 'modal-message error';
+            messageDiv.textContent = 'Something went wrong. Please try again.';
+        }
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Schedule Demo';
+
+        // Close modal after 3 seconds on success
+        if (messageDiv.classList.contains('success')) {
+            setTimeout(() => closeModal('bookDemoModal'), 3000);
+        }
+      }
+
+      function handleNewsletterSubmit(event) {
+        event.preventDefault();
+        const email = document.getElementById('newsletterEmail').value;
+        const submitBtn = document.getElementById('newsletterSubmitBtn');
+        const messageDiv = document.getElementById('newsletterMessage');
+        
+        // Disable button and show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = 'Subscribing...';
+        messageDiv.className = 'newsletter-message';
+        messageDiv.textContent = '';
+
+        // Send email using mailto link
+        const mailtoLink = `mailto:your-email@cleverly.ai?subject=New Cleverly.ai Newsletter Subscriber&body=Got a subscriber for update notification:%0A%0AEmail: ${email}`;
+        
+        try {
+            window.location.href = mailtoLink;
+            
+            // Show success message
+            messageDiv.className = 'newsletter-message success';
+            messageDiv.textContent = 'Thank you for subscribing! We will keep you updated.';
+            
+            // Clear the input
+            document.getElementById('newsletterEmail').value = '';
+        } catch (error) {
+            // Show error message
+            messageDiv.className = 'newsletter-message error';
+            messageDiv.textContent = 'Something went wrong. Please try again.';
+        }
+
+        // Re-enable button
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Subscribe';
+
+        return false;
+      }
     </script>
+    <style>
+      .newsletter-message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+      }
+
+      .newsletter-message.success {
+        display: block;
+        background-color: rgba(20, 128, 122, 0.1);
+        color: #14807a;
+      }
+
+      .newsletter-message.error {
+        display: block;
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+      }
+
+      .newsletter-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      /* Modal Styles */
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1000;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .modal-content {
+        position: relative;
+        background-color: #fff;
+        margin: 15vh auto;
+        padding: 32px;
+        width: 90%;
+        max-width: 500px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .modal-close {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        color: #666;
+        cursor: pointer;
+        transition: color 0.2s;
+      }
+
+      .modal-close:hover {
+        color: #000;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.2s;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #14807a;
+      }
+
+      .modal-submit-btn {
+        width: 100%;
+        padding: 14px;
+        background-color: #14807a;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      .modal-submit-btn:hover {
+        background-color: #0f665f;
+      }
+
+      .modal-message {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 8px;
+        text-align: center;
+        display: none;
+      }
+
+      .modal-message.success {
+        display: block;
+        background-color: rgba(20, 128, 122, 0.1);
+        color: #14807a;
+      }
+
+      .modal-message.error {
+        display: block;
+        background-color: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+      }
+
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+
+      @keyframes slideIn {
+        from { transform: translateY(-20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+    </style>
   </body>
   <footer
     class="site-footer"

@@ -13,6 +13,214 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
+    <style>
+      .nb-tab-content {
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      .nb-tab-panel {
+        display: none;
+      }
+
+      .nb-tab-panel.active {
+        display: block;
+      }
+
+      .nb-action-btn {
+        padding: 8px 16px;
+        border: 1px solid #e0e0e0;
+        background: white;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .nb-action-btn.active {
+        background: #14807a;
+        color: white;
+        border-color: #14807a;
+      }
+
+      .nb-file-row, .nb-folder-row {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: background-color 0.2s;
+      }
+
+      .nb-file-row:hover, .nb-folder-row:hover {
+        background-color: #f8fffe;
+      }
+
+      .nb-file-row:last-child, .nb-folder-row:last-child {
+        border-bottom: none;
+      }
+
+      .nb-file-info, .nb-folder-info {
+        margin-left: 12px;
+        flex-grow: 1;
+      }
+
+      .nb-file-name, .nb-folder-name {
+        display: block;
+        font-weight: 500;
+      }
+
+      .nb-file-date, .nb-folder-count {
+        display: block;
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      .nb-file-action {
+        background: none;
+        border: none;
+        padding: 8px;
+        cursor: pointer;
+        color: #666;
+        transition: color 0.2s;
+      }
+
+      .nb-file-action:hover {
+        color: #14807a;
+      }
+
+      .nb-file-action.active {
+        color: #14807a;
+      }
+
+      /* File Item Styles */
+      .nb-file-item {
+        background: white;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+
+      .nb-file-item:hover {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      }
+
+      .nb-file-icon {
+        font-size: 24px;
+        color: #14807a;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(20,128,122,0.1);
+        border-radius: 8px;
+      }
+
+      .nb-file-details {
+        flex-grow: 1;
+      }
+
+      .nb-file-name {
+        font-weight: 500;
+        display: block;
+        margin-bottom: 4px;
+      }
+
+      .nb-file-meta {
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      .nb-file-status {
+        min-width: 140px;
+      }
+
+      .nb-progress {
+        background: #f0f0f0;
+        height: 6px;
+        border-radius: 3px;
+        margin-bottom: 8px;
+      }
+
+      .nb-progress-bar {
+        background: #14807a;
+        height: 100%;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+      }
+
+      .nb-status-text {
+        font-size: 0.85em;
+        color: #666;
+      }
+
+      .nb-status-text.nb-success {
+        color: #14807a;
+      }
+
+      .nb-status-text.nb-error {
+        color: #dc3545;
+      }
+
+      .nb-file-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .nb-action {
+        background: none;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #666;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .nb-action:hover {
+        background: rgba(20,128,122,0.1);
+        color: #14807a;
+      }
+
+      .nb-action[title="Delete"]:hover {
+        background: rgba(220,53,69,0.1);
+        color: #dc3545;
+      }
+
+      .nb-action[title="Stop"]:hover {
+        background: rgba(255,193,7,0.1);
+        color: #ffc107;
+      }
+
+      .nb-item-complete {
+        border-left: 4px solid #14807a;
+      }
+
+      /* Processing animation */
+      @keyframes processing {
+        0% { opacity: 1; }
+        50% { opacity: 0.6; }
+        100% { opacity: 1; }
+      }
+
+      .nb-file-item:not(.nb-item-complete) .nb-status-text {
+        animation: processing 1.5s infinite;
+      }
+    </style>
   </head>
   <body
     style="
@@ -231,20 +439,94 @@
                 </div>
 
                 <div class="nb-quick-actions">
-                  <button class="nb-action-btn">
+                  <button class="nb-action-btn active" onclick="showNbTab('recent')">
                     <i class="fa-solid fa-clock-rotate-left"></i>
                     <span>Recent Files</span>
                   </button>
-                  <button class="nb-action-btn">
+                  <button class="nb-action-btn" onclick="showNbTab('favorites')">
                     <i class="fa-solid fa-star"></i>
                     <span>Favorites</span>
                   </button>
-                  <button class="nb-action-btn">
+                  <button class="nb-action-btn" onclick="showNbTab('library')">
                     <i class="fa-solid fa-folder"></i>
                     <span>My Library</span>
                   </button>
                 </div>
+
+                <!-- Quick Actions Tab Content -->
+                <div class="nb-tab-content">
+                  <!-- Recent Files Tab -->
+                  <div id="nb-recent" class="nb-tab-panel active">
+                    <div class="nb-recent-files">
+                      <div class="nb-file-row">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <div class="nb-file-info">
+                          <span class="nb-file-name">Chapter_5_Notes.pdf</span>
+                          <span class="nb-file-date">2 mins ago</span>
+                        </div>
+                        <button class="nb-file-action" title="Add to favorites">
+                          <i class="fa-regular fa-star"></i>
+                        </button>
+                      </div>
+                      <div class="nb-file-row">
+                        <i class="fa-solid fa-file-word"></i>
+                        <div class="nb-file-info">
+                          <span class="nb-file-name">Research_Paper.docx</span>
+                          <span class="nb-file-date">1 hour ago</span>
+                        </div>
+                        <button class="nb-file-action" title="Add to favorites">
+                          <i class="fa-regular fa-star"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Favorites Tab -->
+                  <div id="nb-favorites" class="nb-tab-panel">
+                    <div class="nb-favorites-list">
+                      <div class="nb-file-row">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <div class="nb-file-info">
+                          <span class="nb-file-name">Important_Notes.pdf</span>
+                          <span class="nb-file-date">Added to favorites</span>
+                        </div>
+                        <button class="nb-file-action active" title="Remove from favorites">
+                          <i class="fa-solid fa-star"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Library Tab -->
+                  <div id="nb-library" class="nb-tab-panel">
+                    <div class="nb-library-content">
+                      <div class="nb-folder-row">
+                        <i class="fa-solid fa-folder"></i>
+                        <div class="nb-folder-info">
+                          <span class="nb-folder-name">Physics</span>
+                          <span class="nb-folder-count">12 files</span>
+                        </div>
+                      </div>
+                      <div class="nb-folder-row">
+                        <i class="fa-solid fa-folder"></i>
+                        <div class="nb-folder-info">
+                          <span class="nb-folder-name">Chemistry</span>
+                          <span class="nb-folder-count">8 files</span>
+                        </div>
+                      </div>
+                      <div class="nb-folder-row">
+                        <i class="fa-solid fa-folder"></i>
+                        <div class="nb-folder-info">
+                          <span class="nb-folder-name">Mathematics</span>
+                          <span class="nb-folder-count">15 files</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+
 
               <div class="nb-features-panel">
                 <h3>AI Processing Options</h3>
@@ -861,5 +1143,207 @@
         }
       });
     }
+
+    // File Management System
+    class FileManager {
+      constructor() {
+        this.files = new Map();
+        this.processingFiles = new Set();
+      }
+
+      addFile(fileId, fileData) {
+        this.files.set(fileId, fileData);
+        this.updateUI(fileId);
+      }
+
+      removeFile(fileId) {
+        this.files.delete(fileId);
+        this.processingFiles.delete(fileId);
+        const fileElement = document.querySelector(`[data-file-id="${fileId}"]`);
+        if (fileElement) {
+          fileElement.remove();
+        }
+      }
+
+      updateProgress(fileId, progress) {
+        const file = this.files.get(fileId);
+        if (file) {
+          file.progress = progress;
+          this.updateUI(fileId);
+        }
+      }
+
+      updateUI(fileId) {
+        const file = this.files.get(fileId);
+        if (!file) return;
+
+        let fileElement = document.querySelector(`[data-file-id="${fileId}"]`);
+        if (!fileElement) {
+          fileElement = this.createFileElement(file);
+          document.querySelector('.nb-file-list').appendChild(fileElement);
+        }
+
+        const progressBar = fileElement.querySelector('.nb-progress-bar');
+        const statusText = fileElement.querySelector('.nb-status-text');
+
+        if (progressBar) progressBar.style.width = `${file.progress}%`;
+        if (statusText) statusText.textContent = file.progress === 100 ? 'Completed' : 'Processing...';
+
+        if (file.progress === 100) {
+          fileElement.classList.add('nb-item-complete');
+          this.processingFiles.delete(fileId);
+        }
+      }
+
+      createFileElement(file) {
+        const div = document.createElement('div');
+        div.className = 'nb-file-item';
+        div.dataset.fileId = file.id;
+        div.innerHTML = `
+          <div class="nb-file-info">
+            <span class="nb-file-icon"><i class="fa-solid fa-file-${file.type}"></i></span>
+            <div class="nb-file-details">
+              <span class="nb-file-name">${file.name}</span>
+              <span class="nb-file-meta">${file.type.toUpperCase()} • ${file.size} • ${file.time}</span>
+            </div>
+          </div>
+          <div class="nb-file-status">
+            <div class="nb-progress">
+              <div class="nb-progress-bar" style="width:${file.progress}%"></div>
+            </div>
+            <span class="nb-status-text">${file.progress === 100 ? 'Completed' : 'Processing...'}</span>
+          </div>
+          <div class="nb-file-actions">
+            ${file.progress < 100 ? `
+              <button class="nb-action" title="Stop" onclick="fileManager.stopProcessing('${file.id}')">
+                <i class="fa-solid fa-stop"></i>
+              </button>
+            ` : `
+              <button class="nb-action" title="Download" onclick="fileManager.downloadFile('${file.id}')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+              <button class="nb-action" title="Share" onclick="fileManager.shareFile('${file.id}')">
+                <i class="fa-solid fa-share"></i>
+              </button>
+            `}
+            <button class="nb-action" title="Delete" onclick="fileManager.removeFile('${file.id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+        return div;
+      }
+
+      stopProcessing(fileId) {
+        const file = this.files.get(fileId);
+        if (file && file.progress < 100) {
+          clearInterval(file.processingInterval);
+          const statusText = document.querySelector(`[data-file-id="${fileId}"] .nb-status-text`);
+          if (statusText) {
+            statusText.textContent = 'Stopped';
+            statusText.classList.add('nb-error');
+          }
+        }
+      }
+
+      downloadFile(fileId) {
+        const file = this.files.get(fileId);
+        if (file && file.progress === 100) {
+          // Simulate download
+          alert(`Downloading ${file.name}...`);
+        }
+      }
+
+      shareFile(fileId) {
+        const file = this.files.get(fileId);
+        if (file && file.progress === 100) {
+          // Simulate share dialog
+          alert(`Sharing ${file.name}...`);
+        }
+      }
+
+      simulateProcessing(fileId) {
+        const file = this.files.get(fileId);
+        if (!file || file.progress === 100) return;
+
+        this.processingFiles.add(fileId);
+        let progress = 0;
+        file.processingInterval = setInterval(() => {
+          progress += Math.random() * 10;
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(file.processingInterval);
+          }
+          this.updateProgress(fileId, Math.min(progress, 100));
+        }, 500);
+      }
+    }
+
+    // Initialize File Manager
+    const fileManager = new FileManager();
+
+    // Notes Breakdown Quick Actions
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize tab functionality when Notes Breakdown section is loaded
+      function initializeNbTabs() {
+        const nbTabs = document.querySelectorAll('.nb-action-btn');
+        const nbPanels = document.querySelectorAll('.nb-tab-panel');
+        
+        if (nbTabs.length && nbPanels.length) {
+          function showNbTab(tabName) {
+            // Hide all tab panels
+            nbPanels.forEach(panel => {
+              panel.classList.remove('active');
+            });
+            
+            // Show selected tab panel
+            const selectedPanel = document.getElementById('nb-' + tabName);
+            if (selectedPanel) {
+              selectedPanel.classList.add('active');
+            }
+            
+            // Update button states
+            nbTabs.forEach(btn => {
+              btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+          }
+
+          // Add click handlers to tab buttons
+          nbTabs.forEach(btn => {
+            btn.addEventListener('click', function() {
+              const tabName = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+              showNbTab(tabName);
+            });
+          });
+
+          // Initialize favorite functionality
+          const favoriteButtons = document.querySelectorAll('.nb-file-action');
+          favoriteButtons.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              this.classList.toggle('active');
+              const icon = this.querySelector('i');
+              if (this.classList.contains('active')) {
+                icon.classList.remove('fa-regular');
+                icon.classList.add('fa-solid');
+              } else {
+                icon.classList.remove('fa-solid');
+                icon.classList.add('fa-regular');
+              }
+            });
+          });
+        }
+      }
+
+      // Call initialization when the Notes Breakdown section is loaded
+      const notesBreakdownLink = document.querySelector('a[href="#"]:has(i.fa-file-lines)');
+      if (notesBreakdownLink) {
+        notesBreakdownLink.addEventListener('click', function() {
+          // Wait for the content to be loaded
+          setTimeout(initializeNbTabs, 300);
+        });
+      }
+    });
   </script>
 </html>
