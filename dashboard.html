@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="upload-notes.css" />
     <link rel="stylesheet" href="notes-breakdown.css" />
     <link rel="stylesheet" href="ai-images.css" />
+    <link rel="stylesheet" href="mcq-generator.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -427,39 +428,111 @@
           </div>
         `,
         "MCQ Generator": `
-          <!-- Place this inside your workspace tab for MCQ Generator -->
-            <!-- Place inside your MCQ Generator tab content -->
-            <div class="mcq-generator">
+          <div class="mcq-generator">
             <h2>MCQ Generator</h2>
-            <label class="mcq-label" for="mcq-topic">Topic or Paragraph</label>
-            <div class="mcq-input-blend">
-                <textarea id="mcq-topic" class="mcq-input" placeholder="Paste your topic or paragraph here..."></textarea>
-                <div class="mcq-options-row">
-                <label for="mcq-count" class="mcq-label">How many questions?</label>
-                <input type="number" id="mcq-count" class="mcq-count-input" min="5" max="50" value="10">
-                <button class="mcq-generate-btn">Generate MCQs</button>
+            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Generate engaging multiple-choice questions from your study materials</p>
+            
+            <div class="mcq-container">
+              <div class="mcq-input-section">
+                <div class="mcq-input-header">
+                  <h3>Input Your Content</h3>
+                  <p>Paste your text or choose a file to generate questions</p>
                 </div>
-            </div>
-            <div class="mcq-output-area">
-                <h3>Generated MCQs</h3>
+                
+                <div class="mcq-input-area">
+                  <textarea class="mcq-input" placeholder="Enter your text here, or upload a document..."></textarea>
+                </div>
+                
+                <div class="mcq-controls">
+                  <div class="mcq-control-group">
+                    <span class="mcq-control-label">Question Count</span>
+                    <input type="number" class="mcq-control-input" min="5" max="50" value="10">
+                  </div>
+                  
+                  <div class="mcq-control-group">
+                    <span class="mcq-control-label">Difficulty</span>
+                    <select class="mcq-control-input">
+                      <option value="basic">Basic</option>
+                      <option value="intermediate" selected>Intermediate</option>
+                      <option value="advanced">Advanced</option>
+                    </select>
+                  </div>
+                  
+                  <div class="mcq-control-group">
+                    <span class="mcq-control-label">Question Style</span>
+                    <select class="mcq-control-input">
+                      <option value="conceptual" selected>Conceptual Understanding</option>
+                      <option value="analytical">Analytical Thinking</option>
+                      <option value="application">Practical Application</option>
+                    </select>
+                  </div>
+                  
+                  <button class="mcq-generate-btn">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    Generate Questions
+                  </button>
+                </div>
+              </div>
+
+              <div class="mcq-output-section">
+                <div class="mcq-stats">
+                  <div class="mcq-stat">
+                    <div class="mcq-stat-value">10</div>
+                    <div class="mcq-stat-label">Questions</div>
+                  </div>
+                  <div class="mcq-stat">
+                    <div class="mcq-stat-value">4</div>
+                    <div class="mcq-stat-label">Options Each</div>
+                  </div>
+                  <div class="mcq-stat">
+                    <div class="mcq-stat-value">85%</div>
+                    <div class="mcq-stat-label">Accuracy</div>
+                  </div>
+                </div>
+
                 <ul class="mcq-list">
-                <li>
-                    <div class="mcq-question">What is the capital of France?</div>
+                  <li class="mcq-item">
+                    <div class="mcq-question">
+                      <span>1.</span> What is the capital city of France?
+                    </div>
                     <ul class="mcq-answers">
-                    <li>Berlin</li>
-                    <li>Madrid</li>
-                    <li class="mcq-correct">Paris</li>
-                    <li>Rome</li>
+                      <li class="mcq-answer">
+                        <span class="mcq-answer-marker">A</span>
+                        <span>Berlin</span>
+                      </li>
+                      <li class="mcq-answer">
+                        <span class="mcq-answer-marker">B</span>
+                        <span>Madrid</span>
+                      </li>
+                      <li class="mcq-answer correct">
+                        <span class="mcq-answer-marker">C</span>
+                        <span>Paris</span>
+                      </li>
+                      <li class="mcq-answer">
+                        <span class="mcq-answer-marker">D</span>
+                        <span>Rome</span>
+                      </li>
                     </ul>
-                </li>
-                <!-- More MCQs here -->
+                  </li>
                 </ul>
+
                 <div class="mcq-actions">
-                <button class="mcq-save-btn">Save to My Questions</button>
-                <button class="mcq-practice-btn">Start Practice Session</button>
+                  <button class="mcq-action-btn">
+                    <i class="fa-solid fa-file-export"></i>
+                    Export as PDF
+                  </button>
+                  <button class="mcq-action-btn">
+                    <i class="fa-solid fa-share"></i>
+                    Share
+                  </button>
+                  <button class="mcq-action-btn primary">
+                    <i class="fa-solid fa-play"></i>
+                    Start Practice Session
+                  </button>
                 </div>
+              </div>
             </div>
-        </div>
+          </div>
         `,
         "My Dictionary": `<div class="dictionary-card-list">
                 <h2>My Dictionary</h2>
