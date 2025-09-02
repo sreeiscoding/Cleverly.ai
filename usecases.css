@@ -1,0 +1,143 @@
+.usecases-section {
+  background: linear-gradient(180deg, #fff 0%, #f8fffe 100%);
+  padding: 80px 24px;
+}
+
+.usecases-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+  margin-top: 48px;
+  padding: 0 24px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.usecase-card {
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.usecase-card-inner {
+  background: white;
+  border-radius: 20px;
+  padding: 32px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1px solid rgba(20, 128, 122, 0.1);
+  transition: all 0.3s ease;
+}
+
+.usecase-card:hover .usecase-card-inner {
+  transform: translateY(-8px);
+  border-color: #14807a;
+  box-shadow: 0 16px 48px rgba(20, 128, 122, 0.12);
+}
+
+.usecase-icon-wrapper {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.usecase-icon {
+  font-size: 2.5rem;
+  position: relative;
+  z-index: 2;
+  transition: transform 0.3s ease;
+}
+
+.usecase-card:hover .usecase-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.usecase-icon-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #14807a15;
+  border-radius: 16px;
+  transform: rotate(-5deg);
+  transition: all 0.3s ease;
+}
+
+.usecase-card:hover .usecase-icon-bg {
+  transform: rotate(5deg) scale(1.1);
+  background: #14807a20;
+}
+
+.usecase-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+  margin: 0 0 16px 0;
+}
+
+.usecase-desc {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 0 24px 0;
+  flex-grow: 1;
+}
+
+.usecase-features {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 24px 0;
+}
+
+.usecase-features li {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+  color: #444;
+  font-size: 0.95rem;
+}
+
+.feature-dot {
+  width: 6px;
+  height: 6px;
+  background: #14807a;
+  border-radius: 50%;
+  margin-right: 12px;
+  display: inline-block;
+}
+
+.usecase-link {
+  color: #14807a;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  transition: all 0.3s ease;
+  margin-top: auto;
+  padding: 8px 0;
+}
+
+.usecase-link:hover {
+  color: #0f5c57;
+  transform: translateX(4px);
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .usecases-cards {
+    grid-template-columns: 1fr;
+    padding: 0 16px;
+  }
+  
+  .usecase-card-inner {
+    padding: 24px;
+  }
+}
