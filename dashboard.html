@@ -6,6 +6,7 @@
     <title>Dashboard</title>
     <link rel="stylesheet" href="dashboard.css" />
     <link rel="stylesheet" href="upload-notes.css" />
+    <link rel="stylesheet" href="notes-breakdown.css" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
@@ -203,44 +204,130 @@
       // Tab content map: key = link text, value = HTML content
       const tabContents = {
         "Notes Breakdown": `
-                    <div class="notes-breakdown">
-                        <h2>Upload files</h2>
-                        <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:8px;">Select and upload the files of your choice</p>
-                        <div class="nb-upload-box">
-                            <span class="nb-upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></span>
-                            <div class="nb-upload-text">Choose a file or drag & drop it here.</div>
-                            <div class="nb-upload-formats">JPEG, PNG, and PDF formats, up to 500 MB.</div>
-                            <button class="nb-browse-btn" onclick="document.getElementById('nb-file').click();">Browse File</button>
-                            <input type="file" id="nb-file" class="nb-file-input" multiple>
-                        </div>
-                        <div class="nb-file-list">
-                            <!-- Example file item (repeat for each file) -->
-                            <div class="nb-file-item">
-                                <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
-                                <span class="nb-file-name">my-cv.pdf</span>
-                                <span class="nb-file-status">Uploading...</span>
-                                <div class="nb-file-progress" style="width:40%;"></div>
-                                <div class="nb-file-actions">
-                                    <button class="nb-file-delete"><i class="fa-solid fa-xmark"></i></button>
-                                </div>
-                            </div>
-                            <div class="nb-file-item">
-                                <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
-                                <span class="nb-file-name">google-certificate.pdf</span>
-                                <span class="nb-file-status" style="color:#22c55e;">Completed</span>
-                                <div class="nb-file-progress" style="width:100%;"></div>
-                                <div class="nb-file-actions">
-                                    <button class="nb-file-delete"><i class="fa-solid fa-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="nb-or">OR</div>
-                        <div class="nb-url-import">
-                            <input type="text" class="nb-url-input" placeholder="Paste file URL">
-                            <button class="nb-url-btn">Import</button>
-                        </div>
+          <div class="notes-breakdown">
+            <h2>Notes Breakdown</h2>
+            <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Transform your lecture notes and documents into structured learning materials</p>
+            
+            <div class="nb-container">
+              <div class="nb-upload-section">
+                <div class="nb-upload-box">
+                  <div class="nb-upload-content">
+                    <i class="fa-solid fa-cloud-arrow-up nb-upload-icon"></i>
+                    <h3>Drag & Drop Files Here</h3>
+                    <p class="nb-upload-text">or click to browse</p>
+                    <input type="file" id="nb-file" class="nb-file-input" multiple accept=".pdf,.docx,.txt">
+                  </div>
+                  <div class="nb-upload-footer">
+                    <div class="nb-upload-info">
+                      <i class="fa-solid fa-circle-info"></i>
+                      <span>PDF, Word & Text files up to 50MB</span>
                     </div>
-                `,
+                    <button class="nb-browse-btn" onclick="document.getElementById('nb-file').click();">
+                      <i class="fa-solid fa-folder-open"></i> Choose Files
+                    </button>
+                  </div>
+                </div>
+
+                <div class="nb-quick-actions">
+                  <button class="nb-action-btn">
+                    <i class="fa-solid fa-clock-rotate-left"></i>
+                    <span>Recent Files</span>
+                  </button>
+                  <button class="nb-action-btn">
+                    <i class="fa-solid fa-star"></i>
+                    <span>Favorites</span>
+                  </button>
+                  <button class="nb-action-btn">
+                    <i class="fa-solid fa-folder"></i>
+                    <span>My Library</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="nb-features-panel">
+                <h3>AI Processing Options</h3>
+                <div class="nb-features-grid">
+                  <div class="nb-feature-card">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-book-open-reader"></i>
+                    </div>
+                    <h4>Smart Summary</h4>
+                    <p>Generate concise chapter summaries and key points</p>
+                  </div>
+                  <div class="nb-feature-card">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <h4>Mind Map</h4>
+                    <p>Create visual concept maps from your notes</p>
+                  </div>
+                  <div class="nb-feature-card">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <h4>Study Guide</h4>
+                    <p>Generate comprehensive study materials</p>
+                  </div>
+                  <div class="nb-feature-card">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-cards-blank"></i>
+                    </div>
+                    <h4>Flashcards</h4>
+                    <p>Create interactive flashcards for review</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="nb-file-list">
+              <div class="nb-list-header">
+                <h3>Recent Uploads</h3>
+                <div class="nb-list-actions">
+                  <button class="nb-list-action"><i class="fa-solid fa-sort"></i> Sort</button>
+                  <button class="nb-list-action"><i class="fa-solid fa-filter"></i> Filter</button>
+                </div>
+              </div>
+              
+              <div class="nb-file-item">
+                <div class="nb-file-info">
+                  <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
+                  <div class="nb-file-details">
+                    <span class="nb-file-name">Chapter_5_Notes.pdf</span>
+                    <span class="nb-file-meta">PDF • 2.4 MB • Just now</span>
+                  </div>
+                </div>
+                <div class="nb-file-status">
+                  <div class="nb-progress">
+                    <div class="nb-progress-bar" style="width:40%"></div>
+                  </div>
+                  <span class="nb-status-text">Processing...</span>
+                </div>
+                <div class="nb-file-actions">
+                  <button class="nb-action" title="Stop"><i class="fa-solid fa-stop"></i></button>
+                  <button class="nb-action" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+
+              <div class="nb-file-item nb-item-complete">
+                <div class="nb-file-info">
+                  <span class="nb-file-icon"><i class="fa-solid fa-file-word"></i></span>
+                  <div class="nb-file-details">
+                    <span class="nb-file-name">Research_Paper.docx</span>
+                    <span class="nb-file-meta">Word • 1.8 MB • 2 mins ago</span>
+                  </div>
+                </div>
+                <div class="nb-file-status">
+                  <span class="nb-status-text nb-success">Completed</span>
+                </div>
+                <div class="nb-file-actions">
+                  <button class="nb-action" title="Download"><i class="fa-solid fa-download"></i></button>
+                  <button class="nb-action" title="Share"><i class="fa-solid fa-share"></i></button>
+                  <button class="nb-action" title="Delete"><i class="fa-solid fa-trash"></i></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
         "AI Images": `
           <div class="ai-image-generator">
             <h2>AI Image Generator</h2>
