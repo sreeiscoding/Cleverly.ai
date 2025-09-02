@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Cleverly</title>
     <link rel="stylesheet" href="index.css" />
+    <link rel="stylesheet" href="demo-section.css" />
   </head>
   <body>
     <nav class="navbar">
@@ -275,21 +276,62 @@
     <!-- Demo / Screenshot Section -->
     <section class="section demo-section">
       <div class="demo-container">
-        <div class="demo-left">
+        <div class="demo-left animated-block">
+          <span class="demo-badge">🎥 Live Demo</span>
           <h2 class="demo-title">See Cleverly in Action</h2>
           <p class="demo-subtitle">
             An AI assistant that helps you plan, organize, and execute smarter —
             all in one place.
           </p>
-          <a href="#demo" class="demo-btn">Try a Demo</a>
+          <ul class="demo-features">
+            <li>
+              <span class="demo-icon">⚡️</span>
+              <span>Instant AI-powered content generation</span>
+            </li>
+            <li>
+              <span class="demo-icon">🎯</span>
+              <span>Smart organization tools</span>
+            </li>
+            <li>
+              <span class="demo-icon">🔄</span>
+              <span>Real-time collaboration</span>
+            </li>
+          </ul>
+          <div class="demo-cta">
+            <a href="#demo" class="demo-btn pulse">Try a Demo</a>
+            <span class="demo-guarantee">No sign-up required</span>
+          </div>
         </div>
-        <div class="demo-right">
+        <div class="demo-right animated-block">
           <div class="demo-mockup">
-            <img
-              src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
-              alt="Cleverly Dashboard Screenshot"
-              class="demo-screenshot"
-            />
+            <div class="demo-browser-header">
+              <div class="browser-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+              <div class="browser-address">app.cleverly.ai</div>
+            </div>
+            <div class="demo-screenshot-container">
+              <img
+                src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=80"
+                alt="Cleverly Dashboard Screenshot"
+                class="demo-screenshot"
+              />
+              <div class="demo-overlay">
+                <div class="demo-play-button">
+                  <svg viewBox="0 0 24 24" width="48" height="48">
+                    <circle cx="12" cy="12" r="11" fill="#14807a"/>
+                    <path d="M9.5 7.5v9l7.5-4.5z" fill="white"/>
+                  </svg>
+                </div>
+              </div>
+            </div>
+            <div class="demo-features-dots">
+              <span class="active"></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
