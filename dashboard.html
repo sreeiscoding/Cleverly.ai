@@ -14,6 +14,51 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      .prompt-file-input {
+        display: none;
+      }
+
+      .prompt-attachments {
+        padding: 0 16px;
+        margin-bottom: 4px;
+        min-height: 24px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .prompt-attachment {
+        font-size: 0.85rem;
+        color: #14807a;
+        background: rgba(20, 128, 122, 0.1);
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .prompt-attachment i {
+        font-size: 0.8rem;
+      }
+
+      .prompt-attachment .remove-file {
+        color: #666;
+        cursor: pointer;
+        padding: 2px;
+        margin-left: 4px;
+        transition: color 0.2s;
+      }
+
+      .prompt-attachment .remove-file:hover {
+        color: #dc3545;
+      }
+
+      .prompt-input[data-has-files="true"] {
+        color: #14807a;
+        font-style: italic;
+      }
+
       .nb-tab-content {
         margin-top: 20px;
         background: white;
@@ -370,10 +415,12 @@
               <i class="fa-solid fa-plus"></i>
             </button>
             <div class="prompt-menu-dropup">
-              <button class="prompt-menu-item">
+              <input type="file" id="prompt-file-input" class="prompt-file-input" hidden multiple>
+              <button class="prompt-menu-item" onclick="document.getElementById('prompt-file-input').click();">
                 <i class="fa-solid fa-paperclip"></i> Attach
               </button>
             </div>
+            <div class="prompt-attachments"></div>
             <input
               type="text"
               class="prompt-input"
@@ -656,9 +703,9 @@
                 <div class="ai-img-preview-header">
                   <h3 class="ai-img-preview-title">Preview</h3>
                   <div class="ai-img-style-switch">
-                    <button class="ai-img-style-btn active">Modern</button>
-                    <button class="ai-img-style-btn">Classic</button>
-                    <button class="ai-img-style-btn">Minimal</button>
+                    <button class="ai-img-style-btn active" data-style="modern" onclick="switchImgStyle(event, 'modern')">Modern</button>
+                    <button class="ai-img-style-btn" data-style="classic" onclick="switchImgStyle(event, 'classic')">Classic</button>
+                    <button class="ai-img-style-btn" data-style="minimal" onclick="switchImgStyle(event, 'minimal')">Minimal</button>
                   </div>
                 </div>
 
@@ -913,17 +960,20 @@
                   <span>Generate Questions</span>
                   <small>Create practice questions</small>
                 </button>
-                <button class="process-btn" data-action="assignment">
+                <button class="process-btn disabled" data-action="assignment">
+                  <div class="beta-badge">Beta</div>
                   <i class="fa-solid fa-pen-to-square"></i>
                   <span>Generate Assignment</span>
                   <small>Create structured assignments</small>
                 </button>
-                <button class="process-btn" data-action="presentation">
+                <button class="process-btn disabled" data-action="presentation">
+                  <div class="beta-badge">Beta</div>
                   <i class="fa-solid fa-presentation-screen"></i>
                   <span>Generate Presentation</span>
                   <small>Create slide deck</small>
                 </button>
-                <button class="process-btn" data-action="seminar">
+                <button class="process-btn disabled" data-action="seminar">
+                  <div class="beta-badge">Beta</div>
                   <i class="fa-solid fa-chalkboard-teacher"></i>
                   <span>Generate Seminar</span>
                   <small>Create seminar materials</small>
@@ -1107,6 +1157,51 @@
       document.addEventListener("click", (e) => {
         if (!profileDropdown.contains(e.target)) {
           profileDropdown.classList.remove("show");
+        }
+      });
+    }
+
+    // File attachment handling
+    const promptFileInput = document.getElementById('prompt-file-input');
+    const promptAttachments = document.querySelector('.prompt-attachments');
+    const selectedFiles = new Set();
+
+    if (promptFileInput && promptAttachments) {
+      promptFileInput.addEventListener('change', function(e) {
+        const files = Array.from(e.target.files);
+        if (files.length > 0) {
+          files.forEach(file => {
+            if (!selectedFiles.has(file.name)) {
+              selectedFiles.add(file.name);
+              const attachment = document.createElement('div');
+              attachment.className = 'prompt-attachment';
+              
+              // Choose icon based on file type
+              let icon = 'fa-file';
+              if (file.type.includes('pdf')) icon = 'fa-file-pdf';
+              else if (file.type.includes('word') || file.name.endsWith('.docx')) icon = 'fa-file-word';
+              else if (file.type.includes('image')) icon = 'fa-file-image';
+              
+              attachment.innerHTML = `
+                <i class="fa-solid ${icon}"></i>
+                <span>${file.name}</span>
+                <i class="fa-solid fa-xmark remove-file" onclick="this.parentElement.remove(); selectedFiles.delete('${file.name}');"></i>
+              `;
+              promptAttachments.appendChild(attachment);
+            }
+          });
+          
+          // Close the dropup menu
+          const promptMenuDropup = document.querySelector('.prompt-menu-dropup');
+          if (promptMenuDropup) {
+            promptMenuDropup.classList.remove('show');
+          }
+
+          // Update prompt input placeholder
+          const promptInput = document.querySelector('.prompt-input');
+          if (promptInput) {
+            promptInput.placeholder = "Ask about the attached files...";
+          }
         }
       });
     }
@@ -1345,5 +1440,29 @@
         });
       }
     });
+  // AI Image Style Switch Functionality
+  function switchImgStyle(e, style) {
+    // Remove active from all style buttons
+    document.querySelectorAll('.ai-img-style-btn').forEach(btn => btn.classList.remove('active'));
+    // Add active to clicked button
+    e.currentTarget.classList.add('active');
+    // Update preview area
+    const preview = document.querySelector('.ai-img-preview-area');
+    if (preview) {
+      let styleText = '';
+      let styleIcon = '';
+      if (style === 'modern') {
+        styleText = 'Modern style preview: clean, vibrant, and contemporary.';
+        styleIcon = '<i class="fa-solid fa-image"></i>';
+      } else if (style === 'classic') {
+        styleText = 'Classic style preview: elegant, timeless, and detailed.';
+        styleIcon = '<i class="fa-solid fa-image"></i>';
+      } else if (style === 'minimal') {
+        styleText = 'Minimal style preview: simple, clear, and focused.';
+        styleIcon = '<i class="fa-solid fa-image"></i>';
+      }
+      preview.innerHTML = `<div class='ai-img-preview-placeholder'>${styleIcon}<p>${styleText}</p><small>Choose an option and enter your prompt to begin</small></div>`;
+    }
+  }
   </script>
 </html>
