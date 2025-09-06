@@ -1,4 +1,5 @@
 const supabaseAdmin = require('../lib/supabase');
+const { generateMCQs } = require('../lib/openai');
 const { z } = require('zod');
 
 exports.getAllMCQs = async (req, res, next) => {
@@ -13,12 +14,19 @@ exports.createMCQ = async (req, res, next) => {
   try {
     const schema = z.object({
       source_text: z.string(),
-      generated_mcqs: z.array(z.any())
+      question_count: z.number().optional().default(10),
+      difficulty: z.string().optional().default('intermediate'),
+      generated_mcqs: z.array(z.any()).optional()
     });
-    const { source_text, generated_mcqs } = schema.parse(req.body);
+    const { source_text, question_count, difficulty, generated_mcqs } = schema.parse(req.body);
+
+    let mcqs = generated_mcqs;
+    if (!mcqs) {
+      mcqs = await generateMCQs(source_text, question_count, difficulty);
+    }
 
     const { data, error } = await supabaseAdmin.from('mcq_generator')
-      .insert({ user_id: req.user.id, source_text, generated_mcqs })
+      .insert({ user_id: req.user.id, source_text, generated_mcqs: mcqs })
       .single();
 
     if (error) return res.status(500).json({ error: error.message });

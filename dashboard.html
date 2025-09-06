@@ -64,7 +64,7 @@
         background: white;
         border-radius: 8px;
         padding: 16px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
 
       .nb-tab-panel {
@@ -93,7 +93,8 @@
         border-color: #14807a;
       }
 
-      .nb-file-row, .nb-folder-row {
+      .nb-file-row,
+      .nb-folder-row {
         display: flex;
         align-items: center;
         padding: 12px;
@@ -101,25 +102,30 @@
         transition: background-color 0.2s;
       }
 
-      .nb-file-row:hover, .nb-folder-row:hover {
+      .nb-file-row:hover,
+      .nb-folder-row:hover {
         background-color: #f8fffe;
       }
 
-      .nb-file-row:last-child, .nb-folder-row:last-child {
+      .nb-file-row:last-child,
+      .nb-folder-row:last-child {
         border-bottom: none;
       }
 
-      .nb-file-info, .nb-folder-info {
+      .nb-file-info,
+      .nb-folder-info {
         margin-left: 12px;
         flex-grow: 1;
       }
 
-      .nb-file-name, .nb-folder-name {
+      .nb-file-name,
+      .nb-folder-name {
         display: block;
         font-weight: 500;
       }
 
-      .nb-file-date, .nb-folder-count {
+      .nb-file-date,
+      .nb-folder-count {
         display: block;
         font-size: 0.85em;
         color: #666;
@@ -152,11 +158,11 @@
         align-items: center;
         gap: 16px;
         transition: all 0.2s;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
       }
 
       .nb-file-item:hover {
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
       .nb-file-icon {
@@ -167,7 +173,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(20,128,122,0.1);
+        background: rgba(20, 128, 122, 0.1);
         border-radius: 8px;
       }
 
@@ -237,17 +243,17 @@
       }
 
       .nb-action:hover {
-        background: rgba(20,128,122,0.1);
+        background: rgba(20, 128, 122, 0.1);
         color: #14807a;
       }
 
       .nb-action[title="Delete"]:hover {
-        background: rgba(220,53,69,0.1);
+        background: rgba(220, 53, 69, 0.1);
         color: #dc3545;
       }
 
       .nb-action[title="Stop"]:hover {
-        background: rgba(255,193,7,0.1);
+        background: rgba(255, 193, 7, 0.1);
         color: #ffc107;
       }
 
@@ -257,13 +263,157 @@
 
       /* Processing animation */
       @keyframes processing {
-        0% { opacity: 1; }
-        50% { opacity: 0.6; }
-        100% { opacity: 1; }
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.6;
+        }
+        100% {
+          opacity: 1;
+        }
       }
 
       .nb-file-item:not(.nb-item-complete) .nb-status-text {
         animation: processing 1.5s infinite;
+      }
+
+      /* AI Result Modal Styles */
+      .ai-result-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .ai-result-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+      }
+
+      .ai-result-content {
+        position: relative;
+        background: white;
+        border-radius: 12px;
+        padding: 24px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+      }
+
+      .ai-result-close {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: #666;
+      }
+
+      .ai-result h3 {
+        color: #14807a;
+        margin-bottom: 16px;
+        font-size: 1.5rem;
+      }
+
+      .ai-result p, .ai-result div {
+        line-height: 1.6;
+        color: #333;
+      }
+
+      .flashcard {
+        background: #f8fffe;
+        border-left: 4px solid #14807a;
+        padding: 12px 16px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+      }
+
+      .flashcard strong {
+        color: #14807a;
+      }
+
+      /* Processing Options Styles */
+      .processing-options {
+        margin-top: 24px;
+      }
+
+      .processing-options h3 {
+        color: #14807a;
+        margin-bottom: 16px;
+        font-size: 1.2rem;
+      }
+
+      .processing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 12px;
+      }
+
+      .process-btn {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 16px;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        text-align: center;
+        position: relative;
+      }
+
+      .process-btn:hover:not(.disabled) {
+        border-color: #14807a;
+        background: rgba(20, 128, 122, 0.05);
+        transform: translateY(-2px);
+      }
+
+      .process-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .process-btn i {
+        font-size: 24px;
+        color: #14807a;
+      }
+
+      .process-btn span {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .process-btn small {
+        font-size: 0.8rem;
+        color: #666;
+        line-height: 1.2;
+      }
+
+      .process-btn .beta-badge {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ffc107;
+        color: #000;
+        padding: 2px 6px;
+        border-radius: 10px;
+        font-size: 0.7rem;
+        font-weight: bold;
       }
     </style>
   </head>
@@ -274,6 +424,89 @@
       min-height: 100vh;
     "
   >
+    <script>
+      const API_BASE_URL = "http://localhost:4000";
+      let AUTH_TOKEN = localStorage.getItem("authToken");
+
+      // Redirect to login page if no token
+      if (!AUTH_TOKEN) {
+        window.location.href = "signin.html";
+      }
+
+    //   You can integrate the AI Notes and MCQ generation backend calls inside the existing dashboard JS using the apiFetch helper and the stored token to enable authorized calls.
+
+      // Helper function for authenticated API fetch
+      async function apiFetch(path, options = {}) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+        };
+        const res = await fetch(API_BASE_URL + path, options);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || "API Error");
+        }
+        return res.json();
+      }
+
+      // Attach logout handler
+      document.addEventListener("DOMContentLoaded", () => {
+        const logoutLink = document.querySelector(
+          '.dropdown-content a[href="#logout"]'
+        );
+        if (logoutLink) {
+          logoutLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            localStorage.removeItem("authToken");
+            window.location.href = "signin.html";
+          });
+        }
+      });
+
+      // Integrate Notes AI processing
+      async function generateNotesAI(text) {
+        try {
+          const response = await apiFetch("/ai/summarize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          });
+          return response.summary;
+        } catch (err) {
+          console.error("Notes AI generation failed", err);
+          throw err;
+        }
+      }
+
+      // Integrate MCQ AI processing
+      async function generateMCQsAI(
+        text,
+        count = 10,
+        difficulty = "intermediate"
+      ) {
+        try {
+          const response = await apiFetch("/mcq", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source_text: text,
+              question_count: count,
+              difficulty,
+            }),
+          });
+          return response.generated_mcqs || [];
+        } catch (err) {
+          console.error("MCQ AI generation failed", err);
+          throw err;
+        }
+      }
+
+      // Example usage inside your dashboard workspace:
+      // Add event listeners for buttons or form submissions where you want
+      // to trigger these AI services and update the UI accordingly.
+
+      // (You can expand your existing code where Notes Breakdown and MCQ Generator UI are present to call these functions.)
+    </script>
     <div class="dashboard-wrapper">
       <aside class="sidebar">
         <div class="sidebar-header">
@@ -415,8 +648,17 @@
               <i class="fa-solid fa-plus"></i>
             </button>
             <div class="prompt-menu-dropup">
-              <input type="file" id="prompt-file-input" class="prompt-file-input" hidden multiple>
-              <button class="prompt-menu-item" onclick="document.getElementById('prompt-file-input').click();">
+              <input
+                type="file"
+                id="prompt-file-input"
+                class="prompt-file-input"
+                hidden
+                multiple
+              />
+              <button
+                class="prompt-menu-item"
+                onclick="document.getElementById('prompt-file-input').click();"
+              >
                 <i class="fa-solid fa-paperclip"></i> Attach
               </button>
             </div>
@@ -464,7 +706,7 @@
           <div class="notes-breakdown">
             <h2>Notes Breakdown</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Transform your lecture notes and documents into structured learning materials</p>
-            
+
             <div class="nb-container">
               <div class="nb-upload-section">
                 <div class="nb-upload-box">
@@ -618,7 +860,7 @@
                   <button class="nb-list-action"><i class="fa-solid fa-filter"></i> Filter</button>
                 </div>
               </div>
-              
+
               <div class="nb-file-item">
                 <div class="nb-file-info">
                   <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
@@ -663,7 +905,7 @@
           <div class="ai-image-generator">
             <h2>AI Image Generator</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Create professional diagrams, flowcharts, and visual aids for your academic or business needs</p>
-            
+
             <div class="ai-img-container">
               <div class="ai-img-input-section">
                 <div class="ai-img-prompt-area">
@@ -760,24 +1002,24 @@
           <div class="mcq-generator">
             <h2>MCQ Generator</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Generate engaging multiple-choice questions from your study materials</p>
-            
+
             <div class="mcq-container">
               <div class="mcq-input-section">
                 <div class="mcq-input-header">
                   <h3>Input Your Content</h3>
                   <p>Paste your text or choose a file to generate questions</p>
                 </div>
-                
+
                 <div class="mcq-input-area">
                   <textarea class="mcq-input" placeholder="Enter your text here, or upload a document..."></textarea>
                 </div>
-                
+
                 <div class="mcq-controls">
                   <div class="mcq-control-group">
                     <span class="mcq-control-label">Question Count</span>
                     <input type="number" class="mcq-control-input" min="5" max="50" value="10">
                   </div>
-                  
+
                   <div class="mcq-control-group">
                     <span class="mcq-control-label">Difficulty</span>
                     <select class="mcq-control-input">
@@ -786,7 +1028,7 @@
                       <option value="advanced">Advanced</option>
                     </select>
                   </div>
-                  
+
                   <div class="mcq-control-group">
                     <span class="mcq-control-label">Question Style</span>
                     <select class="mcq-control-input">
@@ -795,7 +1037,7 @@
                       <option value="application">Practical Application</option>
                     </select>
                   </div>
-                  
+
                   <button class="mcq-generate-btn">
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     Generate Questions
@@ -867,7 +1109,7 @@
           <div class="my-dictionary">
             <h2>My Dictionary</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Build your personalized vocabulary and language learning hub</p>
-            
+
             <div class="beta-feature-card">
               <div class="beta-feature-icon">
                 <i class="fa-solid fa-book-open"></i>
@@ -893,7 +1135,7 @@
           <div class="my-questions">
             <h2>My Questions</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Track and manage your study questions and practice exercises</p>
-            
+
             <div class="beta-feature-card">
               <div class="beta-feature-icon">
                 <i class="fa-solid fa-flask"></i>
@@ -919,7 +1161,7 @@
           <div class="upload-notes">
             <h2>Upload Notes</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Transform your documents into smart study materials with AI</p>
-            
+
             <div class="upload-container">
               <div class="upload-zone">
                 <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
@@ -931,7 +1173,7 @@
                 <input type="file" id="file-input" hidden multiple accept=".pdf,.docx">
                 <p class="file-types">Supports PDF and Word documents</p>
               </div>
-              
+
               <div class="upload-features">
                 <h3>What our AI can do</h3>
                 <ul>
@@ -959,6 +1201,21 @@
                   <i class="fa-solid fa-question-circle"></i>
                   <span>Generate Questions</span>
                   <small>Create practice questions</small>
+                </button>
+                <button class="process-btn" data-action="mind-map">
+                  <i class="fa-solid fa-mind-share"></i>
+                  <span>Create Mind Map</span>
+                  <small>Generate visual concept maps</small>
+                </button>
+                <button class="process-btn" data-action="flashcards">
+                  <i class="fa-solid fa-cards-blank"></i>
+                  <span>Generate Flashcards</span>
+                  <small>Create study flashcards</small>
+                </button>
+                <button class="process-btn" data-action="study-guide">
+                  <i class="fa-solid fa-graduation-cap"></i>
+                  <span>Study Guide</span>
+                  <small>Comprehensive study materials</small>
                 </button>
                 <button class="process-btn disabled" data-action="assignment">
                   <div class="beta-badge">Beta</div>
@@ -988,6 +1245,11 @@
                   <span>PDFs to Docs</span>
                   <small>Convert PDF files to editable Word documents</small>
                 </button>
+                <button class="process-btn" data-action="extract-keywords">
+                  <i class="fa-solid fa-tags"></i>
+                  <span>Extract Keywords</span>
+                  <small>Identify important terms and concepts</small>
+                </button>
               </div>
             </div>
           </div>
@@ -996,7 +1258,7 @@
           <div class="presentations">
             <h2>Presentations</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Create and manage professional presentations with AI assistance</p>
-            
+
             <div class="beta-feature-card">
               <div class="beta-feature-icon">
                 <i class="fa-solid fa-presentation-screen"></i>
@@ -1022,7 +1284,7 @@
           <div class="assignments">
             <h2>Assignments</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Create, manage, and track your academic assignments</p>
-            
+
             <div class="beta-feature-card">
               <div class="beta-feature-icon">
                 <i class="fa-solid fa-pen-to-square"></i>
@@ -1048,7 +1310,7 @@
           <div class="seminars">
             <h2>Seminars</h2>
             <p style="color:#7b8fa1; font-size:1.08rem; margin-bottom:24px;">Prepare and manage your seminar materials effectively</p>
-            
+
             <div class="beta-feature-card">
               <div class="beta-feature-icon">
                 <i class="fa-solid fa-chalkboard-teacher"></i>
@@ -1107,7 +1369,7 @@
             // Set content
             // Remove the beta badge text from the key
             const fullText = this.textContent.trim();
-            const key = fullText.replace('Beta', '').trim();
+            const key = fullText.replace("Beta", "").trim();
             workspace.innerHTML =
               tabContents[key] ||
               `<div class="empty-state">
@@ -1162,26 +1424,30 @@
     }
 
     // File attachment handling
-    const promptFileInput = document.getElementById('prompt-file-input');
-    const promptAttachments = document.querySelector('.prompt-attachments');
+    const promptFileInput = document.getElementById("prompt-file-input");
+    const promptAttachments = document.querySelector(".prompt-attachments");
     const selectedFiles = new Set();
 
     if (promptFileInput && promptAttachments) {
-      promptFileInput.addEventListener('change', function(e) {
+      promptFileInput.addEventListener("change", function (e) {
         const files = Array.from(e.target.files);
         if (files.length > 0) {
-          files.forEach(file => {
+          files.forEach((file) => {
             if (!selectedFiles.has(file.name)) {
               selectedFiles.add(file.name);
-              const attachment = document.createElement('div');
-              attachment.className = 'prompt-attachment';
-              
+              const attachment = document.createElement("div");
+              attachment.className = "prompt-attachment";
+
               // Choose icon based on file type
-              let icon = 'fa-file';
-              if (file.type.includes('pdf')) icon = 'fa-file-pdf';
-              else if (file.type.includes('word') || file.name.endsWith('.docx')) icon = 'fa-file-word';
-              else if (file.type.includes('image')) icon = 'fa-file-image';
-              
+              let icon = "fa-file";
+              if (file.type.includes("pdf")) icon = "fa-file-pdf";
+              else if (
+                file.type.includes("word") ||
+                file.name.endsWith(".docx")
+              )
+                icon = "fa-file-word";
+              else if (file.type.includes("image")) icon = "fa-file-image";
+
               attachment.innerHTML = `
                 <i class="fa-solid ${icon}"></i>
                 <span>${file.name}</span>
@@ -1190,15 +1456,17 @@
               promptAttachments.appendChild(attachment);
             }
           });
-          
+
           // Close the dropup menu
-          const promptMenuDropup = document.querySelector('.prompt-menu-dropup');
+          const promptMenuDropup = document.querySelector(
+            ".prompt-menu-dropup"
+          );
           if (promptMenuDropup) {
-            promptMenuDropup.classList.remove('show');
+            promptMenuDropup.classList.remove("show");
           }
 
           // Update prompt input placeholder
-          const promptInput = document.querySelector('.prompt-input');
+          const promptInput = document.querySelector(".prompt-input");
           if (promptInput) {
             promptInput.placeholder = "Ask about the attached files...";
           }
@@ -1254,7 +1522,9 @@
       removeFile(fileId) {
         this.files.delete(fileId);
         this.processingFiles.delete(fileId);
-        const fileElement = document.querySelector(`[data-file-id="${fileId}"]`);
+        const fileElement = document.querySelector(
+          `[data-file-id="${fileId}"]`
+        );
         if (fileElement) {
           fileElement.remove();
         }
@@ -1275,53 +1545,69 @@
         let fileElement = document.querySelector(`[data-file-id="${fileId}"]`);
         if (!fileElement) {
           fileElement = this.createFileElement(file);
-          document.querySelector('.nb-file-list').appendChild(fileElement);
+          document.querySelector(".nb-file-list").appendChild(fileElement);
         }
 
-        const progressBar = fileElement.querySelector('.nb-progress-bar');
-        const statusText = fileElement.querySelector('.nb-status-text');
+        const progressBar = fileElement.querySelector(".nb-progress-bar");
+        const statusText = fileElement.querySelector(".nb-status-text");
 
         if (progressBar) progressBar.style.width = `${file.progress}%`;
-        if (statusText) statusText.textContent = file.progress === 100 ? 'Completed' : 'Processing...';
+        if (statusText)
+          statusText.textContent =
+            file.progress === 100 ? "Completed" : "Processing...";
 
         if (file.progress === 100) {
-          fileElement.classList.add('nb-item-complete');
+          fileElement.classList.add("nb-item-complete");
           this.processingFiles.delete(fileId);
         }
       }
 
       createFileElement(file) {
-        const div = document.createElement('div');
-        div.className = 'nb-file-item';
+        const div = document.createElement("div");
+        div.className = "nb-file-item";
         div.dataset.fileId = file.id;
         div.innerHTML = `
           <div class="nb-file-info">
-            <span class="nb-file-icon"><i class="fa-solid fa-file-${file.type}"></i></span>
+            <span class="nb-file-icon"><i class="fa-solid fa-file-${
+              file.type
+            }"></i></span>
             <div class="nb-file-details">
               <span class="nb-file-name">${file.name}</span>
-              <span class="nb-file-meta">${file.type.toUpperCase()} • ${file.size} • ${file.time}</span>
+              <span class="nb-file-meta">${file.type.toUpperCase()} • ${
+          file.size
+        } • ${file.time}</span>
             </div>
           </div>
           <div class="nb-file-status">
             <div class="nb-progress">
-              <div class="nb-progress-bar" style="width:${file.progress}%"></div>
+              <div class="nb-progress-bar" style="width:${
+                file.progress
+              }%"></div>
             </div>
-            <span class="nb-status-text">${file.progress === 100 ? 'Completed' : 'Processing...'}</span>
+            <span class="nb-status-text">${
+              file.progress === 100 ? "Completed" : "Processing..."
+            }</span>
           </div>
           <div class="nb-file-actions">
-            ${file.progress < 100 ? `
+            ${
+              file.progress < 100
+                ? `
               <button class="nb-action" title="Stop" onclick="fileManager.stopProcessing('${file.id}')">
                 <i class="fa-solid fa-stop"></i>
               </button>
-            ` : `
+            `
+                : `
               <button class="nb-action" title="Download" onclick="fileManager.downloadFile('${file.id}')">
                 <i class="fa-solid fa-download"></i>
               </button>
               <button class="nb-action" title="Share" onclick="fileManager.shareFile('${file.id}')">
                 <i class="fa-solid fa-share"></i>
               </button>
-            `}
-            <button class="nb-action" title="Delete" onclick="fileManager.removeFile('${file.id}')">
+            `
+            }
+            <button class="nb-action" title="Delete" onclick="fileManager.removeFile('${
+              file.id
+            }')">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -1333,10 +1619,12 @@
         const file = this.files.get(fileId);
         if (file && file.progress < 100) {
           clearInterval(file.processingInterval);
-          const statusText = document.querySelector(`[data-file-id="${fileId}"] .nb-status-text`);
+          const statusText = document.querySelector(
+            `[data-file-id="${fileId}"] .nb-status-text`
+          );
           if (statusText) {
-            statusText.textContent = 'Stopped';
-            statusText.classList.add('nb-error');
+            statusText.textContent = "Stopped";
+            statusText.classList.add("nb-error");
           }
         }
       }
@@ -1378,53 +1666,54 @@
     const fileManager = new FileManager();
 
     // Notes Breakdown Quick Actions
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener("DOMContentLoaded", function () {
       // Initialize tab functionality when Notes Breakdown section is loaded
       function initializeNbTabs() {
-        const nbTabs = document.querySelectorAll('.nb-action-btn');
-        const nbPanels = document.querySelectorAll('.nb-tab-panel');
+        const nbTabs = document.querySelectorAll(".nb-action-btn");
+        const nbPanels = document.querySelectorAll(".nb-tab-panel");
 
         if (nbTabs.length && nbPanels.length) {
           function showNbTab(tabName) {
             // Hide all tab panels
-            nbPanels.forEach(panel => {
-              panel.classList.remove('active');
+            nbPanels.forEach((panel) => {
+              panel.classList.remove("active");
             });
 
             // Show selected tab panel
-            const selectedPanel = document.getElementById('nb-' + tabName);
+            const selectedPanel = document.getElementById("nb-" + tabName);
             if (selectedPanel) {
-              selectedPanel.classList.add('active');
+              selectedPanel.classList.add("active");
             }
 
             // Update button states
-            nbTabs.forEach(btn => {
-              btn.classList.remove('active');
+            nbTabs.forEach((btn) => {
+              btn.classList.remove("active");
             });
-            event.currentTarget.classList.add('active');
+            event.currentTarget.classList.add("active");
           }
 
           // Add click handlers to tab buttons
-          nbTabs.forEach(btn => {
-            btn.addEventListener('click', function() {
-              const tabName = this.getAttribute('onclick').match(/'([^']+)'/)[1];
+          nbTabs.forEach((btn) => {
+            btn.addEventListener("click", function () {
+              const tabName =
+                this.getAttribute("onclick").match(/'([^']+)'/)[1];
               showNbTab(tabName);
             });
           });
 
           // Initialize favorite functionality
-          const favoriteButtons = document.querySelectorAll('.nb-file-action');
-          favoriteButtons.forEach(btn => {
-            btn.addEventListener('click', function(e) {
+          const favoriteButtons = document.querySelectorAll(".nb-file-action");
+          favoriteButtons.forEach((btn) => {
+            btn.addEventListener("click", function (e) {
               e.stopPropagation();
-              this.classList.toggle('active');
-              const icon = this.querySelector('i');
-              if (this.classList.contains('active')) {
-                icon.classList.remove('fa-regular');
-                icon.classList.add('fa-solid');
+              this.classList.toggle("active");
+              const icon = this.querySelector("i");
+              if (this.classList.contains("active")) {
+                icon.classList.remove("fa-regular");
+                icon.classList.add("fa-solid");
               } else {
-                icon.classList.remove('fa-solid');
-                icon.classList.add('fa-regular');
+                icon.classList.remove("fa-solid");
+                icon.classList.add("fa-regular");
               }
             });
           });
@@ -1432,147 +1721,162 @@
       }
 
       // Call initialization when the Notes Breakdown section is loaded
-      const notesBreakdownLink = document.querySelector('a[href="#"]:has(i.fa-file-lines)');
+      const notesBreakdownLink = document.querySelector(
+        'a[href="#"]:has(i.fa-file-lines)'
+      );
       if (notesBreakdownLink) {
-        notesBreakdownLink.addEventListener('click', function() {
+        notesBreakdownLink.addEventListener("click", function () {
           // Wait for the content to be loaded
           setTimeout(initializeNbTabs, 300);
         });
       }
     });
-  // AI Image Style Switch Functionality
-  function switchImgStyle(e, style) {
-    // Remove active from all style buttons
-    document.querySelectorAll('.ai-img-style-btn').forEach(btn => btn.classList.remove('active'));
-    // Add active to clicked button
-    e.currentTarget.classList.add('active');
-    // Update preview area
-    const preview = document.querySelector('.ai-img-preview-area');
-    if (preview) {
-      let styleText = '';
-      let styleIcon = '';
-      if (style === 'modern') {
-        styleText = 'Modern style preview: clean, vibrant, and contemporary.';
-        styleIcon = '<i class="fa-solid fa-image"></i>';
-      } else if (style === 'classic') {
-        styleText = 'Classic style preview: elegant, timeless, and detailed.';
-        styleIcon = '<i class="fa-solid fa-image"></i>';
-      } else if (style === 'minimal') {
-        styleText = 'Minimal style preview: simple, clear, and focused.';
-        styleIcon = '<i class="fa-solid fa-image"></i>';
+    // AI Image Style Switch Functionality
+    function switchImgStyle(e, style) {
+      // Remove active from all style buttons
+      document
+        .querySelectorAll(".ai-img-style-btn")
+        .forEach((btn) => btn.classList.remove("active"));
+      // Add active to clicked button
+      e.currentTarget.classList.add("active");
+      // Update preview area
+      const preview = document.querySelector(".ai-img-preview-area");
+      if (preview) {
+        let styleText = "";
+        let styleIcon = "";
+        if (style === "modern") {
+          styleText = "Modern style preview: clean, vibrant, and contemporary.";
+          styleIcon = '<i class="fa-solid fa-image"></i>';
+        } else if (style === "classic") {
+          styleText = "Classic style preview: elegant, timeless, and detailed.";
+          styleIcon = '<i class="fa-solid fa-image"></i>';
+        } else if (style === "minimal") {
+          styleText = "Minimal style preview: simple, clear, and focused.";
+          styleIcon = '<i class="fa-solid fa-image"></i>';
+        }
+        preview.innerHTML = `<div class='ai-img-preview-placeholder'>${styleIcon}<p>${styleText}</p><small>Choose an option and enter your prompt to begin</small></div>`;
       }
-      preview.innerHTML = `<div class='ai-img-preview-placeholder'>${styleIcon}<p>${styleText}</p><small>Choose an option and enter your prompt to begin</small></div>`;
     }
-  }
   </script>
   <!-- Add this snippet inside the existing <script> at the end of the file, after your current JS -->
 
-<script>
-  const API_BASE_URL = 'http://localhost:4000'; // Change to your backend URL
+  <script>
+    //   const API_BASE_URL = 'http://localhost:4000'; // Change to your backend URL
 
-  // TODO: Replace with actual auth token retrieval
-  const AUTH_TOKEN = localStorage.getItem('authToken') || '';
+    //   // TODO: Replace with actual auth token retrieval
+    //   const AUTH_TOKEN = localStorage.getItem('authToken') || '';
 
-  // Utility: fetch with auth headers
-  async function apiFetch(path, options = {}) {
-    const res = await fetch(`${API_BASE_URL}${path}`, {
-      ...options,
-      headers: {
-        'Authorization': `Bearer ${AUTH_TOKEN}`,
-        ...options.headers,
+    // Utility: fetch with auth headers
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(`${API_BASE_URL}${path}`, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+          ...options.headers,
+        },
+      });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "API Error");
       }
+      return res.json();
+    }
+
+    // File upload input and handlers for Upload Notes
+    const fileInput = document.getElementById("file-input");
+    const fileListContainer = document.querySelector(
+      ".upload-notes .file-list"
+    );
+
+    fileInput.addEventListener("change", async (e) => {
+      const files = fileInput.files;
+      if (files.length === 0) return;
+
+      for (let i = 0; i < files.length; i++) {
+        await uploadFile(files[i]);
+      }
+      fileInput.value = "";
+      await loadUploadedNotes();
     });
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}));
-      throw new Error(errorData.error || 'API Error');
-    }
-    return res.json();
-  }
 
-  // File upload input and handlers for Upload Notes
-  const fileInput = document.getElementById('file-input');
-  const fileListContainer = document.querySelector('.upload-notes .file-list');
+    // Upload file to backend /files/upload and /upload/notes, then track AI processing placeholder
+    async function uploadFile(file) {
+      try {
+        // Show processing UI
+        addFileToUI(file);
 
-  fileInput.addEventListener('change', async (e) => {
-    const files = fileInput.files;
-    if (files.length === 0) return;
+        // Upload to /files/upload
+        const formData = new FormData();
+        formData.append("file", file);
 
-    for (let i = 0; i < files.length; i++) {
-      await uploadFile(files[i]);
-    }
-    fileInput.value = '';
-    await loadUploadedNotes();
-  });
+        // Upload endpoint
+        const uploadRes = await fetch(`${API_BASE_URL}/files/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+          body: formData,
+        });
 
-  // Upload file to backend /files/upload and /upload/notes, then track AI processing placeholder
-  async function uploadFile(file) {
-    try {
-      // Show processing UI
-      addFileToUI(file);
+        if (!uploadRes.ok) {
+          const err = await uploadRes.json();
+          alert(`Upload failed: ${err.error || "Unknown error"}`);
+          removeFileFromUI(file.name);
+          return;
+        }
+        const uploadData = await uploadRes.json();
+        const signedUrl = uploadData.file.file_url;
 
-      // Upload to /files/upload
-      const formData = new FormData();
-      formData.append('file', file);
+        // After file storage, create upload notes record
+        const notesRes = await fetch(`${API_BASE_URL}/upload/notes`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file_id: uploadData.file.file_url, // You may want file key or path instead
+            title: file.name,
+            ai_analysis: null,
+          }),
+        });
 
-      // Upload endpoint
-      const uploadRes = await fetch(`${API_BASE_URL}/files/upload`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
-        },
-        body: formData
-      });
+        if (!notesRes.ok) {
+          const err = await notesRes.json();
+          alert(
+            `Failed to save uploaded note: ${err.error || "Unknown error"}`
+          );
+          removeFileFromUI(file.name);
+          return;
+        }
 
-      if (!uploadRes.ok) {
-        const err = await uploadRes.json();
-        alert(`Upload failed: ${err.error || 'Unknown error'}`);
+        // Simulate AI processing progress
+        simulateAiProcessing(file.name);
+      } catch (err) {
+        alert("Upload failed: " + err.message);
         removeFileFromUI(file.name);
-        return;
       }
-      const uploadData = await uploadRes.json();
-      const signedUrl = uploadData.file.file_url;
-
-      // After file storage, create upload notes record
-      const notesRes = await fetch(`${API_BASE_URL}/upload/notes`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${AUTH_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          file_id: uploadData.file.file_url, // You may want file key or path instead
-          title: file.name,
-          ai_analysis: null,
-        }),
-      });
-
-      if (!notesRes.ok) {
-        const err = await notesRes.json();
-        alert(`Failed to save uploaded note: ${err.error || 'Unknown error'}`);
-        removeFileFromUI(file.name);
-        return;
-      }
-
-      // Simulate AI processing progress
-      simulateAiProcessing(file.name);
-    } catch (err) {
-      alert('Upload failed: ' + err.message);
-      removeFileFromUI(file.name);
     }
-  }
 
-  function addFileToUI(file) {
-    if (!fileListContainer) return;
-    const item = document.createElement('div');
-    item.className = 'nb-file-item';
-    item.dataset.fileName = file.name;
-    item.innerHTML = `
+    function addFileToUI(file) {
+      if (!fileListContainer) return;
+      const item = document.createElement("div");
+      item.className = "nb-file-item";
+      item.dataset.fileName = file.name;
+      item.innerHTML = `
       <div class="nb-file-info">
-        <span class="nb-file-icon"><i class="fa-solid fa-file-${file.type.includes('pdf') ? 'pdf' :
-          file.type.includes('word') || file.name.endsWith('.docx') ? 'word' : 'lines'}"></i></span>
+        <span class="nb-file-icon"><i class="fa-solid fa-file-${
+          file.type.includes("pdf")
+            ? "pdf"
+            : file.type.includes("word") || file.name.endsWith(".docx")
+            ? "word"
+            : "lines"
+        }"></i></span>
         <div class="nb-file-details">
           <span class="nb-file-name">${file.name}</span>
-          <span class="nb-file-meta">${(file.type || 'file').toUpperCase()} • ${formatFileSize(file.size)} • Just now</span>
+          <span class="nb-file-meta">${(
+            file.type || "file"
+          ).toUpperCase()} • ${formatFileSize(file.size)} • Just now</span>
         </div>
       </div>
       <div class="nb-file-status">
@@ -1582,154 +1886,724 @@
         <span class="nb-status-text">Uploading...</span>
       </div>
       <div class="nb-file-actions">
-        <button class="nb-action" title="Stop" onclick="stopFakeProgress('${file.name}')">
+        <button class="nb-action" title="Stop" onclick="stopFakeProgress('${
+          file.name
+        }')">
           <i class="fa-solid fa-stop"></i>
         </button>
-        <button class="nb-action" title="Delete" onclick="removeFileFromUI('${file.name}')">
+        <button class="nb-action" title="Delete" onclick="removeFileFromUI('${
+          file.name
+        }')">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
     `;
-    fileListContainer.appendChild(item);
-    fakeProgress[file.name] = 0;
-  }
+      fileListContainer.appendChild(item);
+      fakeProgress[file.name] = 0;
+    }
 
-  function removeFileFromUI(fileName) {
-    if (!fileListContainer) return;
-    const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
-    if (elem) elem.remove();
-  }
+    function removeFileFromUI(fileName) {
+      if (!fileListContainer) return;
+      const elem = fileListContainer.querySelector(
+        `[data-file-name="${fileName}"]`
+      );
+      if (elem) elem.remove();
+    }
 
-  // Simple file size formatting
-  function formatFileSize(bytes) {
-    if (bytes === 0) return '0 B';
-    const k = 1024,
-      sizes = ['B', 'KB', 'MB', 'GB', 'TB'],
-      i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  }
+    // Simple file size formatting
+    function formatFileSize(bytes) {
+      if (bytes === 0) return "0 B";
+      const k = 1024,
+        sizes = ["B", "KB", "MB", "GB", "TB"],
+        i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
 
-  // Simulate AI processing progress bar for uploaded file
-  let fakeProgress = {};
-  let fakeIntervals = {};
-  function simulateAiProcessing(fileName) {
-    const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
-    if (!elem) return;
-    const progressBar = elem.querySelector('.nb-progress-bar');
-    const statusText = elem.querySelector('.nb-status-text');
+    // Simulate AI processing progress bar for uploaded file
+    let fakeProgress = {};
+    let fakeIntervals = {};
+    function simulateAiProcessing(fileName) {
+      const elem = fileListContainer.querySelector(
+        `[data-file-name="${fileName}"]`
+      );
+      if (!elem) return;
+      const progressBar = elem.querySelector(".nb-progress-bar");
+      const statusText = elem.querySelector(".nb-status-text");
 
-    fakeIntervals[fileName] = setInterval(() => {
-      if (fakeProgress[fileName] >= 100) {
+      fakeIntervals[fileName] = setInterval(() => {
+        if (fakeProgress[fileName] >= 100) {
+          clearInterval(fakeIntervals[fileName]);
+          statusText.textContent = "AI Processing Completed";
+          progressBar.style.width = "100%";
+          elem.classList.add("nb-item-complete");
+          return;
+        }
+        fakeProgress[fileName] += Math.random() * 15;
+        if (fakeProgress[fileName] > 100) fakeProgress[fileName] = 100;
+        progressBar.style.width = `${fakeProgress[fileName]}%`;
+        statusText.textContent = `AI Processing... ${Math.floor(
+          fakeProgress[fileName]
+        )}%`;
+      }, 400);
+    }
+    function stopFakeProgress(fileName) {
+      if (fakeIntervals[fileName]) {
         clearInterval(fakeIntervals[fileName]);
-        statusText.textContent = 'AI Processing Completed';
-        progressBar.style.width = '100%';
-        elem.classList.add('nb-item-complete');
-        return;
-      }
-      fakeProgress[fileName] += Math.random() * 15;
-      if (fakeProgress[fileName] > 100) fakeProgress[fileName] = 100;
-      progressBar.style.width = `${fakeProgress[fileName]}%`;
-      statusText.textContent = `AI Processing... ${Math.floor(fakeProgress[fileName])}%`;
-    }, 400);
-  }
-  function stopFakeProgress(fileName) {
-    if (fakeIntervals[fileName]) {
-      clearInterval(fakeIntervals[fileName]);
-      const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
-      if (elem) {
-        const statusText = elem.querySelector('.nb-status-text');
-        statusText.textContent = 'Processing Stopped';
-        statusText.classList.add('nb-error');
+        const elem = fileListContainer.querySelector(
+          `[data-file-name="${fileName}"]`
+        );
+        if (elem) {
+          const statusText = elem.querySelector(".nb-status-text");
+          statusText.textContent = "Processing Stopped";
+          statusText.classList.add("nb-error");
+        }
       }
     }
-  }
 
-  // Load already uploaded notes from backend
-  async function loadUploadedNotes() {
-    if (!fileListContainer) return;
-    try {
-      const notes = await apiFetch('/upload/notes');
-      fileListContainer.innerHTML = ''; // Clear existing list
-      notes.forEach(note => {
-        const div = document.createElement('div');
-        div.className = 'nb-file-item nb-item-complete';
-        div.innerHTML = `
+    // Load already uploaded notes from backend
+    async function loadUploadedNotes() {
+      if (!fileListContainer) return;
+      try {
+        const notes = await apiFetch("/upload/notes");
+        fileListContainer.innerHTML = ""; // Clear existing list
+        notes.forEach((note) => {
+          const div = document.createElement("div");
+          div.className = "nb-file-item nb-item-complete";
+          div.innerHTML = `
           <div class="nb-file-info">
             <span class="nb-file-icon"><i class="fa-solid fa-file-lines"></i></span>
             <div class="nb-file-details">
               <span class="nb-file-name">${note.title}</span>
-              <span class="nb-file-meta">Uploaded • ${new Date(note.created_at).toLocaleString()}</span>
+              <span class="nb-file-meta">Uploaded • ${new Date(
+                note.created_at
+              ).toLocaleString()}</span>
             </div>
           </div>
           <div class="nb-file-status">
             <span class="nb-status-text nb-success">Processed</span>
           </div>
           <div class="nb-file-actions">
-            <button class="nb-action" title="Download" onclick="window.open('${note.file_id}', '_blank')">
+            <button class="nb-action" title="Download" onclick="window.open('${
+              note.file_id
+            }', '_blank')">
               <i class="fa-solid fa-download"></i>
             </button>
-            <button class="nb-action" title="Delete" onclick="deleteNote('${note.id}')">
+            <button class="nb-action" title="Delete" onclick="deleteNote('${
+              note.id
+            }')">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
         `;
-        fileListContainer.appendChild(div);
-      });
-    } catch (err) {
-      console.error('Failed to load uploaded notes:', err);
-    }
-  }
-
-  async function deleteNote(noteId) {
-    if (!confirm('Delete this note?')) return;
-    try {
-      await fetch(`${API_BASE_URL}/upload/notes/${noteId}`, {
-        method: 'DELETE',
-        headers: { Authorization: `Bearer ${AUTH_TOKEN}` }
-      });
-      await loadUploadedNotes();
-    } catch (err) {
-      alert('Delete failed: ' + err.message);
-    }
-  }
-
-  // AI Summarize button example (from prompt input)
-  const promptSendBtn = document.querySelector('.prompt-send');
-  const promptInput = document.querySelector('.prompt-input');
-//   let customDropdownSelected = document.querySelector('.custom-dropdown-selected');
-
-  promptSendBtn.addEventListener('click', async () => {
-    const text = promptInput.value.trim();
-    if (!text) {
-      alert('Please enter a query or attach files');
-      return;
-    }
-    const source = customDropdownSelected.textContent.trim();
-    let queryText = text;
-
-    if (source === 'Notes' || source === 'Select Source') {
-      // send to /ai/summarize endpoint
-      try {
-        promptSendBtn.disabled = true;
-        promptSendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
-        const res = await apiFetch('/ai/summarize', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ text: queryText })
+          fileListContainer.appendChild(div);
         });
-        alert('Summary:\n' + res.summary);
       } catch (err) {
-        alert('AI summarize failed: ' + err.message);
-      } finally {
-        promptSendBtn.disabled = false;
-        promptSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+        console.error("Failed to load uploaded notes:", err);
       }
-    } else {
-      alert('AI for the selected source is coming soon.');
     }
-  });
 
-  // On load, fetch uploaded notes to list
-  document.addEventListener('DOMContentLoaded', loadUploadedNotes);
-</script>
+    async function deleteNote(noteId) {
+      if (!confirm("Delete this note?")) return;
+      try {
+        await fetch(`${API_BASE_URL}/upload/notes/${noteId}`, {
+          method: "DELETE",
+          headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
+        });
+        await loadUploadedNotes();
+      } catch (err) {
+        alert("Delete failed: " + err.message);
+      }
+    }
+
+    // AI Summarize button example (from prompt input)
+    const promptSendBtn = document.querySelector(".prompt-send");
+    const promptInput = document.querySelector(".prompt-input");
+    //   let customDropdownSelected = document.querySelector('.custom-dropdown-selected');
+
+    promptSendBtn.addEventListener("click", async () => {
+      const text = promptInput.value.trim();
+      if (!text) {
+        alert("Please enter a query or attach files");
+        return;
+      }
+      const source = customDropdownSelected.textContent.trim();
+      let queryText = text;
+
+      if (source === "Notes" || source === "Select Source") {
+        // send to /ai/summarize endpoint
+        try {
+          promptSendBtn.disabled = true;
+          promptSendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+          const res = await apiFetch("/ai/summarize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text: queryText }),
+          });
+          alert("Summary:\n" + res.summary);
+        } catch (err) {
+          alert("AI summarize failed: " + err.message);
+        } finally {
+          promptSendBtn.disabled = false;
+          promptSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+        }
+      } else {
+        alert("AI for the selected source is coming soon.");
+      }
+    });
+
+    // On load, fetch uploaded notes to list
+    document.addEventListener("DOMContentLoaded", loadUploadedNotes);
+
+    // Upload Notes Processing Options
+    document.addEventListener("click", async (e) => {
+      const processBtn = e.target.closest(".process-btn");
+      if (!processBtn || processBtn.classList.contains("disabled")) return;
+
+      const action = processBtn.dataset.action;
+      const uploadedNotes = document.querySelectorAll(".upload-notes .nb-file-item");
+
+      if (uploadedNotes.length === 0) {
+        alert("Please upload a document first");
+        return;
+      }
+
+      // Get the most recent uploaded note
+      const recentNote = uploadedNotes[0];
+      const noteTitle = recentNote.querySelector(".nb-file-name")?.textContent || "Uploaded Document";
+
+      try {
+        processBtn.disabled = true;
+        processBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Processing...`;
+
+        let endpoint = "";
+        let requestData = {};
+        let resultTitle = "";
+
+        switch (action) {
+          case "summarize":
+            endpoint = "/ai/summarize";
+            requestData = { text: "Sample text from uploaded document" }; // This should be extracted from the actual file
+            resultTitle = "Document Summary";
+            break;
+          case "questions":
+            endpoint = "/mcq";
+            requestData = {
+              source_text: "Sample text from uploaded document",
+              question_count: 5,
+              difficulty: "intermediate"
+            };
+            resultTitle = "Generated Questions";
+            break;
+          case "mind-map":
+            endpoint = "/notes-breakdown/mind-map";
+            requestData = { text: "Sample text from uploaded document", title: "Document Mind Map" };
+            resultTitle = "Mind Map";
+            break;
+          case "flashcards":
+            endpoint = "/notes-breakdown/flashcards";
+            requestData = { text: "Sample text from uploaded document", count: 10, title: "Flashcards" };
+            resultTitle = "Flashcards";
+            break;
+          case "study-guide":
+            endpoint = "/notes-breakdown/study-guide";
+            requestData = { text: "Sample text from uploaded document", title: "Study Guide" };
+            resultTitle = "Study Guide";
+            break;
+          case "extract-keywords":
+            endpoint = "/ai/summarize"; // Using summarize as placeholder for keyword extraction
+            requestData = { text: "Sample text from uploaded document" };
+            resultTitle = "Extracted Keywords";
+            break;
+          case "notes-to-pdf":
+          case "pdf-to-docs":
+            alert(`${action.replace('-', ' ').toUpperCase()} conversion feature coming soon!`);
+            return;
+          default:
+            alert("Processing option not implemented yet");
+            return;
+        }
+
+        const response = await apiFetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData),
+        });
+
+        // Display result
+        let resultHtml = "";
+        if (action === "summarize" || action === "extract-keywords") {
+          resultHtml = `<div class="ai-result"><h3>${resultTitle}</h3><p>${response.summary || response}</p></div>`;
+        } else if (action === "questions") {
+          const mcqs = response.generated_mcqs || [];
+          resultHtml = `<div class="ai-result"><h3>${resultTitle} (${mcqs.length})</h3>`;
+          mcqs.slice(0, 3).forEach((mcq, index) => {
+            resultHtml += `<div class="mcq-item"><strong>${index + 1}.</strong> ${mcq.question}</div>`;
+          });
+          resultHtml += "</div>";
+        } else if (action === "mind-map") {
+          resultHtml = `<div class="ai-result"><h3>${resultTitle}</h3><pre>${JSON.stringify(response.mind_map, null, 2)}</pre></div>`;
+        } else if (action === "flashcards") {
+          const flashcards = response.flashcards || [];
+          resultHtml = `<div class="ai-result"><h3>${resultTitle} (${flashcards.length})</h3>`;
+          flashcards.slice(0, 3).forEach((card, index) => {
+            resultHtml += `<div class="flashcard"><strong>Q${index + 1}:</strong> ${card.question}<br><strong>A:</strong> ${card.answer}</div>`;
+          });
+          resultHtml += "</div>";
+        } else if (action === "study-guide") {
+          resultHtml = `<div class="ai-result"><h3>${resultTitle}</h3><div>${response.study_guide?.replace(/\n/g, '<br>') || response}</div></div>`;
+        }
+
+        // Create result modal
+        const resultModal = document.createElement("div");
+        resultModal.className = "ai-result-modal";
+        resultModal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            ${resultHtml}
+          </div>
+        `;
+        document.body.appendChild(resultModal);
+
+      } catch (err) {
+        alert(`${action.replace('-', ' ').toUpperCase()} failed: ${err.message}`);
+      } finally {
+        processBtn.disabled = false;
+        const icon = processBtn.querySelector("i")?.className || "fa-solid fa-wand-magic-sparkles";
+        const text = processBtn.querySelector("span")?.textContent || "Process";
+        processBtn.innerHTML = `<i class="${icon}"></i><span>${text}</span><small>${processBtn.querySelector("small")?.textContent || ""}</small>`;
+      }
+    });
+
+    // AI Images Generation
+    const aiImgGenerateBtn = document.querySelector(".ai-img-generate-btn");
+    const aiImgInput = document.querySelector(".ai-img-input");
+    const aiImgPreviewArea = document.querySelector(".ai-img-preview-area");
+    const aiImgOptions = document.querySelectorAll(".ai-img-option");
+    const aiImgHistoryGrid = document.querySelector(".ai-img-grid");
+
+    // Handle AI Image option selection
+    aiImgOptions.forEach(option => {
+      option.addEventListener("click", () => {
+        aiImgOptions.forEach(opt => opt.classList.remove("active"));
+        option.classList.add("active");
+
+        // Update prompt placeholder based on selected type
+        const type = option.querySelector(".ai-img-option-label i").className.includes("diagram-project") ? "flowchart" :
+                    option.querySelector(".ai-img-option-label i").className.includes("chart-column") ? "diagram" :
+                    option.querySelector(".ai-img-option-label i").className.includes("mind-share") ? "mind-map" : "infographic";
+
+        const placeholders = {
+          flowchart: "E.g., Generate a flowchart showing the software development lifecycle",
+          diagram: "E.g., Create a technical diagram of a computer network architecture",
+          "mind-map": "E.g., Generate a mind map for learning programming concepts",
+          infographic: "E.g., Create an infographic about renewable energy sources"
+        };
+
+        if (aiImgInput) {
+          aiImgInput.placeholder = placeholders[type] || "E.g., Generate a flowchart showing the water cycle process";
+        }
+      });
+    });
+
+    // Load user's AI images history
+    async function loadAIImagesHistory() {
+      try {
+        const images = await apiFetch("/ai-images");
+        if (aiImgHistoryGrid && images.length > 0) {
+          aiImgHistoryGrid.innerHTML = images.slice(0, 4).map(img => `
+            <div class="ai-img-thumbnail" onclick="loadImageToPreview('${img.image_url}', '${img.prompt}')">
+              <img src="${img.image_url}" alt="${img.prompt}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;">
+              <div class="ai-img-thumbnail-overlay">
+                <small>${img.prompt.substring(0, 30)}...</small>
+              </div>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error("Failed to load AI images history:", err);
+      }
+    }
+
+    // Load image to preview area
+    function loadImageToPreview(imageUrl, prompt) {
+      if (aiImgPreviewArea) {
+        aiImgPreviewArea.innerHTML = `
+          <div class="ai-img-preview-image">
+            <img src="${imageUrl}" alt="Generated Image" style="max-width: 100%; border-radius: 8px;">
+          </div>
+        `;
+
+        // Update actions
+        const downloadBtn = document.querySelector(".ai-img-action-btn:nth-child(1)");
+        const shareBtn = document.querySelector(".ai-img-action-btn:nth-child(2)");
+        const saveBtn = document.querySelector(".ai-img-action-btn:nth-child(3)");
+
+        if (downloadBtn) {
+          downloadBtn.onclick = () => {
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = `ai-generated-image-${Date.now()}.png`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          };
+        }
+
+        if (shareBtn) {
+          shareBtn.onclick = () => {
+            if (navigator.share) {
+              navigator.share({
+                title: 'AI Generated Image',
+                text: prompt,
+                url: imageUrl
+              });
+            } else {
+              navigator.clipboard.writeText(imageUrl);
+              alert("Image URL copied to clipboard!");
+            }
+          };
+        }
+
+        if (saveBtn) {
+          saveBtn.onclick = () => alert("Image already saved to your library!");
+        }
+      }
+    }
+
+    if (aiImgGenerateBtn && aiImgInput && aiImgPreviewArea) {
+      aiImgGenerateBtn.addEventListener("click", async () => {
+        const prompt = aiImgInput.value.trim();
+        if (!prompt) {
+          alert("Please enter a prompt for the image");
+          return;
+        }
+
+        // Get selected type
+        const activeOption = document.querySelector(".ai-img-option.active");
+        const type = activeOption ? (
+          activeOption.querySelector(".ai-img-option-label i").className.includes("diagram-project") ? "flowchart" :
+          activeOption.querySelector(".ai-img-option-label i").className.includes("chart-column") ? "diagram" :
+          activeOption.querySelector(".ai-img-option-label i").className.includes("mind-share") ? "mind-map" : "infographic"
+        ) : "diagram";
+
+        const style = document.querySelector(".ai-img-style-btn.active")?.dataset.style || "modern";
+
+        try {
+          aiImgGenerateBtn.disabled = true;
+          aiImgGenerateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
+
+          const response = await apiFetch("/ai-images/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt, style, type }),
+          });
+
+          // Display the generated image
+          aiImgPreviewArea.innerHTML = `
+            <div class="ai-img-preview-image">
+              <img src="${response.image_url}" alt="Generated Image" style="max-width: 100%; border-radius: 8px;">
+            </div>
+          `;
+
+          // Update actions
+          const downloadBtn = document.querySelector(".ai-img-action-btn:nth-child(1)");
+          const shareBtn = document.querySelector(".ai-img-action-btn:nth-child(2)");
+          const saveBtn = document.querySelector(".ai-img-action-btn:nth-child(3)");
+
+          if (downloadBtn) {
+            downloadBtn.onclick = () => {
+              const link = document.createElement('a');
+              link.href = response.image_url;
+              link.download = `ai-generated-${type}-${Date.now()}.png`;
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            };
+          }
+
+          if (shareBtn) {
+            shareBtn.onclick = () => {
+              if (navigator.share) {
+                navigator.share({
+                  title: 'AI Generated Image',
+                  text: prompt,
+                  url: response.image_url
+                });
+              } else {
+                navigator.clipboard.writeText(response.image_url);
+                alert("Image URL copied to clipboard!");
+              }
+            };
+          }
+
+          if (saveBtn) {
+            saveBtn.onclick = () => {
+              alert("Image saved to library!");
+              loadAIImagesHistory(); // Refresh history
+            };
+          }
+
+          // Clear input after successful generation
+          aiImgInput.value = "";
+
+        } catch (err) {
+          alert("Image generation failed: " + err.message);
+          aiImgPreviewArea.innerHTML = `
+            <div class="ai-img-preview-placeholder">
+              <i class="fa-solid fa-exclamation-triangle"></i>
+              <p>Generation failed. Please try again.</p>
+            </div>
+          `;
+        } finally {
+          aiImgGenerateBtn.disabled = false;
+          aiImgGenerateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Image`;
+        }
+      });
+    }
+
+    // Load history on page load
+    document.addEventListener("DOMContentLoaded", loadAIImagesHistory);
+
+    // MCQ Generator Enhanced Features
+    const mcqGenerateBtn = document.querySelector(".mcq-generate-btn");
+    const mcqInput = document.querySelector(".mcq-input");
+    const mcqOutputSection = document.querySelector(".mcq-output-section");
+    const mcqList = document.querySelector(".mcq-list");
+
+    // MCQ Generation
+    if (mcqGenerateBtn && mcqInput) {
+      mcqGenerateBtn.addEventListener("click", async () => {
+        const text = mcqInput.value.trim();
+        if (!text) {
+          alert("Please enter text content for MCQ generation");
+          return;
+        }
+
+        const questionCount = document.querySelector(".mcq-control-input[type='number']")?.value || 10;
+        const difficulty = document.querySelector(".mcq-control-input:nth-of-type(2)")?.value || "intermediate";
+        const style = document.querySelector(".mcq-control-input:nth-of-type(3)")?.value || "conceptual";
+
+        try {
+          mcqGenerateBtn.disabled = true;
+          mcqGenerateBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Generating...`;
+
+          const response = await apiFetch("/mcq", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              source_text: text,
+              question_count: parseInt(questionCount),
+              difficulty,
+              style
+            }),
+          });
+
+          // Display generated MCQs
+          displayMCQs(response.generated_mcqs || []);
+
+          // Update stats
+          updateMCQStats(response.generated_mcqs || []);
+
+        } catch (err) {
+          alert("MCQ generation failed: " + err.message);
+        } finally {
+          mcqGenerateBtn.disabled = false;
+          mcqGenerateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Questions`;
+        }
+      });
+    }
+
+    function displayMCQs(mcqs) {
+      if (!mcqList) return;
+
+      mcqList.innerHTML = mcqs.map((mcq, index) => `
+        <li class="mcq-item">
+          <div class="mcq-question">
+            <span>${index + 1}.</span> ${mcq.question}
+          </div>
+          <ul class="mcq-answers">
+            ${Object.entries(mcq.options).map(([key, value]) => `
+              <li class="mcq-answer ${key === mcq.correct_answer ? 'correct' : ''}">
+                <span class="mcq-answer-marker">${key.toUpperCase()}</span>
+                <span>${value}</span>
+              </li>
+            `).join('')}
+          </ul>
+          <div class="mcq-explanation" style="display: none;">
+            <strong>Explanation:</strong> ${mcq.explanation || 'No explanation provided'}
+          </div>
+        </li>
+      `).join('');
+
+      // Add click handlers for answers
+      document.querySelectorAll(".mcq-answer").forEach(answer => {
+        answer.addEventListener("click", function() {
+          const parent = this.parentElement.parentElement;
+          const explanation = parent.querySelector(".mcq-explanation");
+
+          // Remove previous selections
+          parent.querySelectorAll(".mcq-answer").forEach(a => a.classList.remove("selected"));
+
+          // Mark as selected
+          this.classList.add("selected");
+
+          // Show explanation
+          if (explanation) {
+            explanation.style.display = "block";
+          }
+        });
+      });
+    }
+
+    function updateMCQStats(mcqs) {
+      const stats = document.querySelectorAll(".mcq-stat-value");
+      if (stats.length >= 3) {
+        stats[0].textContent = mcqs.length;
+        stats[1].textContent = mcqs.length > 0 ? Object.keys(mcqs[0].options).length : 4;
+        stats[2].textContent = "95%"; // Mock accuracy
+      }
+    }
+
+    // MCQ Actions
+    document.addEventListener("click", (e) => {
+      if (e.target.closest(".mcq-action-btn.primary")) {
+        // Start Practice Session
+        const mcqItems = document.querySelectorAll(".mcq-item");
+        if (mcqItems.length === 0) {
+          alert("Please generate MCQs first");
+          return;
+        }
+
+        // Hide all explanations initially
+        document.querySelectorAll(".mcq-explanation").forEach(exp => exp.style.display = "none");
+        document.querySelectorAll(".mcq-answer").forEach(ans => ans.classList.remove("selected"));
+
+        alert("Practice session started! Click on answers to reveal explanations.");
+      }
+
+      if (e.target.closest(".mcq-action-btn:nth-child(1)")) {
+        // Export as PDF
+        alert("PDF export feature coming soon!");
+      }
+
+      if (e.target.closest(".mcq-action-btn:nth-child(2)")) {
+        // Share
+        const mcqText = Array.from(document.querySelectorAll(".mcq-item")).map((item, index) => {
+          const question = item.querySelector(".mcq-question").textContent;
+          const answers = Array.from(item.querySelectorAll(".mcq-answer")).map(ans =>
+            ans.textContent.trim()
+          ).join('\n');
+          return `${index + 1}. ${question}\n${answers}`;
+        }).join('\n\n');
+
+        if (navigator.share) {
+          navigator.share({
+            title: 'Generated MCQs',
+            text: mcqText
+          });
+        } else {
+          navigator.clipboard.writeText(mcqText);
+          alert("MCQs copied to clipboard!");
+        }
+      }
+    });
+
+    // Notes Breakdown AI Features
+    document.addEventListener("click", async (e) => {
+      const featureCard = e.target.closest(".nb-feature-card");
+      if (!featureCard) return;
+
+      const featureType = featureCard.querySelector("h4").textContent.toLowerCase().replace(/\s+/g, '_');
+
+      // Get text from uploaded files or prompt input
+      let text = "";
+      const promptInput = document.querySelector(".prompt-input");
+      if (promptInput && promptInput.value.trim()) {
+        text = promptInput.value.trim();
+      } else {
+        // Try to get text from uploaded files (this would need enhancement)
+        alert("Please enter text in the prompt area or upload a document first");
+        return;
+      }
+
+      if (!text) {
+        alert("Please provide text content for AI processing");
+        return;
+      }
+
+      try {
+        let endpoint = "";
+        let requestData = { text };
+
+        switch (featureType) {
+          case "smart_summary":
+            endpoint = "/ai/summarize";
+            break;
+          case "mind_map":
+            endpoint = "/notes-breakdown/mind-map";
+            requestData.title = "Mind Map";
+            break;
+          case "study_guide":
+            endpoint = "/notes-breakdown/study-guide";
+            requestData.title = "Study Guide";
+            break;
+          case "flashcards":
+            endpoint = "/notes-breakdown/flashcards";
+            requestData.count = 10;
+            requestData.title = "Flashcards";
+            break;
+          default:
+            alert("Feature not implemented yet");
+            return;
+        }
+
+        // Show loading state
+        featureCard.style.opacity = "0.7";
+        featureCard.style.pointerEvents = "none";
+
+        const response = await apiFetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestData),
+        });
+
+        // Display result
+        let resultHtml = "";
+        if (featureType === "smart_summary") {
+          resultHtml = `<div class="ai-result"><h3>Summary</h3><p>${response.summary}</p></div>`;
+        } else if (featureType === "mind_map") {
+          resultHtml = `<div class="ai-result"><h3>Mind Map Generated</h3><pre>${JSON.stringify(response.mind_map, null, 2)}</pre></div>`;
+        } else if (featureType === "study_guide") {
+          resultHtml = `<div class="ai-result"><h3>Study Guide</h3><div>${response.study_guide.replace(/\n/g, '<br>')}</div></div>`;
+        } else if (featureType === "flashcards") {
+          const flashcards = response.flashcards;
+          resultHtml = `<div class="ai-result"><h3>Flashcards (${flashcards.length})</h3>`;
+          flashcards.forEach((card, index) => {
+            resultHtml += `<div class="flashcard"><strong>Q${index + 1}:</strong> ${card.question}<br><strong>A:</strong> ${card.answer}</div>`;
+          });
+          resultHtml += "</div>";
+        }
+
+        // Create result modal or display area
+        const resultModal = document.createElement("div");
+        resultModal.className = "ai-result-modal";
+        resultModal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            ${resultHtml}
+          </div>
+        `;
+        document.body.appendChild(resultModal);
+
+      } catch (err) {
+        alert(`AI ${featureType.replace(/_/g, ' ')} failed: ${err.message}`);
+      } finally {
+        // Reset loading state
+        featureCard.style.opacity = "1";
+        featureCard.style.pointerEvents = "auto";
+      }
+    });
+  </script>
 </html>

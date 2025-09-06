@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "http://localhost:4000";
 
 const registerForm = document.getElementById("registerForm");
 registerForm.addEventListener("submit", async (e) => {
@@ -31,7 +31,7 @@ loginForm.addEventListener("submit", async (e) => {
   const data = await res.json();
 
   if (data.token) {
-    localStorage.setItem("token", data.token);
+    localStorage.setItem("authToken", data.token);
   }
 
   document.getElementById("output").textContent = JSON.stringify(data, null, 2);
@@ -39,7 +39,7 @@ loginForm.addEventListener("submit", async (e) => {
 
 const getProfileBtn = document.getElementById("getProfileBtn");
 getProfileBtn.addEventListener("click", async () => {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("authToken");
 
   const res = await fetch(`${API_BASE}/auth/me`, {
     method: "GET",

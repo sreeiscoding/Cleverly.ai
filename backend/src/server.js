@@ -7,6 +7,8 @@ const authMiddleware = require('./middleware/auth');
 const authRoutes = require('./routes/auth');
 const notesRoutes = require('./routes/notes');
 const aiRoutes = require('./routes/ai');
+const aiImagesRoutes = require('./routes/aiImages');
+const notesBreakdownRoutes = require('./routes/notesBreakdown');
 const filesRoutes = require('./routes/files');
 const paymentsRoutes = require('./routes/payments');
 const dictionaryRoutes = require('./routes/dictionary');
@@ -22,7 +24,7 @@ const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors({ origin: [APP_BASE_URL] }));
+app.use(cors({ origin: true })); // Allow all origins for development
 
 // Public routes
 app.use('/auth', authRoutes);
@@ -33,9 +35,11 @@ app.use(authMiddleware);
 // Protected routes
 app.use('/notes', notesRoutes);
 app.use('/ai', aiRoutes);
+app.use('/ai-images', aiImagesRoutes);
+app.use('/notes-breakdown', notesBreakdownRoutes);
 app.use('/files', filesRoutes);
 app.use('/payments', paymentsRoutes);
-app.use('/dictionary', dictionaryRoutes);
+// app.use('/dictionary', dictionaryRoutes); // TODO: Fix dictionary route
 app.use('/mcq', mcqRoutes);
 app.use('/questions', questionsRoutes);
 app.use('/upload', uploadsRoutes);

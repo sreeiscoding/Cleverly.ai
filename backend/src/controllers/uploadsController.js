@@ -1,5 +1,27 @@
 const supabaseAdmin = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
+const { summarizeText } = require('../lib/openai');
+const pdfParse = require('pdf-parse');
+const mammoth = require('mammoth');
+
+// Extract text from uploaded file
+const extractTextFromFile = async (buffer, mimetype) => {
+  try {
+    if (mimetype === 'application/pdf') {
+      const data = await pdfParse(buffer);
+      return data.text;
+    } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+      const result = await mammoth.extractRawText({ buffer });
+      return result.value;
+    } else {
+      // For other text files
+      return buffer.toString('utf-8');
+    }
+  } catch (error) {
+    console.error('Text extraction error:', error);
+    throw new Error('Failed to extract text from file');
+  }
+};
 
 exports.uploadNote = async (req, res, next) => {
   try {
@@ -23,7 +45,19 @@ exports.uploadNote = async (req, res, next) => {
 
     if (urlError) return res.status(500).json({ error: urlError.message });
 
-    const { title = req.file.originalname, ai_analysis = null } = req.body;
+    const { title = req.file.originalname } = req.body;
+
+    // Extract text and generate AI summary
+    let aiAnalysis = null;
+    try {
+      const extractedText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
+      if (extractedText && extractedText.trim().length > 0) {
+        aiAnalysis = await summarizeText(extractedText);
+      }
+    } catch (error) {
+      console.error('AI processing failed:', error);
+      // Continue without AI analysis if it fails
+    }
 
     const { data: record, error: insertError } = await supabaseAdmin
       .from('upload_notes')
@@ -31,7 +65,7 @@ exports.uploadNote = async (req, res, next) => {
         user_id: userId,
         file_id: path,
         title,
-        ai_analysis,
+        ai_analysis: aiAnalysis,
       })
       .single();
 
