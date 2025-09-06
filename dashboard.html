@@ -1383,20 +1383,20 @@
       function initializeNbTabs() {
         const nbTabs = document.querySelectorAll('.nb-action-btn');
         const nbPanels = document.querySelectorAll('.nb-tab-panel');
-        
+
         if (nbTabs.length && nbPanels.length) {
           function showNbTab(tabName) {
             // Hide all tab panels
             nbPanels.forEach(panel => {
               panel.classList.remove('active');
             });
-            
+
             // Show selected tab panel
             const selectedPanel = document.getElementById('nb-' + tabName);
             if (selectedPanel) {
               selectedPanel.classList.add('active');
             }
-            
+
             // Update button states
             nbTabs.forEach(btn => {
               btn.classList.remove('active');
@@ -1465,4 +1465,271 @@
     }
   }
   </script>
+  <!-- Add this snippet inside the existing <script> at the end of the file, after your current JS -->
+
+<script>
+  const API_BASE_URL = 'http://localhost:4000'; // Change to your backend URL
+
+  // TODO: Replace with actual auth token retrieval
+  const AUTH_TOKEN = localStorage.getItem('authToken') || '';
+
+  // Utility: fetch with auth headers
+  async function apiFetch(path, options = {}) {
+    const res = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers: {
+        'Authorization': `Bearer ${AUTH_TOKEN}`,
+        ...options.headers,
+      }
+    });
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.error || 'API Error');
+    }
+    return res.json();
+  }
+
+  // File upload input and handlers for Upload Notes
+  const fileInput = document.getElementById('file-input');
+  const fileListContainer = document.querySelector('.upload-notes .file-list');
+
+  fileInput.addEventListener('change', async (e) => {
+    const files = fileInput.files;
+    if (files.length === 0) return;
+
+    for (let i = 0; i < files.length; i++) {
+      await uploadFile(files[i]);
+    }
+    fileInput.value = '';
+    await loadUploadedNotes();
+  });
+
+  // Upload file to backend /files/upload and /upload/notes, then track AI processing placeholder
+  async function uploadFile(file) {
+    try {
+      // Show processing UI
+      addFileToUI(file);
+
+      // Upload to /files/upload
+      const formData = new FormData();
+      formData.append('file', file);
+
+      // Upload endpoint
+      const uploadRes = await fetch(`${API_BASE_URL}/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+        },
+        body: formData
+      });
+
+      if (!uploadRes.ok) {
+        const err = await uploadRes.json();
+        alert(`Upload failed: ${err.error || 'Unknown error'}`);
+        removeFileFromUI(file.name);
+        return;
+      }
+      const uploadData = await uploadRes.json();
+      const signedUrl = uploadData.file.file_url;
+
+      // After file storage, create upload notes record
+      const notesRes = await fetch(`${API_BASE_URL}/upload/notes`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${AUTH_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          file_id: uploadData.file.file_url, // You may want file key or path instead
+          title: file.name,
+          ai_analysis: null,
+        }),
+      });
+
+      if (!notesRes.ok) {
+        const err = await notesRes.json();
+        alert(`Failed to save uploaded note: ${err.error || 'Unknown error'}`);
+        removeFileFromUI(file.name);
+        return;
+      }
+
+      // Simulate AI processing progress
+      simulateAiProcessing(file.name);
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+      removeFileFromUI(file.name);
+    }
+  }
+
+  function addFileToUI(file) {
+    if (!fileListContainer) return;
+    const item = document.createElement('div');
+    item.className = 'nb-file-item';
+    item.dataset.fileName = file.name;
+    item.innerHTML = `
+      <div class="nb-file-info">
+        <span class="nb-file-icon"><i class="fa-solid fa-file-${file.type.includes('pdf') ? 'pdf' :
+          file.type.includes('word') || file.name.endsWith('.docx') ? 'word' : 'lines'}"></i></span>
+        <div class="nb-file-details">
+          <span class="nb-file-name">${file.name}</span>
+          <span class="nb-file-meta">${(file.type || 'file').toUpperCase()} • ${formatFileSize(file.size)} • Just now</span>
+        </div>
+      </div>
+      <div class="nb-file-status">
+        <div class="nb-progress">
+          <div class="nb-progress-bar" style="width:0%;"></div>
+        </div>
+        <span class="nb-status-text">Uploading...</span>
+      </div>
+      <div class="nb-file-actions">
+        <button class="nb-action" title="Stop" onclick="stopFakeProgress('${file.name}')">
+          <i class="fa-solid fa-stop"></i>
+        </button>
+        <button class="nb-action" title="Delete" onclick="removeFileFromUI('${file.name}')">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+      </div>
+    `;
+    fileListContainer.appendChild(item);
+    fakeProgress[file.name] = 0;
+  }
+
+  function removeFileFromUI(fileName) {
+    if (!fileListContainer) return;
+    const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
+    if (elem) elem.remove();
+  }
+
+  // Simple file size formatting
+  function formatFileSize(bytes) {
+    if (bytes === 0) return '0 B';
+    const k = 1024,
+      sizes = ['B', 'KB', 'MB', 'GB', 'TB'],
+      i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // Simulate AI processing progress bar for uploaded file
+  let fakeProgress = {};
+  let fakeIntervals = {};
+  function simulateAiProcessing(fileName) {
+    const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
+    if (!elem) return;
+    const progressBar = elem.querySelector('.nb-progress-bar');
+    const statusText = elem.querySelector('.nb-status-text');
+
+    fakeIntervals[fileName] = setInterval(() => {
+      if (fakeProgress[fileName] >= 100) {
+        clearInterval(fakeIntervals[fileName]);
+        statusText.textContent = 'AI Processing Completed';
+        progressBar.style.width = '100%';
+        elem.classList.add('nb-item-complete');
+        return;
+      }
+      fakeProgress[fileName] += Math.random() * 15;
+      if (fakeProgress[fileName] > 100) fakeProgress[fileName] = 100;
+      progressBar.style.width = `${fakeProgress[fileName]}%`;
+      statusText.textContent = `AI Processing... ${Math.floor(fakeProgress[fileName])}%`;
+    }, 400);
+  }
+  function stopFakeProgress(fileName) {
+    if (fakeIntervals[fileName]) {
+      clearInterval(fakeIntervals[fileName]);
+      const elem = fileListContainer.querySelector(`[data-file-name="${fileName}"]`);
+      if (elem) {
+        const statusText = elem.querySelector('.nb-status-text');
+        statusText.textContent = 'Processing Stopped';
+        statusText.classList.add('nb-error');
+      }
+    }
+  }
+
+  // Load already uploaded notes from backend
+  async function loadUploadedNotes() {
+    if (!fileListContainer) return;
+    try {
+      const notes = await apiFetch('/upload/notes');
+      fileListContainer.innerHTML = ''; // Clear existing list
+      notes.forEach(note => {
+        const div = document.createElement('div');
+        div.className = 'nb-file-item nb-item-complete';
+        div.innerHTML = `
+          <div class="nb-file-info">
+            <span class="nb-file-icon"><i class="fa-solid fa-file-lines"></i></span>
+            <div class="nb-file-details">
+              <span class="nb-file-name">${note.title}</span>
+              <span class="nb-file-meta">Uploaded • ${new Date(note.created_at).toLocaleString()}</span>
+            </div>
+          </div>
+          <div class="nb-file-status">
+            <span class="nb-status-text nb-success">Processed</span>
+          </div>
+          <div class="nb-file-actions">
+            <button class="nb-action" title="Download" onclick="window.open('${note.file_id}', '_blank')">
+              <i class="fa-solid fa-download"></i>
+            </button>
+            <button class="nb-action" title="Delete" onclick="deleteNote('${note.id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+        fileListContainer.appendChild(div);
+      });
+    } catch (err) {
+      console.error('Failed to load uploaded notes:', err);
+    }
+  }
+
+  async function deleteNote(noteId) {
+    if (!confirm('Delete this note?')) return;
+    try {
+      await fetch(`${API_BASE_URL}/upload/notes/${noteId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${AUTH_TOKEN}` }
+      });
+      await loadUploadedNotes();
+    } catch (err) {
+      alert('Delete failed: ' + err.message);
+    }
+  }
+
+  // AI Summarize button example (from prompt input)
+  const promptSendBtn = document.querySelector('.prompt-send');
+  const promptInput = document.querySelector('.prompt-input');
+//   let customDropdownSelected = document.querySelector('.custom-dropdown-selected');
+
+  promptSendBtn.addEventListener('click', async () => {
+    const text = promptInput.value.trim();
+    if (!text) {
+      alert('Please enter a query or attach files');
+      return;
+    }
+    const source = customDropdownSelected.textContent.trim();
+    let queryText = text;
+
+    if (source === 'Notes' || source === 'Select Source') {
+      // send to /ai/summarize endpoint
+      try {
+        promptSendBtn.disabled = true;
+        promptSendBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`;
+        const res = await apiFetch('/ai/summarize', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: queryText })
+        });
+        alert('Summary:\n' + res.summary);
+      } catch (err) {
+        alert('AI summarize failed: ' + err.message);
+      } finally {
+        promptSendBtn.disabled = false;
+        promptSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+      }
+    } else {
+      alert('AI for the selected source is coming soon.');
+    }
+  });
+
+  // On load, fetch uploaded notes to list
+  document.addEventListener('DOMContentLoaded', loadUploadedNotes);
+</script>
 </html>
