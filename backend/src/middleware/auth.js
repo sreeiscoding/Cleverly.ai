@@ -9,12 +9,23 @@ module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
   console.log('Auth middleware called with authHeader:', authHeader ? 'present' : 'missing');
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    console.log('Auth header missing or malformed');
-    return res.status(401).json({ error: 'Authorization header missing or malformed' });
+  if (!authHeader) {
+    console.log('Auth header missing');
+    return res.status(401).json({ error: 'Authorization header missing' });
   }
 
-  const token = authHeader.split(' ')[1];
+  let token;
+  if (authHeader.startsWith('Bearer ')) {
+    token = authHeader.split(' ')[1];
+  } else {
+    // Assume the entire header is the token (for clients that send token directly)
+    token = authHeader;
+  }
+
+  if (!token) {
+    console.log('No token found in auth header');
+    return res.status(401).json({ error: 'No token provided' });
+  }
   console.log('Token extracted, length:', token.length);
 
   try {
