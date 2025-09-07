@@ -633,6 +633,9 @@
         early access updates.<br />
         Join our newsletter and never miss a smarter way to study &amp; work.
       </p>
+      <div id="newsletterLoggedIn" class="newsletter-logged-in" style="display: none;">
+        <p class="newsletter-logged-in-message">You'll get notifications</p>
+      </div>
       <form class="newsletter-form" id="newsletterForm" onsubmit="return handleNewsletterSubmit(event)">
         <input
           type="email"
@@ -871,6 +874,23 @@
         }
       }
 
+      // Newsletter visibility based on login status
+      function updateNewsletterVisibility() {
+        const authToken = localStorage.getItem('authToken');
+        const newsletterForm = document.getElementById('newsletterForm');
+        const newsletterLoggedIn = document.getElementById('newsletterLoggedIn');
+
+        if (authToken) {
+          // User is logged in - show logged in message, hide form
+          newsletterForm.style.display = 'none';
+          newsletterLoggedIn.style.display = 'block';
+        } else {
+          // User is not logged in - show form, hide logged in message
+          newsletterForm.style.display = 'block';
+          newsletterLoggedIn.style.display = 'none';
+        }
+      }
+
       function handleEarlyAccessSubmit(event) {
         event.preventDefault();
         const name = document.getElementById('earlyAccessName').value;
@@ -1016,6 +1036,21 @@
       .newsletter-btn:disabled {
         opacity: 0.7;
         cursor: not-allowed;
+      }
+
+      .newsletter-logged-in {
+        text-align: center;
+        padding: 20px;
+        background-color: rgba(20, 128, 122, 0.1);
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+
+      .newsletter-logged-in-message {
+        color: #14807a;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
       }
 
       /* Modal Styles */
@@ -1219,7 +1254,7 @@
 
   <script src="script.js"></script>
   <script>
-    // Check if user is logged in and modify navbar accordingly
+    // Check if user is logged in and modify navbar and newsletter accordingly
     document.addEventListener('DOMContentLoaded', function() {
       const authToken = localStorage.getItem('authToken');
       const navbarRight = document.querySelector('.navbar-right');
@@ -1232,18 +1267,113 @@
         if (getStartedBtn) getStartedBtn.style.display = 'none';
         if (signInBtn) signInBtn.style.display = 'none';
 
-        // Add Your AI Playground button
-        const aiPlaygroundBtn = document.createElement('a');
-        aiPlaygroundBtn.href = '#';
-        aiPlaygroundBtn.className = 'btn';
-        aiPlaygroundBtn.textContent = 'Your AI Playground';
-        aiPlaygroundBtn.addEventListener('click', function(e) {
-          e.preventDefault();
-          window.location.href = 'dashboard.html';
-        });
+        // Fetch user data to get the name
+        fetch('http://localhost:4000/auth/me', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${authToken}`,
+            'Content-Type': 'application/json'
+          }
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.user && data.user.name) {
+            // Create container for button and username
+            const container = document.createElement('div');
+            container.style.cssText = 'display: flex; flex-direction: column; align-items: center; gap: 8px;';
 
-        navbarRight.appendChild(aiPlaygroundBtn);
+            // Add Launch Workspace button wrapped in a div
+            const buttonWrapper = document.createElement('div');
+
+            const aiPlaygroundBtn = document.createElement('a');
+            aiPlaygroundBtn.href = '#';
+            aiPlaygroundBtn.className = 'btn';
+            aiPlaygroundBtn.textContent = 'Launch Workspace';
+            aiPlaygroundBtn.style.cssText = 'border-bottom-left-radius: 0; border-bottom-right-radius: 0;';
+            aiPlaygroundBtn.addEventListener('click', function(e) {
+              e.preventDefault();
+              window.location.href = 'dashboard.html';
+            });
+
+            buttonWrapper.appendChild(aiPlaygroundBtn);
+            container.appendChild(buttonWrapper);
+
+            // Add user dropdown menu
+            const userDropdown = document.createElement('div');
+            userDropdown.className = 'user-dropdown';
+            userDropdown.style.cssText = 'position: relative; width: 187px;';
+
+            // Dropdown button (username)
+            const userDropdownBtn = document.createElement('button');
+            userDropdownBtn.className = 'user-dropdown-btn';
+            userDropdownBtn.textContent = data.user.name;
+            userDropdownBtn.style.cssText = 'color: #14807a; font-size: 12px; font-weight: 600; text-align: center; background-color: rgba(20, 128, 122, 0.1); padding: 4px 8px; border: none; border-radius: 4px; border-top-left-radius: 0; border-top-right-radius: 0; width: 100%; box-sizing: border-box; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px; transition: background-color 0.2s;';
+            userDropdownBtn.innerHTML = `${data.user.name} <span style="font-size: 10px;">▼</span>`;
+
+            // Add hover effects
+            userDropdownBtn.addEventListener('mouseover', function() {
+              this.style.backgroundColor = 'rgba(20, 128, 122, 0.2)';
+            });
+            userDropdownBtn.addEventListener('mouseout', function() {
+              this.style.backgroundColor = 'rgba(20, 128, 122, 0.1)';
+            });
+
+            // Dropdown content
+            const userDropdownContent = document.createElement('div');
+            userDropdownContent.className = 'user-dropdown-content';
+            userDropdownContent.style.cssText = 'display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #e3e8ee; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); z-index: 1000; width: 100%; margin-top: 2px;';
+
+            // Logout button
+            const logoutBtn = document.createElement('button');
+            logoutBtn.className = 'user-logout-btn';
+            logoutBtn.textContent = 'Logout';
+            logoutBtn.style.cssText = 'width: 100%; padding: 8px 12px; background: none; border: none; text-align: left; cursor: pointer; color: #333; font-size: 12px; border-radius: 4px; transition: background-color 0.2s;';
+            logoutBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              // Clear auth token and redirect to home
+              localStorage.removeItem('authToken');
+              window.location.href = 'index.html';
+            });
+            logoutBtn.addEventListener('mouseover', function() {
+              this.style.backgroundColor = '#f8f9fa';
+            });
+            logoutBtn.addEventListener('mouseout', function() {
+              this.style.backgroundColor = 'transparent';
+            });
+
+            userDropdownContent.appendChild(logoutBtn);
+            userDropdown.appendChild(userDropdownBtn);
+            userDropdown.appendChild(userDropdownContent);
+
+            // Toggle dropdown functionality
+            userDropdownBtn.addEventListener('click', function(e) {
+              e.stopPropagation();
+              const isVisible = userDropdownContent.style.display === 'block';
+              // Close all other dropdowns
+              document.querySelectorAll('.user-dropdown-content').forEach(content => {
+                content.style.display = 'none';
+              });
+              // Toggle this dropdown
+              userDropdownContent.style.display = isVisible ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+              userDropdownContent.style.display = 'none';
+            });
+
+            container.appendChild(userDropdown);
+
+            navbarRight.appendChild(container);
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching user data:', error);
+        });
       }
+
+      // Update newsletter visibility based on login status
+      updateNewsletterVisibility();
     });
   </script>
 </html>
