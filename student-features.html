@@ -74,6 +74,8 @@
             margin-bottom: 12px;
             position: relative;
             color: #555;
+            text-align: left;
+            margin-top: 20px;
         }
 
         .feature-benefits li::before {
@@ -97,6 +99,41 @@
         .try-now-btn:hover {
             background: #0f665f;
         }
+
+        .breadcrumb {
+            background: #f8f9fa;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .breadcrumb-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: #14807a;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .breadcrumb a:hover {
+            color: #0f665f;
+            text-decoration: underline;
+        }
+
+        .breadcrumb-separator {
+            margin: 0 8px;
+            color: #6c757d;
+        }
+
+        .breadcrumb-current {
+            color: #495057;
+            font-weight: 500;
+        }
     </style>
 </head>
 <body>
@@ -110,6 +147,18 @@
             <a href="get-started.html" class="btn">Get Started</a>
             <a href="signin.html" class="btn">Sign In</a>
         </div>
+    </nav>
+
+    <!-- Breadcrumb Navigation -->
+    <div class="breadcrumb">
+        <div class="breadcrumb-container">
+            <a href="index.html">Home</a>
+            <span class="breadcrumb-separator">></span>
+            <span class="breadcrumb-current">Student Features</span>
+        </div>
+    </div>
+
+    <div class="feature-header">
     </nav>
 
     <div class="feature-header">
@@ -172,3 +221,39 @@
     </div>
 </body>
 </html>
+
+    <script>
+        // Check if user is logged in and modify navbar accordingly
+        document.addEventListener('DOMContentLoaded', function() {
+            const authToken = localStorage.getItem('authToken');
+            const navbarRight = document.querySelector('.navbar-right');
+
+            if (authToken) {
+                // User is logged in - hide Get Started and Sign In, show AI Playground button
+                const getStartedBtn = navbarRight.querySelector('a[href="get-started.html"]');
+                const signInBtn = navbarRight.querySelector('a[href="signin.html"]');
+
+                if (getStartedBtn) getStartedBtn.style.display = 'none';
+                if (signInBtn) signInBtn.style.display = 'none';
+
+                // Add Your AI Playground button
+                const aiPlaygroundBtn = document.createElement('a');
+                aiPlaygroundBtn.href = '#';
+                aiPlaygroundBtn.className = 'btn';
+                aiPlaygroundBtn.textContent = 'Your AI Playground';
+                aiPlaygroundBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = 'dashboard.html';
+                });
+
+                navbarRight.appendChild(aiPlaygroundBtn);
+
+                // Modify "Try Now" buttons for logged-in users to link to demo
+                const tryNowButtons = document.querySelectorAll('.try-now-btn');
+                tryNowButtons.forEach(button => {
+                    button.textContent = 'Try It Now';
+                    button.href = 'demo.html';
+                });
+            }
+        });
+    </script>

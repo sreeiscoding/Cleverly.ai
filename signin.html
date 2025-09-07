@@ -158,8 +158,8 @@
         const data = await res.json();
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('accountType', data.user.account_type || 'student');
-        // Redirect to dashboard on successful login
-        window.location.href = 'dashboard.html';
+        // Redirect to landing page on successful login
+        window.location.href = 'index.html';
       } catch (err) {
         errorElem.textContent = 'Network error. Please try again later.';
       }

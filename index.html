@@ -1218,4 +1218,32 @@
   </footer>
 
   <script src="script.js"></script>
+  <script>
+    // Check if user is logged in and modify navbar accordingly
+    document.addEventListener('DOMContentLoaded', function() {
+      const authToken = localStorage.getItem('authToken');
+      const navbarRight = document.querySelector('.navbar-right');
+
+      if (authToken) {
+        // User is logged in - hide Get Started and Sign In, show AI Playground button
+        const getStartedBtn = navbarRight.querySelector('a[href="get-started.html"]');
+        const signInBtn = navbarRight.querySelector('a[href="signin.html"]');
+
+        if (getStartedBtn) getStartedBtn.style.display = 'none';
+        if (signInBtn) signInBtn.style.display = 'none';
+
+        // Add Your AI Playground button
+        const aiPlaygroundBtn = document.createElement('a');
+        aiPlaygroundBtn.href = '#';
+        aiPlaygroundBtn.className = 'btn';
+        aiPlaygroundBtn.textContent = 'Your AI Playground';
+        aiPlaygroundBtn.addEventListener('click', function(e) {
+          e.preventDefault();
+          window.location.href = 'dashboard.html';
+        });
+
+        navbarRight.appendChild(aiPlaygroundBtn);
+      }
+    });
+  </script>
 </html>

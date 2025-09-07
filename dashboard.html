@@ -455,6 +455,11 @@
         font-size: 0.7rem;
         font-weight: bold;
       }
+
+      .sidebar-header-link {
+        text-decoration: none;
+        color: inherit;
+      }
     </style>
   </head>
   <body style="background-color: var(--bg-primary); min-height: 100vh;">
@@ -621,10 +626,12 @@
     </script>
     <div class="dashboard-wrapper">
       <aside class="sidebar">
-        <div class="sidebar-header">
-          <span class="sidebar-logo"><i class="fa-solid fa-square"></i></span>
-          <span class="sidebar-title">Cleverly.ai</span>
-        </div>
+        <a href="index.html" class="sidebar-header-link">
+          <div class="sidebar-header">
+            <span class="sidebar-logo"><img src="Cleverly AI.png" alt="Cleverly.ai" width="40" /></span>
+            <span class="sidebar-title">Cleverly.ai</span>
+          </div>
+        </a>
         <nav class="sidebar-nav">
           <ul>
             <li>
