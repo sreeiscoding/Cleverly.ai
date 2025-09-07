@@ -6,5 +6,6 @@ const rateLimit = require('../middleware/rateLimit');
 router.post('/generate', rateLimit(3, 60000), aiImagesController.generateImage); // 3 requests per minute for images
 router.get('/', aiImagesController.getUserImages);
 router.delete('/:id', aiImagesController.deleteImage);
+router.get('/search', aiImagesController.searchImages);
 
 module.exports = router;

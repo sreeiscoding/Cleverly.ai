@@ -1,9 +1,31 @@
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { z } = require('zod');
 
 exports.getAllQuestions = async (req, res, next) => {
   try {
     const { data, error } = await supabaseAdmin.from('my_questions').select('*').eq('user_id', req.user.id);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) { next(err); }
+};
+
+exports.searchQuestions = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { q } = req.query;
+
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('my_questions')
+      .select('*')
+      .eq('user_id', userId)
+      .or(`question_text.ilike.%${q}%,options.cs.{${q}}`)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (err) { next(err); }

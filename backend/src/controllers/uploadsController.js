@@ -1,4 +1,4 @@
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
 const { summarizeText } = require('../lib/openai');
 const pdfParse = require('pdf-parse');
@@ -81,6 +81,28 @@ exports.getNotes = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { data, error } = await supabaseAdmin.from('upload_notes').select('*').eq('user_id', userId);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) { next(err); }
+};
+
+exports.searchUploadNotes = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { q } = req.query;
+
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('upload_notes')
+      .select('*')
+      .eq('user_id', userId)
+      .or(`title.ilike.%${q}%,ai_analysis.ilike.%${q}%`)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (err) { next(err); }

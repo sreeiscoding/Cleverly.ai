@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings - Cleverly.ai</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="settings.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body style="background-color: var(--bg-primary); min-height: 100vh;">
+    <script>
+      const API_BASE_URL = "http://localhost:4000";
+      let AUTH_TOKEN = localStorage.getItem("authToken");
+
+      // Redirect to login page if no token
+      if (!AUTH_TOKEN) {
+        window.location.href = "signin.html";
+      }
+
+      // Helper function for authenticated API fetch
+      async function apiFetch(path, options = {}) {
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+        };
+        const res = await fetch(API_BASE_URL + path, options);
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || "API Error");
+        }
+        return res.json();
+      }
+    </script>
+
+    <div class="dashboard-wrapper">
+      <aside class="sidebar">
+        <div class="sidebar-header">
+          <span class="sidebar-logo"><i class="fa-solid fa-square"></i></span>
+          <span class="sidebar-title">Cleverly.ai</span>
+        </div>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <button class="home-btn">
+                <i class="fa-solid fa-house"></i> Dashboard
+              </button>
+            </li>
+            <li class="nav-section">
+              Core Features
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-file-lines"></i> Notes Breakdown</a
+                  >
+                </li>
+                <li>
+                  <a href="#"><i class="fa-solid fa-palette"></i> AI Images</a>
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-bullseye"></i> MCQ Generator</a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Resources
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-book"></i> My Dictionary
+                    <span class="beta-badge">Beta</span></a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-question"></i> My Questions
+                    <span class="beta-badge">Beta</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Uploads & Media
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-folder-open"></i> Upload Notes</a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-image"></i> Presentations
+                    <span class="beta-badge">Beta</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+            <li class="nav-section">
+              Tasks & Events
+              <ul>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-pen"></i> Assignments
+                    <span class="beta-badge">Beta</span></a
+                  >
+                </li>
+                <li>
+                  <a href="#"
+                    ><i class="fa-solid fa-microphone"></i> Seminars
+                    <span class="beta-badge">Beta</span></a
+                  >
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb">
+            <a href="dashboard.html"><i class="fa-solid fa-home"></i> Dashboard</a>
+            <span>/</span>
+            <span>Settings</span>
+          </div>
+          <div class="profile-dropdown">
+            <button class="profile-btn">
+              <i class="fa-solid fa-user"></i>
+            </button>
+            <div class="dropdown-content">
+              <a href="settings.html">Settings</a>
+              <a href="#logout">Logout</a>
+            </div>
+          </div>
+        </header>
+        <section class="workspace">
+          <h1 class="settings-title">Account Settings</h1>
+          <p class="settings-desc">
+            Manage your account information and preferences
+          </p>
+
+          <div class="settings-container">
+            <div class="settings-sidebar">
+              <nav class="settings-nav">
+                <a href="#profile" class="settings-nav-item active" data-section="profile">
+                  <i class="fa-solid fa-user"></i>
+                  Profile
+                </a>
+                <a href="#security" class="settings-nav-item" data-section="security">
+                  <i class="fa-solid fa-shield"></i>
+                  Security
+                </a>
+                <a href="#preferences" class="settings-nav-item" data-section="preferences">
+                  <i class="fa-solid fa-gear"></i>
+                  Preferences
+                </a>
+              </nav>
+            </div>
+
+            <div class="settings-content">
+              <!-- Profile Section -->
+              <div id="profile-section" class="settings-section active">
+                <div class="section-header">
+                  <h2>Profile Information</h2>
+                  <p>Update your personal information and contact details</p>
+                </div>
+
+                <form id="profile-form" class="settings-form">
+                  <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="Enter your full name" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter your email" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="plan">Current Plan</label>
+                    <input type="text" id="plan" name="plan" readonly />
+                  </div>
+
+                  <div class="form-actions">
+                    <button type="button" class="btn-secondary" onclick="cancelChanges()">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Security Section -->
+              <div id="security-section" class="settings-section">
+                <div class="section-header">
+                  <h2>Security Settings</h2>
+                  <p>Manage your password and security preferences</p>
+                </div>
+
+                <div class="security-options">
+                  <div class="security-item">
+                    <div class="security-info">
+                      <h3>Password</h3>
+                      <p>Last updated 30 days ago</p>
+                    </div>
+                    <button class="btn-outline" onclick="changePassword()">Change Password</button>
+                  </div>
+
+                  <div class="security-item">
+                    <div class="security-info">
+                      <h3>Two-Factor Authentication</h3>
+                      <p>Add an extra layer of security to your account</p>
+                    </div>
+                    <button class="btn-outline" onclick="setup2FA()">Setup 2FA</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Preferences Section -->
+              <div id="preferences-section" class="settings-section">
+                <div class="section-header">
+                  <h2>Preferences</h2>
+                  <p>Customize your experience with Cleverly.ai</p>
+                </div>
+
+                <div class="preferences-options">
+                  <div class="preference-item">
+                    <div class="preference-info">
+                      <h3>Email Notifications</h3>
+                      <p>Receive updates about your account and features</p>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" id="email-notifications" checked />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+
+                  <div class="preference-item">
+                    <div class="preference-info">
+                      <h3>Dark Mode</h3>
+                      <p>Switch to dark theme for better visibility</p>
+                    </div>
+                    <label class="toggle">
+                      <input type="checkbox" id="dark-mode" />
+                      <span class="toggle-slider"></span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Navigation handling
+      document.addEventListener("DOMContentLoaded", function () {
+        // Handle sidebar navigation
+        const sidebarLinks = document.querySelectorAll(".sidebar-nav ul li ul li a");
+        const homeBtn = document.querySelector(".home-btn");
+
+        homeBtn.addEventListener("click", function () {
+          window.location.href = "dashboard.html";
+        });
+
+        sidebarLinks.forEach((link) => {
+          link.addEventListener("click", function (e) {
+            e.preventDefault();
+            window.location.href = "dashboard.html" + this.getAttribute("href");
+          });
+        });
+
+        // Settings navigation
+        const settingsNavItems = document.querySelectorAll(".settings-nav-item");
+        const settingsSections = document.querySelectorAll(".settings-section");
+
+        settingsNavItems.forEach((item) => {
+          item.addEventListener("click", function (e) {
+            e.preventDefault();
+            const sectionId = this.getAttribute("data-section");
+
+            // Update active nav item
+            settingsNavItems.forEach((nav) => nav.classList.remove("active"));
+            this.classList.add("active");
+
+            // Show corresponding section
+            settingsSections.forEach((section) => {
+              section.classList.remove("active");
+            });
+            document.getElementById(sectionId + "-section").classList.add("active");
+          });
+        });
+
+        // Profile dropdown
+        const profileDropdown = document.querySelector(".profile-dropdown");
+        const profileBtn = document.querySelector(".profile-btn");
+
+        if (profileDropdown && profileBtn) {
+          profileBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            profileDropdown.classList.toggle("show");
+          });
+          document.addEventListener("click", (e) => {
+            if (!profileDropdown.contains(e.target)) {
+              profileDropdown.classList.remove("show");
+            }
+          });
+        }
+
+        // Logout handler
+        const logoutLink = document.querySelector('.dropdown-content a[href="#logout"]');
+        if (logoutLink) {
+          logoutLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            localStorage.removeItem("authToken");
+            window.location.href = "signin.html";
+          });
+        }
+
+        // Load user profile
+        loadUserProfile();
+      });
+
+      // Load user profile data
+      async function loadUserProfile() {
+        try {
+          const response = await apiFetch("/auth/me");
+          const user = response.user;
+
+          document.getElementById("name").value = user.name || "";
+          document.getElementById("email").value = user.email || "";
+          document.getElementById("plan").value = user.plan || "free";
+        } catch (err) {
+          console.error("Failed to load user profile:", err);
+          alert("Failed to load profile data");
+        }
+      }
+
+      // Handle profile form submission
+      document.getElementById("profile-form").addEventListener("submit", async function (e) {
+        e.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+
+        if (!name || !email) {
+          alert("Please fill in all required fields");
+          return;
+        }
+
+        try {
+          const response = await apiFetch("/auth/update-profile", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email }),
+          });
+
+          alert("Profile updated successfully!");
+          loadUserProfile(); // Reload to show updated data
+        } catch (err) {
+          console.error("Failed to update profile:", err);
+          alert("Failed to update profile: " + err.message);
+        }
+      });
+
+      // Cancel changes
+      function cancelChanges() {
+        loadUserProfile();
+      }
+
+      // Placeholder functions for security features
+      function changePassword() {
+        alert("Password change feature coming soon!");
+      }
+
+      function setup2FA() {
+        alert("Two-factor authentication setup coming soon!");
+      }
+
+      // Enhanced Dark Mode Functionality
+      function initializeDarkMode() {
+        const darkModeToggle = document.getElementById('dark-mode');
+        const body = document.body;
+
+        // Load saved preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+          darkModeToggle.checked = true;
+        }
+
+        // Toggle dark mode with smooth transition
+        darkModeToggle.addEventListener('change', function() {
+          if (this.checked) {
+            body.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            body.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+          }
+
+          // Add visual feedback
+          const toggle = this.parentElement;
+          toggle.style.transform = 'scale(1.1)';
+          setTimeout(() => {
+            toggle.style.transform = '';
+          }, 200);
+        });
+      }
+
+      // Initialize dark mode when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // ... existing code ...
+        initializeDarkMode();
+      });
+    </script>
+  </body>
+</html>

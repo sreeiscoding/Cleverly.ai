@@ -20,6 +20,7 @@ const app = express();
 
 const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
+
 // Middleware
 app.use(helmet());
 app.use(express.json());
@@ -39,7 +40,7 @@ app.use('/ai-images', aiImagesRoutes);
 app.use('/notes-breakdown', notesBreakdownRoutes);
 app.use('/files', filesRoutes);
 app.use('/payments', paymentsRoutes);
-// app.use('/dictionary', dictionaryRoutes); // TODO: Fix dictionary route
+app.use('/dictionary', dictionaryRoutes);
 app.use('/mcq', mcqRoutes);
 app.use('/questions', questionsRoutes);
 app.use('/upload', uploadsRoutes);
@@ -53,4 +54,7 @@ app.use(function (err, req, res, next) {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
+// Trigger nodemon restart
+// Another trigger
+// Third trigger
 });

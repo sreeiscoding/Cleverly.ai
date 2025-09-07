@@ -1,5 +1,5 @@
 const { generateMindMap, generateStudyGuide, generateFlashcards } = require('../lib/openai');
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { z } = require('zod');
 
 exports.generateMindMap = async (req, res, next) => {

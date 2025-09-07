@@ -1,5 +1,5 @@
 const { razorpay, stripe } = require('../lib/payments');
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const crypto = require('crypto');
 
 exports.createPayment = async (req, res, next) => {

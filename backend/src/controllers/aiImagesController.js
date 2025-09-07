@@ -1,5 +1,5 @@
 const { generateImage } = require('../lib/openai');
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { z } = require('zod');
 
 exports.generateImage = async (req, res, next) => {
@@ -18,8 +18,6 @@ exports.generateImage = async (req, res, next) => {
       .insert({
         user_id: req.user.id,
         prompt,
-        style,
-        type,
         image_url: imageUrl
       })
       .single();
@@ -38,6 +36,30 @@ exports.getUserImages = async (req, res, next) => {
       .select('*')
       .eq('user_id', req.user.id)
       .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.searchImages = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { q } = req.query;
+
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('ai_images')
+      .select('*')
+      .eq('user_id', userId)
+      .ilike('prompt', `%${q}%`)
+      .order('created_at', { ascending: false })
+      .limit(20);
 
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);

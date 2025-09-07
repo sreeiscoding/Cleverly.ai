@@ -7,5 +7,6 @@ router.post('/', questionsController.createQuestion);
 router.get('/:id', questionsController.getQuestion);
 router.put('/:id', questionsController.updateQuestion);
 router.delete('/:id', questionsController.deleteQuestion);
+router.get('/search', questionsController.searchQuestions);
 
 module.exports = router;

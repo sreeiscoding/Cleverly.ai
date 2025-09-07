@@ -1,4 +1,4 @@
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { generateMCQs } = require('../lib/openai');
 const { z } = require('zod');
 

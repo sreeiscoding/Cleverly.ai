@@ -1,4 +1,4 @@
-const supabaseAdmin = require('../lib/supabase');
+const { supabaseAdmin } = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
 
 exports.uploadFile = async (req, res, next) => {
@@ -44,6 +44,30 @@ exports.listFiles = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { data, error } = await supabaseAdmin.from('files').select('*').eq('user_id', userId);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.searchFiles = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+    const { q } = req.query;
+
+    if (!q || q.trim().length === 0) {
+      return res.json([]);
+    }
+
+    const { data, error } = await supabaseAdmin
+      .from('files')
+      .select('*')
+      .eq('user_id', userId)
+      .or(`file_url.ilike.%${q}%,file_type.ilike.%${q}%`)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (err) {

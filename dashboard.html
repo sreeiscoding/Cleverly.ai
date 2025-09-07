@@ -14,6 +14,46 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <style>
+      /* CSS Variables for Dark Mode */
+      :root {
+        --bg-primary: #f2ece3;
+        --bg-secondary: #ffffff;
+        --bg-sidebar: #ffffff;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --text-muted: #7b8fa1;
+        --border-color: #e0e0e0;
+        --border-light: #f0f0f0;
+        --accent-color: #14807a;
+        --accent-hover: #0f6b63;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --input-bg: #ffffff;
+        --input-readonly-bg: #f8f9fa;
+        --btn-secondary-bg: #f8f9fa;
+        --btn-secondary-hover: #e9ecef;
+        --breadcrumb-separator: #ccc;
+      }
+
+      /* Dark Mode Variables */
+      [data-theme="dark"] {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-sidebar: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --text-muted: #aaaaaa;
+        --border-color: #404040;
+        --border-light: #404040;
+        --accent-color: #14807a;
+        --accent-hover: #0f6b63;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --input-bg: #3d3d3d;
+        --input-readonly-bg: #2d2d2d;
+        --btn-secondary-bg: #3d3d3d;
+        --btn-secondary-hover: #454545;
+        --breadcrumb-separator: #666666;
+      }
+
       .prompt-file-input {
         display: none;
       }
@@ -417,13 +457,7 @@
       }
     </style>
   </head>
-  <body
-    style="
-      /* background: linear-gradient(120deg, #14807a 0%, #f7e6f7 100%); */
-      background-color: #f2ece3;
-      min-height: 100vh;
-    "
-  >
+  <body style="background-color: var(--bg-primary); min-height: 100vh;">
     <script>
       const API_BASE_URL = "http://localhost:4000";
       let AUTH_TOKEN = localStorage.getItem("authToken");
@@ -461,7 +495,69 @@
             window.location.href = "signin.html";
           });
         }
+
+        // Initialize dark mode
+        initializeDarkMode();
       });
+
+      // Enhanced Dark Mode Functionality
+      function initializeDarkMode() {
+        const body = document.body;
+        const toggleBtn = document.getElementById('darkModeToggle');
+
+        // Load saved preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+        }
+
+        // Update toggle button state
+        updateToggleButton();
+
+        // Add event listener to main toggle button
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', toggleDarkMode);
+        }
+
+        // Add dark mode toggle to profile dropdown as backup
+        const profileDropdown = document.querySelector('.dropdown-content');
+        if (profileDropdown) {
+          const darkModeToggle = document.createElement('a');
+          darkModeToggle.href = '#';
+          darkModeToggle.innerHTML = '<i class="fa-solid fa-moon"></i> Toggle Dark Mode';
+          darkModeToggle.style.cssText = 'display: block; padding: 8px 16px; color: inherit; text-decoration: none;';
+          darkModeToggle.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleDarkMode();
+          });
+          profileDropdown.appendChild(darkModeToggle);
+        }
+      }
+
+      function toggleDarkMode() {
+        const body = document.body;
+        const isDark = body.hasAttribute('data-theme');
+
+        if (isDark) {
+          body.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+        } else {
+          body.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+        }
+
+        updateToggleButton();
+      }
+
+      function updateToggleButton() {
+        const body = document.body;
+        const toggleBtn = document.getElementById('darkModeToggle');
+
+        if (toggleBtn) {
+          const isDark = body.hasAttribute('data-theme');
+          toggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+      }
 
       // Integrate Notes AI processing
       async function generateNotesAI(text) {
@@ -593,14 +689,58 @@
       </aside>
       <main class="main-content">
         <header class="topbar">
-          <input type="text" class="search-bar" placeholder="Search..." />
-          <div class="profile-dropdown">
-            <button class="profile-btn">
-              <i class="fa-solid fa-user"></i>
+          <div class="search-container">
+            <div class="search-dropdown">
+              <button class="search-type-btn" id="searchTypeBtn">
+                <i class="fa-solid fa-search"></i>
+                <span>All</span>
+                <i class="fa-solid fa-chevron-down"></i>
+              </button>
+              <div class="search-type-dropdown" id="searchTypeDropdown">
+                <div class="search-type-option active" data-type="all">
+                  <i class="fa-solid fa-search"></i>
+                  <span>All</span>
+                </div>
+                <div class="search-type-option" data-type="files">
+                  <i class="fa-solid fa-file"></i>
+                  <span>Files</span>
+                </div>
+                <div class="search-type-option" data-type="questions">
+                  <i class="fa-solid fa-question"></i>
+                  <span>Questions</span>
+                </div>
+                <div class="search-type-option" data-type="images">
+                  <i class="fa-solid fa-image"></i>
+                  <span>AI Images</span>
+                </div>
+                <div class="search-type-option" data-type="notes">
+                  <i class="fa-solid fa-sticky-note"></i>
+                  <span>Notes</span>
+                </div>
+                <div class="search-type-option" data-type="dictionary">
+                  <i class="fa-solid fa-book"></i>
+                  <span>Dictionary</span>
+                </div>
+              </div>
+            </div>
+            <input type="text" class="search-bar" id="searchInput" placeholder="Search..." />
+            <button class="search-btn" id="searchBtn">
+              <i class="fa-solid fa-search"></i>
             </button>
-            <div class="dropdown-content">
-              <a href="#settings">Settings</a>
-              <a href="#logout">Logout</a>
+          </div>
+          <div style="display: flex; align-items: center;">
+            <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
+              <i class="fa-solid fa-sun sun-icon"></i>
+              <i class="fa-solid fa-moon moon-icon"></i>
+            </button>
+            <div class="profile-dropdown">
+              <button class="profile-btn">
+                <i class="fa-solid fa-user"></i>
+              </button>
+              <div class="dropdown-content">
+                <a href="settings.html">Settings</a>
+                <a href="#logout">Logout</a>
+              </div>
             </div>
           </div>
         </header>
@@ -1768,10 +1908,15 @@
 
     // Utility: fetch with auth headers
     async function apiFetch(path, options = {}) {
-      const res = await fetch(`${API_BASE_URL}${path}`, {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        throw new Error("No authentication token found. Please log in.");
+      }
+
+      const res = await fetch(`http://localhost:4000${path}`, {
         ...options,
         headers: {
-          Authorization: `Bearer ${AUTH_TOKEN}`,
+          Authorization: `Bearer ${token}`,
           ...options.headers,
         },
       });
@@ -2363,7 +2508,362 @@
     }
 
     // Load history on page load
-    document.addEventListener("DOMContentLoaded", loadAIImagesHistory);
+    document.addEventListener("DOMContentLoaded", function() {
+      loadAIImagesHistory();
+      initializeSearch();
+    });
+
+    // Search functionality
+    let currentSearchType = 'all';
+    let searchTimeout = null;
+
+    function initializeSearch() {
+      console.log('Initializing search functionality...');
+
+      const searchTypeBtn = document.getElementById('searchTypeBtn');
+      const searchTypeDropdown = document.getElementById('searchTypeDropdown');
+      const searchInput = document.getElementById('searchInput');
+      const searchBtn = document.getElementById('searchBtn');
+
+      console.log('Search elements found:', {
+        searchTypeBtn: !!searchTypeBtn,
+        searchTypeDropdown: !!searchTypeDropdown,
+        searchInput: !!searchInput,
+        searchBtn: !!searchBtn
+      });
+
+      // Search type dropdown toggle
+      if (searchTypeBtn && searchTypeDropdown) {
+        searchTypeBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          searchTypeDropdown.classList.toggle('show');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+          if (!searchTypeBtn.contains(e.target) && !searchTypeDropdown.contains(e.target)) {
+            searchTypeDropdown.classList.remove('show');
+          }
+        });
+
+        // Search type selection
+        const searchOptions = searchTypeDropdown.querySelectorAll('.search-type-option');
+        searchOptions.forEach(option => {
+          option.addEventListener('click', function() {
+            const type = this.getAttribute('data-type');
+            const icon = this.querySelector('i').outerHTML;
+            const text = this.querySelector('span').textContent;
+
+            // Update button
+            searchTypeBtn.innerHTML = `${icon}<span>${text}</span><i class="fa-solid fa-chevron-down"></i>`;
+
+            // Update active state
+            searchOptions.forEach(opt => opt.classList.remove('active'));
+            this.classList.add('active');
+
+            // Update current search type
+            currentSearchType = type;
+
+            // Close dropdown
+            searchTypeDropdown.classList.remove('show');
+
+            // Perform search if there's a query
+            const query = searchInput.value.trim();
+            if (query) {
+              performSearch(query, type);
+            }
+          });
+        });
+      }
+
+      // Search input handler
+      if (searchInput) {
+        searchInput.addEventListener('input', function() {
+          const query = this.value.trim();
+
+          // Clear previous timeout
+          if (searchTimeout) {
+            clearTimeout(searchTimeout);
+          }
+
+          if (query.length === 0) {
+            clearSearchResults();
+            return;
+          }
+
+          // Debounce search
+          searchTimeout = setTimeout(() => {
+            performSearch(query, currentSearchType);
+          }, 300);
+        });
+
+        // Search on Enter key
+        searchInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            const query = this.value.trim();
+            if (query) {
+              performSearch(query, currentSearchType);
+            }
+          }
+        });
+      }
+
+      // Search button handler
+      if (searchBtn) {
+        searchBtn.addEventListener('click', function() {
+          const query = searchInput.value.trim();
+          if (query) {
+            performSearch(query, currentSearchType);
+          }
+        });
+      }
+    }
+
+    async function performSearch(query, type) {
+      console.log('Performing search:', { query, type });
+
+      try {
+        showSearchLoading();
+
+        let results = [];
+
+        if (type === 'all') {
+          // Search all types
+          const [filesRes, questionsRes, imagesRes, notesRes, dictionaryRes, uploadsRes] = await Promise.allSettled([
+            apiFetch(`/files/search?q=${encodeURIComponent(query)}`).catch(() => []),
+            apiFetch(`/questions/search?q=${encodeURIComponent(query)}`).catch(() => []),
+            apiFetch(`/ai-images/search?q=${encodeURIComponent(query)}`).catch(() => []),
+            apiFetch(`/notes/search?q=${encodeURIComponent(query)}`).catch(() => []),
+            apiFetch(`/dictionary/search?q=${encodeURIComponent(query)}`).catch(() => []),
+            apiFetch(`/uploads/notes/search?q=${encodeURIComponent(query)}`).catch(() => [])
+          ]);
+
+          // Combine results
+          if (filesRes.status === 'fulfilled' && Array.isArray(filesRes.value)) {
+            results.push(...filesRes.value.map(item => ({ ...item, type: 'file' })));
+          }
+          if (questionsRes.status === 'fulfilled' && Array.isArray(questionsRes.value)) {
+            results.push(...questionsRes.value.map(item => ({ ...item, type: 'question' })));
+          }
+          if (imagesRes.status === 'fulfilled' && Array.isArray(imagesRes.value)) {
+            results.push(...imagesRes.value.map(item => ({ ...item, type: 'image' })));
+          }
+          if (notesRes.status === 'fulfilled' && Array.isArray(notesRes.value)) {
+            results.push(...notesRes.value.map(item => ({ ...item, type: 'note' })));
+          }
+          if (dictionaryRes.status === 'fulfilled' && Array.isArray(dictionaryRes.value)) {
+            results.push(...dictionaryRes.value.map(item => ({ ...item, type: 'dictionary' })));
+          }
+          if (uploadsRes.status === 'fulfilled' && Array.isArray(uploadsRes.value)) {
+            results.push(...uploadsRes.value.map(item => ({ ...item, type: 'upload' })));
+          }
+        } else {
+          // Search specific type
+          let endpoint = '';
+          switch (type) {
+            case 'files': endpoint = '/files/search'; break;
+            case 'questions': endpoint = '/questions/search'; break;
+            case 'images': endpoint = '/ai-images/search'; break;
+            case 'notes': endpoint = '/notes/search'; break;
+            case 'dictionary': endpoint = '/dictionary/search'; break;
+            case 'uploads': endpoint = '/uploads/notes/search'; break;
+          }
+
+          if (endpoint) {
+            try {
+              results = await apiFetch(`${endpoint}?q=${encodeURIComponent(query)}`);
+              if (Array.isArray(results)) {
+                results = results.map(item => ({ ...item, type }));
+              } else {
+                results = [];
+              }
+            } catch (endpointError) {
+              console.warn(`Search failed for ${type}:`, endpointError.message);
+              results = [];
+            }
+          }
+        }
+
+        displaySearchResults(results, query, type);
+      } catch (error) {
+        console.error('Search failed:', error);
+        console.error('Error details:', {
+          message: error.message,
+          stack: error.stack,
+          name: error.name
+        });
+
+        if (error.message.includes('authentication') || error.message.includes('token')) {
+          showAuthError();
+        } else {
+          showSearchError();
+        }
+      }
+    }
+
+    function showSearchLoading() {
+      const workspace = document.querySelector('.workspace');
+      let resultsContainer = document.querySelector('.search-results');
+
+      if (!resultsContainer) {
+        resultsContainer = document.createElement('div');
+        resultsContainer.className = 'search-results';
+        workspace.appendChild(resultsContainer);
+      }
+
+      resultsContainer.innerHTML = `
+        <div class="search-loading">
+          <i class="fa-solid fa-spinner"></i>
+          <p>Searching...</p>
+        </div>
+      `;
+    }
+
+    function displaySearchResults(results, query, type) {
+      const workspace = document.querySelector('.workspace');
+      let resultsContainer = document.querySelector('.search-results');
+
+      if (!resultsContainer) {
+        resultsContainer = document.createElement('div');
+        resultsContainer.className = 'search-results';
+        workspace.appendChild(resultsContainer);
+      }
+
+      if (results.length === 0) {
+        resultsContainer.innerHTML = `
+          <div class="search-no-results">
+            <i class="fa-solid fa-search"></i>
+            <h4>No results found</h4>
+            <p>No items match your search for "${query}"</p>
+          </div>
+        `;
+        return;
+      }
+
+      const typeLabel = type === 'all' ? 'All' : type.charAt(0).toUpperCase() + type.slice(1);
+
+      resultsContainer.innerHTML = `
+        <div class="search-results-header">
+          <h3>Search Results for "${query}" in ${typeLabel}</h3>
+        </div>
+        <div class="search-results-list">
+          ${results.map(result => createSearchResultItem(result)).join('')}
+        </div>
+      `;
+    }
+
+    function createSearchResultItem(result) {
+      const icons = {
+        file: 'fa-file',
+        question: 'fa-question',
+        image: 'fa-image',
+        note: 'fa-sticky-note',
+        dictionary: 'fa-book',
+        upload: 'fa-file-lines'
+      };
+
+      const titles = {
+        file: result.file_url || 'File',
+        question: result.question_text || 'Question',
+        image: result.prompt || 'AI Image',
+        note: result.title || 'Note',
+        dictionary: result.word || 'Word',
+        upload: result.title || 'Uploaded Note'
+      };
+
+      const metas = {
+        file: result.file_type || 'File',
+        question: result.options ? `${result.options.length} options` : 'Question',
+        image: result.style || 'AI Generated',
+        note: result.content ? result.content.substring(0, 100) + '...' : 'Note',
+        dictionary: result.meaning || 'Definition',
+        upload: result.ai_analysis ? result.ai_analysis.substring(0, 100) + '...' : 'Uploaded file'
+      };
+
+      return `
+        <div class="search-result-item" onclick="handleSearchResultClick('${result.type}', '${result.id}')">
+          <div class="search-result-icon">
+            <i class="fa-solid ${icons[result.type]}"></i>
+          </div>
+          <div class="search-result-content">
+            <div class="search-result-title">${titles[result.type]}</div>
+            <div class="search-result-meta">${metas[result.type]}</div>
+            <span class="search-result-type">${result.type}</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function handleSearchResultClick(type, id) {
+      // Navigate to the appropriate section based on type
+      const links = {
+        file: 'Upload Notes',
+        question: 'My Questions',
+        image: 'AI Images',
+        note: 'Notes Breakdown',
+        dictionary: 'My Dictionary',
+        upload: 'Upload Notes'
+      };
+
+      const linkText = links[type];
+      if (linkText) {
+        // Find and click the corresponding sidebar link
+        const sidebarLinks = document.querySelectorAll('.sidebar-nav ul li ul li a');
+        sidebarLinks.forEach(link => {
+          if (link.textContent.trim().replace('Beta', '').trim() === linkText) {
+            link.click();
+          }
+        });
+      }
+    }
+
+    function clearSearchResults() {
+      const resultsContainer = document.querySelector('.search-results');
+      if (resultsContainer) {
+        resultsContainer.remove();
+      }
+    }
+
+    function showSearchError() {
+      const workspace = document.querySelector('.workspace');
+      let resultsContainer = document.querySelector('.search-results');
+
+      if (!resultsContainer) {
+        resultsContainer = document.createElement('div');
+        resultsContainer.className = 'search-results';
+        workspace.appendChild(resultsContainer);
+      }
+
+      resultsContainer.innerHTML = `
+        <div class="search-no-results">
+          <i class="fa-solid fa-exclamation-triangle"></i>
+          <h4>Search failed</h4>
+          <p>Please try again later</p>
+        </div>
+      `;
+    }
+
+    function showAuthError() {
+      const workspace = document.querySelector('.workspace');
+      let resultsContainer = document.querySelector('.search-results');
+
+      if (!resultsContainer) {
+        resultsContainer = document.createElement('div');
+        resultsContainer.className = 'search-results';
+        workspace.appendChild(resultsContainer);
+      }
+
+      resultsContainer.innerHTML = `
+        <div class="search-no-results">
+          <i class="fa-solid fa-lock"></i>
+          <h4>Authentication Required</h4>
+          <p>Please log in to use the search functionality</p>
+          <button onclick="window.location.href='signin.html'" style="background: #14807a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-top: 10px;">
+            Go to Login
+          </button>
+        </div>
+      `;
+    }
 
     // MCQ Generator Enhanced Features
     const mcqGenerateBtn = document.querySelector(".mcq-generate-btn");
