@@ -185,6 +185,17 @@
                     <input type="text" id="plan" name="plan" readonly />
                   </div>
 
+                  <div class="form-group">
+                    <label for="accountType">Account Type</label>
+                    <div class="account-type-display">
+                      <span id="accountTypeBadge" class="account-type-badge">
+                        <i class="fa-solid fa-user-graduate"></i>
+                        <span id="accountTypeText">Student Account</span>
+                      </span>
+                      <small class="account-type-info">Your account type determines available features and pricing</small>
+                    </div>
+                  </div>
+
                   <div class="form-actions">
                     <button type="button" class="btn-secondary" onclick="cancelChanges()">Cancel</button>
                     <button type="submit" class="btn-primary">Save Changes</button>
@@ -333,9 +344,29 @@
           document.getElementById("name").value = user.name || "";
           document.getElementById("email").value = user.email || "";
           document.getElementById("plan").value = user.plan || "free";
+
+          // Display account type
+          updateAccountTypeDisplay(user.account_type || "student");
         } catch (err) {
           console.error("Failed to load user profile:", err);
           alert("Failed to load profile data");
+        }
+      }
+
+      // Update account type display
+      function updateAccountTypeDisplay(accountType) {
+        const badge = document.getElementById("accountTypeBadge");
+        const text = document.getElementById("accountTypeText");
+
+        if (badge && text) {
+          // Update icon and text based on account type
+          if (accountType === "student") {
+            badge.innerHTML = '<i class="fa-solid fa-user-graduate"></i><span id="accountTypeText">Student Account</span>';
+          } else if (accountType === "business") {
+            badge.innerHTML = '<i class="fa-solid fa-briefcase"></i><span id="accountTypeText">Business Account</span>';
+          } else {
+            badge.innerHTML = '<i class="fa-solid fa-user"></i><span id="accountTypeText">Account</span>';
+          }
         }
       }
 

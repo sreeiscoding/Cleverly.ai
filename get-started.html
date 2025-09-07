@@ -179,6 +179,7 @@
                 const fullname = document.getElementById("fullname").value.trim();
                 const email = document.getElementById("email").value.trim();
                 const password = document.getElementById("password").value;
+                const accountType = document.getElementById("accountType").value;
 
                 if (!fullname || !email || !password) {
                   errorElem.textContent = "Please fill in all required fields.";
@@ -189,7 +190,7 @@
                   const res = await fetch(`${API_BASE_URL}/auth/register`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name: fullname, email, password }),
+                    body: JSON.stringify({ name: fullname, email, password, account_type: accountType }),
                   });
 
                   if (!res.ok) {

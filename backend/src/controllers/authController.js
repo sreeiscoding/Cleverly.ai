@@ -6,9 +6,10 @@ exports.register = async (req, res, next) => {
     const schema = z.object({
       email: z.string().email(),
       password: z.string().min(6),
-      name: z.string().optional()
+      name: z.string().optional(),
+      account_type: z.string().default('student')
     });
-    const { email, password, name } = schema.parse(req.body);
+    const { email, password, name, account_type } = schema.parse(req.body);
 
     const { data, error } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -18,9 +19,9 @@ exports.register = async (req, res, next) => {
     });
     if (error) return res.status(400).json({ error: error.message });
 
-    await supabaseAdmin.from('users_app').insert({ id: data.id, email, name, plan: 'free' });
+    await supabaseAdmin.from('users_app').insert({ id: data.id, email, name, plan: 'free', account_type });
 
-    res.status(201).json({ message: 'User registered successfully', user: { id: data.id, email, name } });
+    res.status(201).json({ message: 'User registered successfully', user: { id: data.id, email, name, account_type } });
   } catch (err) {
     next(err);
   }
@@ -38,7 +39,24 @@ exports.login = async (req, res, next) => {
     const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
     if (error) return res.status(401).json({ error: error.message });
 
-    res.json({ token: data.session.access_token, user: data.user });
+    // Fetch user profile from users_app to get account_type
+    const { data: userProfile, error: profileError } = await supabaseAdmin
+      .from('users_app')
+      .select('account_type')
+      .eq('id', data.user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching user profile:', profileError);
+      // Continue without account_type if error
+    }
+
+    const userWithAccountType = {
+      ...data.user,
+      account_type: userProfile?.account_type || 'student'
+    };
+
+    res.json({ token: data.session.access_token, user: userWithAccountType });
   } catch (err) {
     next(err);
   }
@@ -65,7 +83,8 @@ exports.me = async (req, res, next) => {
             id: req.user.id,
             email: req.user.email,
             name: req.user.email.split('@')[0], // Use email prefix as name
-            plan: 'free'
+            plan: 'free',
+            account_type: 'student'
           })
           .select('*')
           .single();
@@ -82,7 +101,13 @@ exports.me = async (req, res, next) => {
       return res.status(404).json({ error: 'User profile not found', details: error.message });
     }
 
-    res.json({ user: data });
+    // Ensure account_type is included, defaulting to 'student' if not present
+    const userWithAccountType = {
+      ...data,
+      account_type: data.account_type || 'student'
+    };
+
+    res.json({ user: userWithAccountType });
   } catch (err) {
     console.error('Unexpected error in me endpoint:', err);
     next(err);
@@ -95,7 +120,8 @@ exports.updateProfile = async (req, res, next) => {
 
     const schema = z.object({
       name: z.string().min(1).optional(),
-      email: z.string().email().optional()
+      email: z.string().email().optional(),
+      account_type: z.string().optional()
     });
 
     const updateData = schema.parse(req.body);

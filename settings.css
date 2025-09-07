@@ -170,6 +170,50 @@
   cursor: not-allowed;
 }
 
+/* Account Type Display */
+.account-type-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.account-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: linear-gradient(135deg, #14807a 0%, #1a9d96 100%);
+  color: white;
+  max-width: 150px;
+  border-radius: 25px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  box-shadow: 0 2px 4px rgba(20, 128, 122, 0.2);
+  transition: all 0.2s ease;
+}
+
+.account-type-badge:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(20, 128, 122, 0.3);
+}
+
+.account-type-badge i {
+  font-size: 1rem;
+}
+
+.account-type-info {
+  color: var(--text-secondary);
+  font-size: 0.85rem;
+  margin: 0;
+  font-style: italic;
+}
+
+/* Dark mode adjustments for account type */
+[data-theme="dark"] .account-type-badge {
+  background: linear-gradient(135deg, #14807a 0%, #1a9d96 100%);
+  box-shadow: 0 2px 4px rgba(20, 128, 122, 0.4);
+}
+
 .form-actions {
   display: flex;
   gap: 1rem;

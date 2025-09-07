@@ -498,6 +498,22 @@
 
         // Initialize dark mode
         initializeDarkMode();
+
+        // Fetch and display user name
+        (async () => {
+          try {
+            const response = await apiFetch("/auth/me");
+            const userName = response.user.name || response.user.email.split('@')[0];
+            const plan = response.user.plan || 'free';
+            const accountType = response.user.account_type || 'student';
+            const accountTypeDisplay = accountType.charAt(0).toUpperCase() + accountType.slice(1);
+
+            document.getElementById("user-welcome").innerHTML = `Welcome, ${userName}<br><small style="color: var(--text-secondary); font-size: 0.8em;">${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan • ${accountTypeDisplay} Account</small>`;
+          } catch (err) {
+            console.error("Failed to fetch user:", err);
+            document.getElementById("user-welcome").innerHTML = `Welcome<br><small style="color: var(--text-secondary); font-size: 0.8em;">Free Plan • Student Account</small>`;
+          }
+        })();
       });
 
       // Enhanced Dark Mode Functionality
@@ -689,46 +705,8 @@
       </aside>
       <main class="main-content">
         <header class="topbar">
-          <div class="search-container">
-            <div class="search-dropdown">
-              <button class="search-type-btn" id="searchTypeBtn">
-                <i class="fa-solid fa-search"></i>
-                <span>All</span>
-                <i class="fa-solid fa-chevron-down"></i>
-              </button>
-              <div class="search-type-dropdown" id="searchTypeDropdown">
-                <div class="search-type-option active" data-type="all">
-                  <i class="fa-solid fa-search"></i>
-                  <span>All</span>
-                </div>
-                <div class="search-type-option" data-type="files">
-                  <i class="fa-solid fa-file"></i>
-                  <span>Files</span>
-                </div>
-                <div class="search-type-option" data-type="questions">
-                  <i class="fa-solid fa-question"></i>
-                  <span>Questions</span>
-                </div>
-                <div class="search-type-option" data-type="images">
-                  <i class="fa-solid fa-image"></i>
-                  <span>AI Images</span>
-                </div>
-                <div class="search-type-option" data-type="notes">
-                  <i class="fa-solid fa-sticky-note"></i>
-                  <span>Notes</span>
-                </div>
-                <div class="search-type-option" data-type="dictionary">
-                  <i class="fa-solid fa-book"></i>
-                  <span>Dictionary</span>
-                </div>
-              </div>
-            </div>
-            <input type="text" class="search-bar" id="searchInput" placeholder="Search..." />
-            <button class="search-btn" id="searchBtn">
-              <i class="fa-solid fa-search"></i>
-            </button>
-          </div>
-          <div style="display: flex; align-items: center;">
+          <div id="user-welcome" style="font-weight: 500; color: var(--text-primary);">Loading...</div>
+          <div style="display: flex; align-items: center; margin-left: auto;">
             <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
               <i class="fa-solid fa-sun sun-icon"></i>
               <i class="fa-solid fa-moon moon-icon"></i>

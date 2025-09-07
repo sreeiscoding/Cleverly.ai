@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users_app (
   name TEXT,
   email TEXT UNIQUE,
   plan TEXT DEFAULT 'free',
+  account_type TEXT DEFAULT 'student',
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE users_app ENABLE ROW LEVEL SECURITY;

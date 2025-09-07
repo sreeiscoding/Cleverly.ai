@@ -110,6 +110,24 @@
       }
     });
 
+    // Update account type badge
+    const updateAccountBadge = () => {
+      const accountType = localStorage.getItem('accountType') || 'student';
+      const badge = document.querySelector('.student-badge .badge');
+      if (badge) {
+        if (accountType === 'student') {
+          badge.textContent = '🎓 Student Account';
+        } else if (accountType === 'business') {
+          badge.textContent = '💼 Business Account';
+        } else {
+          badge.textContent = '👤 Account';
+        }
+      }
+    };
+
+    // Update badge on page load
+    updateAccountBadge();
+
     // Handle login form submit
     document.getElementById('login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -139,6 +157,7 @@
 
         const data = await res.json();
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('accountType', data.user.account_type || 'student');
         // Redirect to dashboard on successful login
         window.location.href = 'dashboard.html';
       } catch (err) {
