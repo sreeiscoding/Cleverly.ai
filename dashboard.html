@@ -2223,6 +2223,161 @@
     // Global instance
     const nbFileManager = new NbFileManager();
 
+    // Initialize drag and drop functionality for file upload
+    function initializeDragDrop() {
+      const uploadBox = document.querySelector('.nb-upload-box');
+      const fileInput = document.getElementById('nb-file');
+      let hasFile = false; // Track if any file is currently uploaded
+
+      // Ensure clean initial state
+      if (fileInput) {
+        fileInput.value = '';
+      }
+
+      if (!uploadBox || !fileInput) return;
+
+      // Function to show restriction popup
+      function showRestrictionPopup(message) {
+        const modal = document.createElement('div');
+        modal.className = 'ai-result-modal';
+        modal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content" style="max-width: 400px;">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            <h3 style="color: #14807a; margin-bottom: 16px;">Upload Restriction</h3>
+            <p style="margin-bottom: 20px; line-height: 1.5;">${message}</p>
+            <div style="text-align: center;">
+              <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #14807a; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer;">OK</button>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+      }
+
+      // Function to update UI with file information
+      function updateFileDisplay(files) {
+        const uploadContent = document.querySelector('.nb-upload-content');
+        if (!uploadContent) return;
+
+        if (files && files.length > 0) {
+          const file = files[0]; // Show first file info
+          const fileName = file.name;
+          const fileType = getFileTypeFromName(fileName);
+          const iconClass = getFileIconClass(fileType);
+
+          hasFile = true; // Mark that we have a file
+
+          uploadContent.innerHTML = `
+            <i class="fa-solid ${iconClass} nb-upload-icon"></i>
+            <h3>${fileName}</h3>
+            <p class="nb-upload-text">${fileType.toUpperCase()} File</p>
+            <button class="nb-remove-file" onclick="removeCurrentFile()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;">
+              <i class="fa-solid fa-times"></i> Remove File
+            </button>
+            <input type="file" id="nb-file" class="nb-file-input" accept=".pdf,.docx,.txt">
+          `;
+        } else {
+          // Reset to original state
+          hasFile = false;
+          uploadContent.innerHTML = `
+            <i class="fa-solid fa-cloud-arrow-up nb-upload-icon"></i>
+            <h3>Drag & Drop Files Here</h3>
+            <p class="nb-upload-text">or click to browse</p>
+            <input type="file" id="nb-file" class="nb-file-input" accept=".pdf,.docx,.txt">
+          `;
+        }
+      }
+
+      // Helper functions for file type detection
+      function getFileTypeFromName(filename) {
+        if (!filename) return 'document';
+        const ext = filename.split('.').pop().toLowerCase();
+        const typeMap = {
+          'pdf': 'pdf',
+          'docx': 'docx',
+          'doc': 'docx',
+          'txt': 'txt'
+        };
+        return typeMap[ext] || 'document';
+      }
+
+      function getFileIconClass(type) {
+        const iconMap = {
+          'pdf': 'fa-file-pdf',
+          'docx': 'fa-file-word',
+          'doc': 'fa-file-word',
+          'txt': 'fa-file-lines',
+          'document': 'fa-file-lines'
+        };
+        return iconMap[type] || 'fa-file-lines';
+      }
+
+      uploadBox.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      uploadBox.addEventListener('dragleave', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      });
+
+      uploadBox.addEventListener('drop', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          // Check if any file is already uploaded
+          if (hasFile) {
+            showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
+            return;
+          }
+
+          // Set files to input element
+          fileInput.files = files;
+
+          // Update UI to show file information
+          updateFileDisplay(files);
+
+          // Note: We don't manually trigger change event here since we're handling the UI update directly
+          // The backend upload will be handled by the existing change event listener
+        }
+      });
+
+      // Function to remove current file
+      window.removeCurrentFile = function() {
+        const fileInput = document.getElementById('nb-file');
+        if (fileInput) {
+          fileInput.value = '';
+          hasFile = false;
+          updateFileDisplay([]);
+        }
+      };
+
+      // Also update UI when files are selected via click
+      fileInput.addEventListener('change', (e) => {
+        const files = e.target.files;
+
+        // If no files selected (input was cleared), reset UI
+        if (files.length === 0) {
+          updateFileDisplay([]);
+          return;
+        }
+
+        // Check if any file is already uploaded
+        if (hasFile) {
+          showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
+          // Clear the file input to prevent the change
+          e.target.value = '';
+          return;
+        }
+
+        // Update UI to show file information
+        updateFileDisplay(files);
+      });
+    }
+
     // Notes Breakdown Quick Actions
     document.addEventListener("DOMContentLoaded", function () {
       // Initialize tab functionality when Notes Breakdown section is loaded
@@ -2275,6 +2430,7 @@
           // Wait for the content to be loaded
           setTimeout(() => {
             initializeNbTabs();
+            initializeDragDrop(); // Initialize drag and drop functionality
             // Load real data from database
             loadRecentUploads();
             // Initialize other UI components
@@ -2532,14 +2688,17 @@
       ".upload-notes .file-list"
     );
 
+    // Modified to work with single file system and not interfere with UI updates
     fileInput.addEventListener("change", async (e) => {
       const files = fileInput.files;
       if (files.length === 0) return;
 
-      for (let i = 0; i < files.length; i++) {
-        await uploadFile(files[i]);
-      }
-      fileInput.value = "";
+      // Only handle the first file (single file mode)
+      const file = files[0];
+      await uploadFile(file);
+
+      // Don't clear the input here - let the UI update handle it
+      // The UI will be updated by our drag/drop change handler
       await loadUploadedNotes();
     });
 
