@@ -301,6 +301,24 @@
         border-left: 4px solid #14807a;
       }
 
+      /* Empty state styles */
+      .nb-empty-state {
+        text-align: center;
+        padding: 40px 20px;
+        color: #666;
+      }
+
+      .nb-empty-state h4 {
+        margin: 16px 0 8px 0;
+        font-size: 1.1rem;
+        font-weight: 500;
+      }
+
+      .nb-empty-state p {
+        margin: 0;
+        font-size: 0.9rem;
+      }
+
       /* Processing animation */
       @keyframes processing {
         0% {
@@ -469,10 +487,26 @@
         overflow-y: auto;
       }
 
-      .nb-recent-files:empty::before,
-      .nb-favorites-list:empty::before,
+      .nb-recent-files:empty::before {
+        content: "No recent files here";
+        display: block;
+        text-align: center;
+        color: #666;
+        padding: 20px;
+        font-style: italic;
+      }
+
+      .nb-favorites-list:empty::before {
+        content: "No favorites yet";
+        display: block;
+        text-align: center;
+        color: #666;
+        padding: 20px;
+        font-style: italic;
+      }
+
       .nb-library-content:empty::before {
-        content: "No items yet";
+        content: "No folders yet";
         display: block;
         text-align: center;
         color: #666;
@@ -951,26 +985,7 @@
                   <!-- Recent Files Tab -->
                   <div id="nb-recent" class="nb-tab-panel active">
                     <div class="nb-recent-files">
-                      <div class="nb-file-row">
-                        <i class="fa-solid fa-file-pdf"></i>
-                        <div class="nb-file-info">
-                          <span class="nb-file-name">Chapter_5_Notes.pdf</span>
-                          <span class="nb-file-date">2 mins ago</span>
-                        </div>
-                        <button class="nb-file-action" title="Add to favorites">
-                          <i class="fa-regular fa-star"></i>
-                        </button>
-                      </div>
-                      <div class="nb-file-row">
-                        <i class="fa-solid fa-file-word"></i>
-                        <div class="nb-file-info">
-                          <span class="nb-file-name">Research_Paper.docx</span>
-                          <span class="nb-file-date">1 hour ago</span>
-                        </div>
-                        <button class="nb-file-action" title="Add to favorites">
-                          <i class="fa-regular fa-star"></i>
-                        </button>
-                      </div>
+                      <!-- Recent files will be loaded dynamically -->
                     </div>
                   </div>
 
@@ -1065,41 +1080,12 @@
                 </div>
               </div>
 
-              <div class="nb-file-item">
-                <div class="nb-file-info">
-                  <span class="nb-file-icon"><i class="fa-solid fa-file-pdf"></i></span>
-                  <div class="nb-file-details">
-                    <span class="nb-file-name">Chapter_5_Notes.pdf</span>
-                    <span class="nb-file-meta">PDF • 2.4 MB • Just now</span>
-                  </div>
-                </div>
-                <div class="nb-file-status">
-                  <div class="nb-progress">
-                    <div class="nb-progress-bar" style="width:40%"></div>
-                  </div>
-                  <span class="nb-status-text">Processing...</span>
-                </div>
-                <div class="nb-file-actions">
-                  <button class="nb-action" title="Stop"><i class="fa-solid fa-stop"></i></button>
-                  <button class="nb-action" title="Delete"><i class="fa-solid fa-trash"></i></button>
-                </div>
-              </div>
-
-              <div class="nb-file-item nb-item-complete">
-                <div class="nb-file-info">
-                  <span class="nb-file-icon"><i class="fa-solid fa-file-word"></i></span>
-                  <div class="nb-file-details">
-                    <span class="nb-file-name">Research_Paper.docx</span>
-                    <span class="nb-file-meta">Word • 1.8 MB • 2 mins ago</span>
-                  </div>
-                </div>
-                <div class="nb-file-status">
-                  <span class="nb-status-text nb-success">Completed</span>
-                </div>
-                <div class="nb-file-actions">
-                  <button class="nb-action" title="Download"><i class="fa-solid fa-download"></i></button>
-                  <button class="nb-action" title="Share"><i class="fa-solid fa-share"></i></button>
-                  <button class="nb-action" title="Delete"><i class="fa-solid fa-trash"></i></button>
+              <!-- File items will be dynamically loaded here -->
+              <div class="nb-file-items-container">
+                <div class="nb-empty-state">
+                  <i class="fa-solid fa-cloud-upload" style="font-size: 48px; color: #14807a; margin-bottom: 16px;"></i>
+                  <h4 style="color: #14807a; margin-bottom: 8px;">No Files Uploaded Yet</h4>
+                  <p style="color: #666; margin: 0;">Uploaded files will show here</p>
                 </div>
               </div>
             </div>
@@ -1889,17 +1875,17 @@
       // Add file to recent files
       addRecentFile(fileData) {
         const file = {
-          id: Date.now().toString(),
+          id: fileData.id || Date.now().toString(),
           name: fileData.name,
           type: fileData.type || 'document',
           size: fileData.size || 0,
-          timestamp: new Date().toISOString(),
+          timestamp: fileData.timestamp || new Date().toISOString(),
           content: fileData.content || '',
           source: fileData.source || 'upload'
         };
 
         // Remove if already exists
-        this.recentFiles = this.recentFiles.filter(f => f.name !== file.name);
+        this.recentFiles = this.recentFiles.filter(f => f.id !== file.id);
 
         // Add to beginning
         this.recentFiles.unshift(file);
@@ -1969,6 +1955,11 @@
       updateRecentFilesUI() {
         const container = document.querySelector('#nb-recent .nb-recent-files');
         if (!container) return;
+
+        if (this.recentFiles.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No recent uploads found. Upload some files to get started!</p>';
+          return;
+        }
 
         container.innerHTML = this.recentFiles.map(file => `
           <div class="nb-file-row" data-file-id="${file.id}">
@@ -2173,6 +2164,62 @@
       }
     }
 
+    // Load recent uploads from database
+    async function loadRecentUploads() {
+      try {
+        const uploads = await apiFetch('/upload/notes');
+        const recentFiles = uploads.slice(0, 20).map(upload => ({
+          id: upload.id,
+          name: upload.title,
+          type: getFileTypeFromName(upload.title),
+          size: 0, // Size not stored in upload_notes table
+          timestamp: upload.created_at,
+          content: upload.ai_analysis || '',
+          source: 'upload'
+        }));
+
+        // Update NbFileManager with real data
+        nbFileManager.recentFiles = recentFiles;
+        nbFileManager.saveData();
+        nbFileManager.updateRecentFilesUI();
+      } catch (err) {
+        console.error('Failed to load recent uploads:', err);
+        // Show empty state
+        showEmptyState();
+      }
+    }
+
+    // Show empty state when no files are uploaded
+    function showEmptyState() {
+      const container = document.querySelector('#nb-recent .nb-recent-files');
+      if (container) {
+        container.innerHTML = `
+          <div class="nb-empty-state">
+            <i class="fa-solid fa-cloud-upload" style="font-size: 48px; color: #14807a; margin-bottom: 16px;"></i>
+            <h4 style="color: #14807a; margin-bottom: 8px;">No Recent Files Here</h4>
+            <p style="color: #666; margin: 0;">Upload some files to get started</p>
+          </div>
+        `;
+      }
+    }
+
+    // Helper function to determine file type from filename
+    function getFileTypeFromName(filename) {
+      if (!filename) return 'document';
+      const ext = filename.split('.').pop().toLowerCase();
+      const typeMap = {
+        'pdf': 'pdf',
+        'docx': 'docx',
+        'doc': 'docx',
+        'txt': 'txt',
+        'pptx': 'pptx',
+        'ppt': 'pptx',
+        'xlsx': 'xlsx',
+        'xls': 'xlsx'
+      };
+      return typeMap[ext] || 'document';
+    }
+
     // Global instance
     const nbFileManager = new NbFileManager();
 
@@ -2228,12 +2275,199 @@
           // Wait for the content to be loaded
           setTimeout(() => {
             initializeNbTabs();
-            // Initialize UI
-            nbFileManager.updateRecentFilesUI();
+            // Load real data from database
+            loadRecentUploads();
+            // Initialize other UI components
             nbFileManager.updateFavoritesUI();
             nbFileManager.updateLibraryUI();
+            // Initialize sort and filter functionality
+            initializeSortAndFilter();
           }, 300);
         });
+      }
+
+      // Sort and Filter functionality for Recent Uploads
+      function initializeSortAndFilter() {
+        const sortBtn = document.querySelector('.nb-list-actions .nb-list-action:first-child');
+        const filterBtn = document.querySelector('.nb-list-actions .nb-list-action:last-child');
+
+        if (sortBtn) {
+          sortBtn.addEventListener('click', () => {
+            showSortOptions();
+          });
+        }
+
+        if (filterBtn) {
+          filterBtn.addEventListener('click', () => {
+            showFilterOptions();
+          });
+        }
+      }
+
+      function showSortOptions() {
+        // Create sort options modal
+        const modal = document.createElement('div');
+        modal.className = 'ai-result-modal';
+        modal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content" style="max-width: 300px;">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            <h3 style="color: #14807a; margin-bottom: 20px;">Sort Files</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button class="sort-option" data-sort="name-asc" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Name (A-Z)</button>
+              <button class="sort-option" data-sort="name-desc" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Name (Z-A)</button>
+              <button class="sort-option" data-sort="date-new" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Newest First</button>
+              <button class="sort-option" data-sort="date-old" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Oldest First</button>
+              <button class="sort-option" data-sort="size-large" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Largest First</button>
+              <button class="sort-option" data-sort="size-small" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Smallest First</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add click handlers for sort options
+        modal.querySelectorAll('.sort-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const sortType = btn.dataset.sort;
+            sortRecentFiles(sortType);
+            modal.remove();
+          });
+        });
+      }
+
+      function showFilterOptions() {
+        // Create filter options modal
+        const modal = document.createElement('div');
+        modal.className = 'ai-result-modal';
+        modal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content" style="max-width: 300px;">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            <h3 style="color: #14807a; margin-bottom: 20px;">Filter Files</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <button class="filter-option" data-filter="all" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">All Files</button>
+              <button class="filter-option" data-filter="pdf" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">PDF Files</button>
+              <button class="filter-option" data-filter="word" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Word Documents</button>
+              <button class="filter-option" data-filter="text" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Text Files</button>
+              <button class="filter-option" data-filter="powerpoint" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">PowerPoint</button>
+              <button class="filter-option" data-filter="excel" style="padding: 10px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Excel Files</button>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add click handlers for filter options
+        modal.querySelectorAll('.filter-option').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const filterType = btn.dataset.filter;
+            filterRecentFiles(filterType);
+            modal.remove();
+          });
+        });
+      }
+
+      function sortRecentFiles(sortType) {
+        if (!nbFileManager.recentFiles || nbFileManager.recentFiles.length === 0) return;
+
+        let sortedFiles = [...nbFileManager.recentFiles];
+
+        switch (sortType) {
+          case 'name-asc':
+            sortedFiles.sort((a, b) => a.name.localeCompare(b.name));
+            break;
+          case 'name-desc':
+            sortedFiles.sort((a, b) => b.name.localeCompare(a.name));
+            break;
+          case 'date-new':
+            sortedFiles.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+            break;
+          case 'date-old':
+            sortedFiles.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            break;
+          case 'size-large':
+            sortedFiles.sort((a, b) => (b.size || 0) - (a.size || 0));
+            break;
+          case 'size-small':
+            sortedFiles.sort((a, b) => (a.size || 0) - (b.size || 0));
+            break;
+        }
+
+        nbFileManager.recentFiles = sortedFiles;
+        nbFileManager.updateRecentFilesUI();
+
+        // Update the container with sorted files
+        const container = document.querySelector('#nb-recent .nb-recent-files');
+        if (container && sortedFiles.length > 0) {
+          container.innerHTML = sortedFiles.map(file => `
+            <div class="nb-file-row" data-file-id="${file.id}">
+              <i class="fa-solid fa-file-${nbFileManager.getFileIcon(file.type)}"></i>
+              <div class="nb-file-info">
+                <span class="nb-file-name">${file.name}</span>
+                <span class="nb-file-date">${nbFileManager.formatDate(file.timestamp)}</span>
+              </div>
+              <button class="nb-file-action ${nbFileManager.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="Add to favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
+                <i class="fa-${nbFileManager.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
+              </button>
+            </div>
+          `).join('');
+        }
+      }
+
+      function filterRecentFiles(filterType) {
+        if (!nbFileManager.recentFiles || nbFileManager.recentFiles.length === 0) return;
+
+        let filteredFiles;
+
+        if (filterType === 'all') {
+          filteredFiles = [...nbFileManager.recentFiles];
+        } else {
+          filteredFiles = nbFileManager.recentFiles.filter(file => {
+            const fileType = file.type.toLowerCase();
+            switch (filterType) {
+              case 'pdf':
+                return fileType === 'pdf';
+              case 'word':
+                return fileType === 'docx' || fileType === 'doc';
+              case 'text':
+                return fileType === 'txt' || fileType === 'text';
+              case 'powerpoint':
+                return fileType === 'pptx' || fileType === 'ppt';
+              case 'excel':
+                return fileType === 'xlsx' || fileType === 'xls';
+              default:
+                return true;
+            }
+          });
+        }
+
+        // Temporarily update UI with filtered results
+        const container = document.querySelector('#nb-recent .nb-recent-files');
+        if (container) {
+          if (filteredFiles.length === 0) {
+            container.innerHTML = `
+              <div class="nb-empty-state">
+                <i class="fa-solid fa-filter" style="font-size: 48px; color: #14807a; margin-bottom: 16px;"></i>
+                <h4 style="color: #14807a; margin-bottom: 8px;">No Files Match Filter</h4>
+                <p style="color: #666; margin: 0;">Try selecting a different filter option</p>
+              </div>
+            `;
+          } else {
+            container.innerHTML = filteredFiles.map(file => `
+              <div class="nb-file-row" data-file-id="${file.id}">
+                <i class="fa-solid fa-file-${nbFileManager.getFileIcon(file.type)}"></i>
+                <div class="nb-file-info">
+                  <span class="nb-file-name">${file.name}</span>
+                  <span class="nb-file-date">${nbFileManager.formatDate(file.timestamp)}</span>
+                </div>
+                <button class="nb-file-action ${nbFileManager.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="Add to favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
+                  <i class="fa-${nbFileManager.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
+                </button>
+              </div>
+            `).join('');
+          }
+        }
       }
     });
     // AI Image Style Switch Functionality
@@ -2435,10 +2669,7 @@
           this.activeUploads.delete(uploadId);
 
           // Remove from UI
-          const fileElement = document.querySelector(`[data-upload-id="${uploadId}"]`);
-          if (fileElement) {
-            fileElement.remove();
-          }
+          removeFileFromUI(uploadId);
         } catch (err) {
           console.error('Delete upload failed:', err);
           alert('Delete failed: ' + err.message);
@@ -2464,15 +2695,111 @@
         const fileElement = document.querySelector(`[data-upload-id="${uploadId}"]`);
         if (fileElement) {
           const statusText = fileElement.querySelector('.nb-status-text');
+          const pauseBtn = fileElement.querySelector('button[title="Pause"]');
+          const resumeBtn = fileElement.querySelector('button[title="Resume"]');
 
           if (statusText) {
             statusText.textContent = message;
             statusText.className = `nb-status-text ${status === 'completed' ? 'nb-success' : status === 'failed' ? 'nb-error' : ''}`;
           }
 
+          // Toggle pause/resume buttons
+          if (pauseBtn && resumeBtn) {
+            if (status === 'paused') {
+              pauseBtn.style.display = 'none';
+              resumeBtn.style.display = 'inline-flex';
+            } else if (status === 'uploading') {
+              pauseBtn.style.display = 'inline-flex';
+              resumeBtn.style.display = 'none';
+            } else if (status === 'completed' || status === 'failed') {
+              pauseBtn.style.display = 'none';
+              resumeBtn.style.display = 'none';
+            }
+          }
+
           if (status === 'completed') {
             fileElement.classList.add('nb-item-complete');
+
+            // Update action buttons for completed upload
+            const actionsContainer = fileElement.querySelector('.nb-file-actions');
+            if (actionsContainer) {
+              actionsContainer.innerHTML = `
+                <button class="nb-action" title="Download" onclick="downloadFile('${uploadId}')">
+                  <i class="fa-solid fa-download"></i>
+                </button>
+                <button class="nb-action" title="Share" onclick="shareFile('${uploadId}')">
+                  <i class="fa-solid fa-share"></i>
+                </button>
+                <button class="nb-action" title="Delete" onclick="chunkedUploader.deleteUpload('${uploadId}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              `;
+            }
+
+            // Add to recent files
+            const uploadData = this.activeUploads.get(uploadId);
+            if (uploadData && window.nbFileManager) {
+              window.nbFileManager.addRecentFile({
+                id: uploadId,
+                name: uploadData.file.name,
+                type: getFileTypeFromName(uploadData.file.name),
+                size: uploadData.file.size,
+                timestamp: new Date().toISOString(),
+                content: '',
+                source: 'upload'
+              });
+            }
           }
+        }
+      }
+    }
+
+    // Download file function
+    async function downloadFile(uploadId) {
+      try {
+        // Create download link to backend endpoint
+        const link = document.createElement('a');
+        link.href = `${API_BASE_URL}/upload/${uploadId}/download`;
+        link.style.display = 'none';
+
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        console.error('Download failed:', err);
+        alert('Download failed: ' + err.message);
+      }
+    }
+
+    // Share file function
+    async function shareFile(uploadId) {
+      try {
+        // Get file info
+        const uploadInfo = await apiFetch(`/upload/${uploadId}/progress`);
+        const fileUrl = `${window.location.origin}/upload/${uploadId}/download`;
+        const fileName = uploadInfo.fileName;
+
+        // Try native share API first
+        if (navigator.share) {
+          await navigator.share({
+            title: `Shared File: ${fileName}`,
+            text: `Check out this file: ${fileName}`,
+            url: fileUrl
+          });
+        } else {
+          // Fallback: copy link to clipboard
+          await navigator.clipboard.writeText(fileUrl);
+          alert(`File link copied to clipboard!\n\n${fileUrl}`);
+        }
+      } catch (err) {
+        console.error('Share failed:', err);
+        // Fallback for older browsers
+        try {
+          const fileUrl = `${window.location.origin}/upload/${uploadId}/download`;
+          await navigator.clipboard.writeText(fileUrl);
+          alert(`File link copied to clipboard!\n\n${fileUrl}`);
+        } catch (clipboardErr) {
+          alert('Sharing not supported on this browser. Please copy the URL manually.');
         }
       }
     }
@@ -2480,30 +2807,52 @@
     // Initialize uploader
     const chunkedUploader = new ChunkedUploader();
 
+    // Helper functions for file type recognition
+    function getFileIcon(mimeType) {
+      if (!mimeType) return 'lines';
+
+      if (mimeType.includes('pdf')) return 'pdf';
+      if (mimeType.includes('word') || mimeType.includes('document')) return 'word';
+      if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'powerpoint';
+      if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'excel';
+      if (mimeType.includes('image')) return 'image';
+      if (mimeType.includes('text')) return 'lines';
+      if (mimeType.includes('zip') || mimeType.includes('rar')) return 'archive';
+
+      return 'lines';
+    }
+
+    function getFileTypeLabel(mimeType) {
+      if (!mimeType) return 'FILE';
+
+      if (mimeType.includes('pdf')) return 'PDF';
+      if (mimeType.includes('word') || mimeType.includes('document')) return 'Word';
+      if (mimeType.includes('powerpoint') || mimeType.includes('presentation')) return 'PowerPoint';
+      if (mimeType.includes('excel') || mimeType.includes('spreadsheet')) return 'Excel';
+      if (mimeType.includes('image')) return 'Image';
+      if (mimeType.includes('text')) return 'Text';
+      if (mimeType.includes('zip') || mimeType.includes('rar')) return 'Archive';
+
+      return mimeType.split('/')[1]?.toUpperCase() || 'FILE';
+    }
+
     // Upload file using chunked uploader
     async function uploadFile(file) {
       await chunkedUploader.uploadFile(file);
     }
 
-    function addFileToUI(file) {
+    function addFileToUI(file, uploadId) {
       if (!fileListContainer) return;
       const item = document.createElement("div");
       item.className = "nb-file-item";
       item.dataset.fileName = file.name;
+      item.dataset.uploadId = uploadId;
       item.innerHTML = `
       <div class="nb-file-info">
-        <span class="nb-file-icon"><i class="fa-solid fa-file-${
-          file.type.includes("pdf")
-            ? "pdf"
-            : file.type.includes("word") || file.name.endsWith(".docx")
-            ? "word"
-            : "lines"
-        }"></i></span>
+        <span class="nb-file-icon"><i class="fa-solid fa-file-${getFileIcon(file.type)}"></i></span>
         <div class="nb-file-details">
           <span class="nb-file-name">${file.name}</span>
-          <span class="nb-file-meta">${(
-            file.type || "file"
-          ).toUpperCase()} • ${formatFileSize(file.size)} • Just now</span>
+          <span class="nb-file-meta">${getFileTypeLabel(file.type)} • ${formatFileSize(file.size)} • Just now</span>
         </div>
       </div>
       <div class="nb-file-status">
@@ -2513,26 +2862,24 @@
         <span class="nb-status-text">Uploading...</span>
       </div>
       <div class="nb-file-actions">
-        <button class="nb-action" title="Stop" onclick="stopFakeProgress('${
-          file.name
-        }')">
-          <i class="fa-solid fa-stop"></i>
+        <button class="nb-action" title="Pause" onclick="chunkedUploader.pauseUpload('${uploadId}')">
+          <i class="fa-solid fa-pause"></i>
         </button>
-        <button class="nb-action" title="Delete" onclick="removeFileFromUI('${
-          file.name
-        }')">
+        <button class="nb-action" title="Resume" onclick="chunkedUploader.resumeUpload('${uploadId}')" style="display: none;">
+          <i class="fa-solid fa-play"></i>
+        </button>
+        <button class="nb-action" title="Delete" onclick="chunkedUploader.deleteUpload('${uploadId}')">
           <i class="fa-solid fa-trash"></i>
         </button>
       </div>
     `;
       fileListContainer.appendChild(item);
-      fakeProgress[file.name] = 0;
     }
 
-    function removeFileFromUI(fileName) {
+    function removeFileFromUI(uploadId) {
       if (!fileListContainer) return;
       const elem = fileListContainer.querySelector(
-        `[data-file-name="${fileName}"]`
+        `[data-upload-id="${uploadId}"]`
       );
       if (elem) elem.remove();
     }
@@ -2610,10 +2957,11 @@
             <span class="nb-status-text nb-success">Processed</span>
           </div>
           <div class="nb-file-actions">
-            <button class="nb-action" title="Download" onclick="window.open('${
-              note.file_id
-            }', '_blank')">
+            <button class="nb-action" title="Download" onclick="downloadFile('${note.id}')">
               <i class="fa-solid fa-download"></i>
+            </button>
+            <button class="nb-action" title="Share" onclick="shareFile('${note.id}')">
+              <i class="fa-solid fa-share"></i>
             </button>
             <button class="nb-action" title="Delete" onclick="deleteNote('${
               note.id

@@ -15,6 +15,7 @@ router.put('/:uploadId/pause', uploadsController.pauseUpload);
 router.put('/:uploadId/resume', uploadsController.resumeUpload);
 router.delete('/:uploadId', uploadsController.deleteUpload);
 router.get('/:uploadId/progress', uploadsController.getUploadProgress);
+router.get('/:uploadId/download', uploadsController.downloadFile);
 router.get('/user/uploads', uploadsController.getUserUploads);
 
 // Existing endpoints

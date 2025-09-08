@@ -1,4 +1,4 @@
--- Enable pgcrypto extension
+e-- Enable pgcrypto extension
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- Enable RLS
@@ -115,6 +115,26 @@ CREATE TABLE IF NOT EXISTS files (
 );
 ALTER TABLE files ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "User access files" ON files
+  FOR ALL USING (user_id = auth.uid());
+
+-- file_uploads (for chunked uploads)
+CREATE TABLE IF NOT EXISTS file_uploads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  file_name TEXT,
+  file_size BIGINT,
+  file_type TEXT,
+  status TEXT DEFAULT 'uploading',
+  uploaded_size BIGINT DEFAULT 0,
+  progress INT DEFAULT 0,
+  temp_path TEXT,
+  error_message TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  completed_at TIMESTAMPTZ
+);
+ALTER TABLE file_uploads ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "User access file_uploads" ON file_uploads
   FOR ALL USING (user_id = auth.uid());
 
 -- payments

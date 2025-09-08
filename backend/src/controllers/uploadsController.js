@@ -459,3 +459,48 @@ exports.getUserUploads = async (req, res, next) => {
     next(err);
   }
 };
+
+// Download file
+exports.downloadFile = async (req, res, next) => {
+  try {
+    const { uploadId } = req.params;
+    const userId = req.user.id;
+
+    // Get upload record
+    const { data: uploadRecord, error: fetchError } = await supabaseAdmin
+      .from('file_uploads')
+      .select('*')
+      .eq('id', uploadId)
+      .eq('user_id', userId)
+      .eq('status', 'completed')
+      .single();
+
+    if (fetchError || !uploadRecord) {
+      return res.status(404).json({ error: 'File not found or not completed' });
+    }
+
+    // Get the file from Supabase storage
+    const { data: fileData, error: downloadError } = await supabaseAdmin.storage
+      .from('files')
+      .download(`${userId}/upload_notes/${uploadRecord.file_name}`);
+
+    if (downloadError) {
+      return res.status(500).json({ error: 'Failed to download file from storage' });
+    }
+
+    // Set headers for file download
+    const fileName = uploadRecord.file_name;
+    const mimeType = uploadRecord.file_type || 'application/octet-stream';
+
+    res.setHeader('Content-Type', mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    res.setHeader('Content-Length', fileData.size);
+
+    // Send the file
+    res.send(Buffer.from(await fileData.arrayBuffer()));
+
+  } catch (err) {
+    console.error('Download error:', err);
+    next(err);
+  }
+};
