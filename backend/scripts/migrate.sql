@@ -84,7 +84,7 @@ CREATE POLICY "User access my_questions" ON my_questions
 CREATE TABLE IF NOT EXISTS upload_notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
-  file_id UUID,
+  file_id TEXT,
   title TEXT,
   ai_analysis JSONB,
   created_at TIMESTAMPTZ DEFAULT NOW()

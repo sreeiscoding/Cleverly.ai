@@ -414,6 +414,118 @@
         font-size: 1.2rem;
       }
 
+      /* Custom Notification System */
+      .custom-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid #14807a;
+        z-index: 10000;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .custom-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .custom-notification.error {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+      }
+
+      .custom-notification.success {
+        border-left-color: #28a745;
+        background: #f8fff8;
+      }
+
+      .custom-notification.warning {
+        border-left-color: #ffc107;
+        background: #fffbf0;
+      }
+
+      .custom-notification.info {
+        border-left-color: #17a2b8;
+        background: #f0f8ff;
+      }
+
+      .custom-notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .custom-notification-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #333;
+        margin: 0;
+      }
+
+      .custom-notification-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: #666;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .custom-notification-message {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      /* Upload File Button Styles */
+      .upload-file-btn {
+        background: #14807a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+        margin-left: 12px;
+      }
+
+      .upload-file-btn:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(20, 128, 122, 0.3);
+      }
+
+      .upload-file-btn:active {
+        transform: translateY(0);
+      }
+
+      .upload-file-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+      }
+
       .processing-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -610,6 +722,16 @@
             document.getElementById("user-welcome").innerHTML = `Welcome, ${userName}<br><small style="color: var(--text-secondary); font-size: 0.8em;">${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan • ${accountTypeDisplay} Account</small>`;
           } catch (err) {
             console.error("Failed to fetch user:", err);
+
+            let errorMessage = "Failed to load user information. Using default settings.";
+            if (err.message.includes('fetch') || err.message.includes('network')) {
+              errorMessage = "Network connection issue. Please check your internet connection.";
+            } else if (err.message.includes('No authentication token')) {
+              errorMessage = "Session expired. Please refresh the page and log in again.";
+            }
+
+            handleError(new Error(errorMessage), 'User Info Fetch');
+
             document.getElementById("user-welcome").innerHTML = `Welcome<br><small style="color: var(--text-secondary); font-size: 0.8em;">Free Plan • Student Account</small>`;
           }
         })();
@@ -936,6 +1058,142 @@
     </div>
   </body>
   <script>
+    // Custom Notification System
+    function showNotification(message, type = 'info', duration = 5000) {
+      // Remove existing notifications
+      const existingNotifications = document.querySelectorAll('.custom-notification');
+      existingNotifications.forEach(notification => notification.remove());
+
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `custom-notification ${type}`;
+
+      notification.innerHTML = `
+        <div class="custom-notification-header">
+          <h4 class="custom-notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+          <button class="custom-notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+        </div>
+        <p class="custom-notification-message">${message}</p>
+      `;
+
+      // Add to page
+      document.body.appendChild(notification);
+
+      // Show notification
+      setTimeout(() => notification.classList.add('show'), 10);
+
+      // Auto-hide after duration
+      if (duration > 0) {
+        setTimeout(() => {
+          if (notification.parentElement) {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+          }
+        }, duration);
+      }
+
+      return notification;
+    }
+
+    // Direct Upload Handler
+    async function handleDirectUpload() {
+      const fileInput = document.getElementById('nb-file');
+      if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+        showNotification('Warning\nPlease select a file first using "Drag & Drop Files or Choose Files" button', 'warning');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const uploadBtn = document.querySelector('.upload-file-btn');
+
+      try {
+        // Disable button during upload
+        uploadBtn.disabled = true;
+        uploadBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading...';
+
+        // Show upload progress notification
+        showNotification('Starting file upload...', 'info', 0);
+
+        // Create FormData for file upload
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', file.name);
+
+        // Upload file directly to database
+        const response = await fetch(API_BASE_URL + '/upload/notes', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${AUTH_TOKEN}`,
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            // Token invalid or expired, redirect to login
+            localStorage.removeItem("authToken");
+            window.location.href = "signin.html";
+            return;
+          }
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Upload failed');
+        }
+
+        const result = await response.json();
+
+        // Show success notification
+        showNotification('Upload success', 'success');
+
+        // Refresh the file list for Notes Breakdown section
+        await loadUploadedNotes();
+
+        // Clear the file input after successful upload
+        fileInput.value = '';
+        // Reset UI to show drag & drop area again
+        // Note: updateFileDisplay function may need to be updated to work with the new container structure
+
+      } catch (error) {
+        handleError(error, 'File Upload');
+      } finally {
+        // Re-enable button
+        uploadBtn.disabled = false;
+        uploadBtn.innerHTML = '<i class="fa-solid fa-cloud-arrow-up"></i> Upload File';
+      }
+    }
+
+    // Enhanced error handling function
+    function handleError(error, context = '') {
+      console.error(`${context} Error:`, error);
+
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      let errorType = 'error';
+
+      if (error.message) {
+        if (error.message.includes('fetch') || error.message.includes('network') || error.message.includes('Failed to fetch')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (error.message.includes('API') || error.message.includes('endpoint') || error.message.includes('404')) {
+          errorMessage = "Service temporarily unavailable. Please try again later.";
+        } else if (error.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+          errorType = 'warning';
+        } else if (error.message.includes('403') || error.message.includes('Unauthorized')) {
+          errorMessage = "Access denied. Please check your permissions.";
+        } else if (error.message.includes('413')) {
+          errorMessage = "File is too large. Please choose a smaller file.";
+        } else if (error.message.includes('415')) {
+          errorMessage = "File type not supported. Please choose a different file.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      // Show notification
+      showNotification(errorMessage, errorType);
+
+      // Also log to console for debugging
+      console.warn('Error notification shown:', errorMessage);
+    }
+
     // Sidebar tab switching with fade-in animation
     document.addEventListener("DOMContentLoaded", function () {
       const sidebarLinks = document.querySelectorAll(
@@ -964,9 +1222,14 @@
                       <i class="fa-solid fa-circle-info"></i>
                       <span>PDF, Word & Text files up to 50MB</span>
                     </div>
-                    <button class="nb-browse-btn" onclick="document.getElementById('nb-file').click();">
-                      <i class="fa-solid fa-folder-open"></i> Choose Files
-                    </button>
+                    <div style="display: flex; gap: 12px; align-items: center;">
+                      <button class="nb-browse-btn" onclick="document.getElementById('nb-file').click();">
+                        <i class="fa-solid fa-folder-open"></i> Choose Files
+                      </button>
+                      <button class="upload-file-btn" onclick="handleDirectUpload()">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload File
+                      </button>
+                    </div>
                   </div>
                 </div>
 
@@ -1044,34 +1307,34 @@
               <div class="nb-features-panel">
                 <h3>AI Processing Options</h3>
                 <div class="nb-features-grid">
-                  <div class="nb-feature-card">
+                  <button type="button" class="nb-feature-card">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-book-open-reader"></i>
                     </div>
                     <h4>Smart Summary</h4>
                     <p>Generate concise chapter summaries and key points</p>
-                  </div>
-                  <div class="nb-feature-card">
+                  </button>
+                  <button type="button" class="nb-feature-card">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-diagram-project"></i>
                     </div>
                     <h4>Mind Map</h4>
                     <p>Create visual concept maps from your notes</p>
-                  </div>
-                  <div class="nb-feature-card">
+                  </button>
+                  <button type="button" class="nb-feature-card">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-lightbulb"></i>
                     </div>
                     <h4>Study Guide</h4>
                     <p>Generate comprehensive study materials</p>
-                  </div>
-                  <div class="nb-feature-card">
+                  </button>
+                  <button type="button" class="nb-feature-card">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-cards-blank"></i>
                     </div>
                     <h4>Flashcards</h4>
                     <p>Create interactive flashcards for review</p>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1828,7 +2091,7 @@
         const file = this.files.get(fileId);
         if (file && file.progress === 100) {
           // Simulate download
-          alert(`Downloading ${file.name}...`);
+          showNotification(`Downloading ${file.name}...`, 'info');
         }
       }
 
@@ -1836,7 +2099,7 @@
         const file = this.files.get(fileId);
         if (file && file.progress === 100) {
           // Simulate share dialog
-          alert(`Sharing ${file.name}...`);
+          showNotification(`Sharing ${file.name}...`, 'info');
         }
       }
 
@@ -1971,7 +2234,7 @@
             <i class="fa-solid fa-file-${this.getFileIcon(file.type)}"></i>
             <div class="nb-file-info">
               <span class="nb-file-name">${file.name}</span>
-              <span class="nb-file-date">${this.formatDate(file.timestamp)}</span>
+              <span class="nb-file-date">${file.type.toUpperCase()} • ${this.formatDate(file.timestamp)}</span>
             </div>
             <button class="nb-file-action ${this.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="Add to favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
               <i class="fa-${this.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
@@ -1984,17 +2247,26 @@
         const container = document.querySelector('#nb-favorites .nb-favorites-list');
         if (!container) return;
 
-        if (this.favorites.length === 0) {
+        // Filter favorites to only show files that exist in recentFiles (database)
+        const validFavorites = this.favorites.filter(fav => this.recentFiles.some(rf => rf.id === fav.id));
+
+        // Update localStorage with valid favorites only
+        if (validFavorites.length !== this.favorites.length) {
+          this.favorites = validFavorites;
+          this.saveData();
+        }
+
+        if (validFavorites.length === 0) {
           container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No favorites yet</p>';
           return;
         }
 
-        container.innerHTML = this.favorites.map(file => `
+        container.innerHTML = validFavorites.map(file => `
           <div class="nb-file-row" data-file-id="${file.id}">
             <i class="fa-solid fa-file-${this.getFileIcon(file.type)}"></i>
             <div class="nb-file-info">
               <span class="nb-file-name">${file.name}</span>
-              <span class="nb-file-date">Added to favorites</span>
+              <span class="nb-file-date">${file.type.toUpperCase()} • Added to favorites</span>
             </div>
             <button class="nb-file-action active" title="Remove from favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
               <i class="fa-solid fa-star"></i>
@@ -2099,14 +2371,14 @@
             const folderNameInput = modal.querySelector('#folder-name-input');
             const folderName = folderNameInput.value.trim();
             if (!folderName) {
-              alert('Please enter a folder name');
+              showNotification('Please enter a folder name', 'warning');
               return;
             }
             this.createLibraryFolder(folderName);
           } else {
             const selectedFiles = Array.from(modal.querySelectorAll('.file-checkbox:checked')).map(cb => cb.value);
             if (selectedFiles.length === 0) {
-              alert('Please select at least one file');
+              showNotification('Please select at least one file', 'warning');
               return;
             }
             selectedFiles.forEach(fileId => {
@@ -2189,6 +2461,16 @@
         nbFileManager.updateRecentFilesUI();
       } catch (err) {
         console.error('Failed to load recent uploads:', err);
+
+        let errorMessage = "Failed to load recent uploads. Please refresh the page.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        }
+
+        handleError(new Error(errorMessage), 'Load Recent Uploads');
+
         // Show empty state
         showEmptyState();
       }
@@ -2228,26 +2510,71 @@
     // Global instance
     const nbFileManager = new NbFileManager();
 
+    // Global variables for drag and drop
+    let hasFile = false; // Track if any file is currently uploaded
+    let isDragDropOperation = false; // Flag to track drag & drop operations
+
+    // Function to get or create file input
+    function getFileInput() {
+      let fileInput = document.getElementById('nb-file');
+      if (!fileInput) {
+        // Create file input if it doesn't exist
+        fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.id = 'nb-file';
+        fileInput.className = 'nb-file-input';
+        fileInput.accept = '.pdf,.docx,.txt';
+        document.querySelector('.nb-upload-content').appendChild(fileInput);
+      }
+      return fileInput;
+    }
+
+    // Function to update UI with file information
+    function updateFileDisplay(files) {
+      const uploadContent = document.querySelector('.nb-upload-content');
+      if (!uploadContent) return;
+
+      let icon = uploadContent.querySelector('.nb-upload-icon');
+      let h3 = uploadContent.querySelector('h3');
+      let p = uploadContent.querySelector('.nb-upload-text');
+      let removeBtn = uploadContent.querySelector('.nb-remove-file');
+
+      if (files && files.length > 0) {
+        const file = files[0]; // Show first file info
+        const fileName = file.name;
+        const fileType = getFileTypeFromName(fileName);
+        const iconClass = getFileIconClass(fileType);
+        const fileSize = formatFileSize(file.size);
+
+        hasFile = true; // Mark that we have a file
+
+        if (icon) icon.className = `fa-solid ${iconClass} nb-upload-icon`;
+        if (h3) h3.textContent = fileName;
+        if (p) p.textContent = `${fileType.toUpperCase()} File • ${fileSize}`;
+
+        if (!removeBtn) {
+          removeBtn = document.createElement('button');
+          removeBtn.className = 'nb-remove-file';
+          removeBtn.onclick = removeCurrentFile;
+          removeBtn.style.cssText = 'background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;';
+          removeBtn.innerHTML = '<i class="fa-solid fa-times"></i> Remove File';
+          uploadContent.appendChild(removeBtn);
+        } else {
+          removeBtn.style.display = 'inline-block';
+        }
+      } else {
+        // Reset to original state
+        hasFile = false;
+        if (icon) icon.className = 'fa-solid fa-cloud-arrow-up nb-upload-icon';
+        if (h3) h3.textContent = 'Drag & Drop Files Here';
+        if (p) p.textContent = 'or click to browse';
+        if (removeBtn) removeBtn.style.display = 'none';
+      }
+    }
+
     // Initialize drag and drop functionality for file upload
     function initializeDragDrop() {
       const uploadBox = document.querySelector('.nb-upload-box');
-      let hasFile = false; // Track if any file is currently uploaded
-      let isDragDropOperation = false; // Flag to track drag & drop operations
-
-      // Function to get or create file input
-      function getFileInput() {
-        let fileInput = document.getElementById('nb-file');
-        if (!fileInput) {
-          // Create file input if it doesn't exist
-          fileInput = document.createElement('input');
-          fileInput.type = 'file';
-          fileInput.id = 'nb-file';
-          fileInput.className = 'nb-file-input';
-          fileInput.accept = '.pdf,.docx,.txt';
-          document.querySelector('.nb-upload-content').appendChild(fileInput);
-        }
-        return fileInput;
-      }
 
       // Ensure clean initial state
       const fileInput = getFileInput();
@@ -2273,41 +2600,6 @@
           </div>
         `;
         document.body.appendChild(modal);
-      }
-
-      // Function to update UI with file information
-      function updateFileDisplay(files) {
-        const uploadContent = document.querySelector('.nb-upload-content');
-        if (!uploadContent) return;
-
-        if (files && files.length > 0) {
-          const file = files[0]; // Show first file info
-          const fileName = file.name;
-          const fileType = getFileTypeFromName(fileName);
-          const iconClass = getFileIconClass(fileType);
-          const fileSize = formatFileSize(file.size);
-
-          hasFile = true; // Mark that we have a file
-
-          uploadContent.innerHTML = `
-            <i class="fa-solid ${iconClass} nb-upload-icon"></i>
-            <h3>${fileName}</h3>
-            <p class="nb-upload-text">${fileType.toUpperCase()} File • ${fileSize}</p>
-            <button class="nb-remove-file" onclick="removeCurrentFile()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;">
-              <i class="fa-solid fa-times"></i> Remove File
-            </button>
-            <input type="file" id="nb-file" class="nb-file-input" accept=".pdf,.docx,.txt">
-          `;
-        } else {
-          // Reset to original state
-          hasFile = false;
-          uploadContent.innerHTML = `
-            <i class="fa-solid fa-cloud-arrow-up nb-upload-icon"></i>
-            <h3>Drag & Drop Files Here</h3>
-            <p class="nb-upload-text">or click to browse</p>
-            <input type="file" id="nb-file" class="nb-file-input" accept=".pdf,.docx,.txt">
-          `;
-        }
       }
 
       // Helper function to format file size
@@ -2359,12 +2651,6 @@
 
         const files = e.dataTransfer.files;
         if (files.length > 0) {
-          // Check if any file is already uploaded
-          if (hasFile) {
-            showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
-            return;
-          }
-
           // Mark that this is a drag & drop operation
           isDragDropOperation = true;
 
@@ -2383,7 +2669,7 @@
       });
 
       // Function to remove current file
-      window.removeCurrentFile = function() {
+      function removeCurrentFile() {
         const fileInput = document.getElementById('nb-file');
         if (fileInput) {
           fileInput.value = '';
@@ -2392,7 +2678,10 @@
           // Reset to original state
           updateFileDisplay([]);
         }
-      };
+      }
+  
+      // Make it globally accessible
+      window.removeCurrentFile = removeCurrentFile;
 
       // Also update UI when files are selected via click (using event delegation)
       document.addEventListener('change', (e) => {
@@ -2405,17 +2694,9 @@
             return;
           }
 
-          // If this is a drag & drop operation, skip the restriction check
+          // If this is a drag & drop operation, skip the UI update
           // (the drag & drop handler already handled the UI update)
           if (isDragDropOperation) {
-            return;
-          }
-
-          // Check if any file is already uploaded
-          if (hasFile) {
-            showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
-            // Clear the file input to prevent the change
-            e.target.value = '';
             return;
           }
 
@@ -2423,6 +2704,79 @@
           updateFileDisplay(files);
         }
       });
+    }
+
+    // Initialize drag and drop on page load if Notes Breakdown is active
+    document.addEventListener("DOMContentLoaded", function () {
+      // Check if Notes Breakdown content is already loaded
+      const uploadBox = document.querySelector('.nb-upload-box');
+      if (uploadBox) {
+        initializeDragDrop();
+      }
+    });
+
+
+    // Load already uploaded notes from backend
+    async function loadUploadedNotes(container = null) {
+      // Use the provided container or default to nbFileListContainer for Notes Breakdown
+      let targetContainer = container;
+      if (!targetContainer) {
+        // If no container provided, determine based on current context
+        targetContainer = nbFileListContainer || fileListContainer;
+      }
+      if (!targetContainer) return;
+
+      try {
+        const notes = await apiFetch("/upload/notes");
+        targetContainer.innerHTML = ""; // Clear existing list
+        notes.forEach((note) => {
+          const fileType = getFileTypeFromName(note.title);
+          const iconClass = getFileIconClass(fileType);
+          const div = document.createElement("div");
+          div.className = "nb-file-item nb-item-complete";
+          div.innerHTML = `
+          <div class="nb-file-info">
+            <span class="nb-file-icon"><i class="fa-solid ${iconClass}"></i></span>
+            <div class="nb-file-details">
+              <span class="nb-file-name">${note.title}</span>
+              <span class="nb-file-meta">${fileType.toUpperCase()} • Uploaded • ${new Date(
+                note.created_at
+              ).toLocaleString()}</span>
+            </div>
+          </div>
+          <div class="nb-file-status">
+            <span class="nb-status-text nb-success">Processed</span>
+          </div>
+          <div class="nb-file-actions">
+            <button class="nb-action" title="Download" onclick="downloadFile('${note.id}')">
+              <i class="fa-solid fa-download"></i>
+            </button>
+            <button class="nb-action" title="Share" onclick="shareFile('${note.id}')">
+              <i class="fa-solid fa-share"></i>
+            </button>
+            <button class="nb-action" title="Delete" onclick="deleteNote('${note.id}', targetContainer)">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `;
+          targetContainer.appendChild(div);
+        });
+      } catch (err) {
+        console.error("Failed to load uploaded notes:", err);
+
+        let errorMessage = "Failed to load uploaded notes. Please refresh the page.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        }
+
+        try {
+          alert(errorMessage);
+        } catch (alertError) {
+          console.warn('Alert blocked, load notes error message:', errorMessage);
+        }
+      }
     }
 
     // Notes Breakdown Quick Actions
@@ -2732,8 +3086,12 @@
     // File upload input and handlers for Upload Notes
     const fileInput = document.getElementById("file-input");
     const fileListContainer = document.querySelector(
-      ".upload-notes .file-list"
+      ".upload-notes .file-list .nb-file-items-container"
     );
+
+    // File upload input and handlers for Notes Breakdown
+    const nbFileInput = document.getElementById("nb-file");
+    const nbFileListContainer = document.querySelector(".nb-file-list .nb-file-items-container");
 
     // Modified to work with single file system and not interfere with UI updates
     fileInput.addEventListener("change", async (e) => {
@@ -2749,7 +3107,7 @@
         fileInput.value = '';
       }, 100);
 
-      // Load uploaded notes
+      // Load uploaded notes for Notes Breakdown section
       await loadUploadedNotes();
     });
 
@@ -2789,7 +3147,24 @@
 
         } catch (err) {
           console.error('Upload initialization failed:', err);
-          alert('Upload failed: ' + err.message);
+
+          let errorMessage = "Upload failed. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          } else if (err.message.includes('413')) {
+            errorMessage = "File is too large. Please choose a smaller file.";
+          } else if (err.message.includes('415')) {
+            errorMessage = "File type not supported. Please choose a different file.";
+          }
+
+          try {
+            alert(errorMessage);
+          } catch (alertError) {
+            console.warn('Alert blocked, upload error message:', errorMessage);
+          }
+
           removeFileFromUI(file.name);
         }
       }
@@ -2837,6 +3212,22 @@
 
           } catch (err) {
             console.error(`Chunk ${i} upload failed:`, err);
+
+            let errorMessage = "Upload failed. Please try again.";
+            if (err.message.includes('fetch') || err.message.includes('network')) {
+              errorMessage = "Network connection issue. Please check your internet connection.";
+            } else if (err.message.includes('No authentication token')) {
+              errorMessage = "Session expired. Please refresh the page and log in again.";
+            } else if (err.message.includes('413')) {
+              errorMessage = "File is too large. Please choose a smaller file.";
+            }
+
+            try {
+              alert(errorMessage);
+            } catch (alertError) {
+              console.warn('Alert blocked, chunk upload error message:', errorMessage);
+            }
+
             this.updateStatus(uploadId, 'failed', 'Upload failed');
             break;
           }
@@ -2882,7 +3273,21 @@
           removeFileFromUI(uploadId);
         } catch (err) {
           console.error('Delete upload failed:', err);
-          alert('Delete failed: ' + err.message);
+
+          let errorMessage = "Delete failed. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          } else if (err.message.includes('404')) {
+            errorMessage = "File not found. It may have already been deleted.";
+          }
+
+          try {
+            alert(errorMessage);
+          } catch (alertError) {
+            console.warn('Alert blocked, delete upload error message:', errorMessage);
+          }
         }
       }
 
@@ -2977,7 +3382,21 @@
         document.body.removeChild(link);
       } catch (err) {
         console.error('Download failed:', err);
-        alert('Download failed: ' + err.message);
+
+        let errorMessage = "Download failed. Please try again.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (err.message.includes('404')) {
+          errorMessage = "File not found. It may have been deleted.";
+        }
+
+        try {
+          alert(errorMessage);
+        } catch (alertError) {
+          console.warn('Alert blocked, download error message:', errorMessage);
+        }
       }
     }
 
@@ -2999,23 +3418,71 @@
         } else {
           // Fallback: copy link to clipboard
           await navigator.clipboard.writeText(fileUrl);
-          alert(`File link copied to clipboard!\n\n${fileUrl}`);
+          showNotification('File link copied to clipboard!', 'success');
         }
       } catch (err) {
         console.error('Share failed:', err);
+
+        let errorMessage = "Sharing failed. Please try again.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (err.message.includes('404')) {
+          errorMessage = "File not found. It may have been deleted.";
+        }
+
         // Fallback for older browsers
         try {
           const fileUrl = `${window.location.origin}/upload/${uploadId}/download`;
           await navigator.clipboard.writeText(fileUrl);
-          alert(`File link copied to clipboard!\n\n${fileUrl}`);
+          try {
+            alert(`File link copied to clipboard!\n\n${fileUrl}`);
+          } catch (alertError) {
+            console.warn('Alert blocked, share success message:', `File link copied to clipboard!\n\n${fileUrl}`);
+          }
         } catch (clipboardErr) {
-          alert('Sharing not supported on this browser. Please copy the URL manually.');
+          showNotification('Sharing not supported on this browser. Please copy the URL manually.', 'warning');
         }
       }
     }
 
     // Initialize uploader
     const chunkedUploader = new ChunkedUploader();
+
+    // Helper functions for file type recognition
+    function getFileTypeFromName(fileName) {
+      if (!fileName) return 'file';
+      const extension = fileName.split('.').pop().toLowerCase();
+      const typeMap = {
+        'pdf': 'pdf',
+        'doc': 'word',
+        'docx': 'word',
+        'txt': 'text',
+        'jpg': 'image',
+        'jpeg': 'image',
+        'png': 'image',
+        'gif': 'image',
+        'ppt': 'powerpoint',
+        'pptx': 'powerpoint',
+        'xls': 'excel',
+        'xlsx': 'excel'
+      };
+      return typeMap[extension] || 'file';
+    }
+
+    function getFileIconClass(fileType) {
+      const iconMap = {
+        'pdf': 'fa-file-pdf',
+        'word': 'fa-file-word',
+        'text': 'fa-file-lines',
+        'image': 'fa-file-image',
+        'powerpoint': 'fa-file-powerpoint',
+        'excel': 'fa-file-excel',
+        'file': 'fa-file'
+      };
+      return iconMap[fileType] || 'fa-file';
+    }
 
     // Helper functions for file type recognition
     function getFileIcon(mimeType) {
@@ -3144,59 +3611,30 @@
       }
     }
 
-    // Load already uploaded notes from backend
-    async function loadUploadedNotes() {
-      if (!fileListContainer) return;
-      try {
-        const notes = await apiFetch("/upload/notes");
-        fileListContainer.innerHTML = ""; // Clear existing list
-        notes.forEach((note) => {
-          const div = document.createElement("div");
-          div.className = "nb-file-item nb-item-complete";
-          div.innerHTML = `
-          <div class="nb-file-info">
-            <span class="nb-file-icon"><i class="fa-solid fa-file-lines"></i></span>
-            <div class="nb-file-details">
-              <span class="nb-file-name">${note.title}</span>
-              <span class="nb-file-meta">Uploaded • ${new Date(
-                note.created_at
-              ).toLocaleString()}</span>
-            </div>
-          </div>
-          <div class="nb-file-status">
-            <span class="nb-status-text nb-success">Processed</span>
-          </div>
-          <div class="nb-file-actions">
-            <button class="nb-action" title="Download" onclick="downloadFile('${note.id}')">
-              <i class="fa-solid fa-download"></i>
-            </button>
-            <button class="nb-action" title="Share" onclick="shareFile('${note.id}')">
-              <i class="fa-solid fa-share"></i>
-            </button>
-            <button class="nb-action" title="Delete" onclick="deleteNote('${
-              note.id
-            }')">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
-        `;
-          fileListContainer.appendChild(div);
-        });
-      } catch (err) {
-        console.error("Failed to load uploaded notes:", err);
-      }
-    }
 
-    async function deleteNote(noteId) {
+    async function deleteNote(noteId, containerElement = null) {
       if (!confirm("Delete this note?")) return;
       try {
         await fetch(`${API_BASE_URL}/upload/notes/${noteId}`, {
           method: "DELETE",
           headers: { Authorization: `Bearer ${AUTH_TOKEN}` },
         });
-        await loadUploadedNotes();
+        // Use the provided container element or default to nbFileListContainer
+        const targetContainer = containerElement || nbFileListContainer || fileListContainer;
+        await loadUploadedNotes(targetContainer);
       } catch (err) {
-        alert("Delete failed: " + err.message);
+        console.error('Delete Note Error:', err);
+
+        let errorMessage = "Delete failed. Please try again.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (err.message.includes('404')) {
+          errorMessage = "File not found. It may have already been deleted.";
+        }
+
+        handleError(new Error(errorMessage), 'Delete Note');
       }
     }
 
@@ -3208,7 +3646,7 @@
     promptSendBtn.addEventListener("click", async () => {
       const text = promptInput.value.trim();
       if (!text) {
-        alert("Please enter a query or attach files");
+        showNotification("Please enter a query or attach files", 'warning');
         return;
       }
       const source = customDropdownSelected.textContent.trim();
@@ -3224,20 +3662,44 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ text: queryText }),
           });
-          alert("Summary:\n" + res.summary);
+          showNotification("Summary generated successfully!", 'success');
+          // Display summary in a modal
+          const summaryModal = document.createElement("div");
+          summaryModal.className = "ai-result-modal";
+          summaryModal.innerHTML = `
+            <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+            <div class="ai-result-content">
+              <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+              <div class="ai-result"><h3>Summary</h3><p>${res.summary}</p></div>
+            </div>
+          `;
+          document.body.appendChild(summaryModal);
         } catch (err) {
-          alert("AI summarize failed: " + err.message);
+          console.error('AI Summarize Error:', err);
+
+          let errorMessage = "AI summarize failed. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          }
+
+          try {
+            alert(errorMessage);
+          } catch (alertError) {
+            console.warn('Alert blocked, AI Summarize error message:', errorMessage);
+          }
         } finally {
           promptSendBtn.disabled = false;
           promptSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
         }
       } else {
-        alert("AI for the selected source is coming soon.");
+        showNotification("AI for the selected source is coming soon.", 'info');
       }
     });
 
-    // On load, fetch uploaded notes to list
-    document.addEventListener("DOMContentLoaded", loadUploadedNotes);
+    // On load, fetch uploaded notes to list for Upload Notes section
+    document.addEventListener("DOMContentLoaded", () => loadUploadedNotes());
 
     // Upload Notes Processing Options
     document.addEventListener("click", async (e) => {
@@ -3248,7 +3710,7 @@
       const uploadedNotes = document.querySelectorAll(".upload-notes .nb-file-item");
 
       if (uploadedNotes.length === 0) {
-        alert("Please upload a document first");
+        showNotification("Please upload a document first", 'warning');
         return;
       }
 
@@ -3351,7 +3813,22 @@
         document.body.appendChild(resultModal);
 
       } catch (err) {
-        alert(`${action.replace('-', ' ').toUpperCase()} failed: ${err.message}`);
+        console.error(`${action} Processing Error:`, err);
+
+        let errorMessage = `${action.replace('-', ' ').toUpperCase()} failed. Please try again.`;
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (err.message.includes('404')) {
+          errorMessage = "Service not found. Please try again later.";
+        }
+
+        try {
+          alert(errorMessage);
+        } catch (alertError) {
+          console.warn('Alert blocked, process error message:', errorMessage);
+        }
       } finally {
         processBtn.disabled = false;
         const icon = processBtn.querySelector("i")?.className || "fa-solid fa-wand-magic-sparkles";
@@ -3407,6 +3884,19 @@
         }
       } catch (err) {
         console.error("Failed to load AI images history:", err);
+
+        let errorMessage = "Failed to load AI images history. Please refresh the page.";
+        if (err.message.includes('fetch') || err.message.includes('network')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        }
+
+        try {
+          alert(errorMessage);
+        } catch (alertError) {
+          console.warn('Alert blocked, load AI images error message:', errorMessage);
+        }
       }
     }
 
@@ -3445,7 +3935,7 @@
               });
             } else {
               navigator.clipboard.writeText(imageUrl);
-              alert("Image URL copied to clipboard!");
+              showNotification("Image URL copied to clipboard!", 'success');
             }
           };
         }
@@ -3460,7 +3950,7 @@
       aiImgGenerateBtn.addEventListener("click", async () => {
         const prompt = aiImgInput.value.trim();
         if (!prompt) {
-          alert("Please enter a prompt for the image");
+          showNotification("Please enter a prompt for the image", 'warning');
           return;
         }
 
@@ -3517,14 +4007,14 @@
                 });
               } else {
                 navigator.clipboard.writeText(response.image_url);
-                alert("Image URL copied to clipboard!");
+                showNotification("Image URL copied to clipboard!", 'success');
               }
             };
           }
 
           if (saveBtn) {
             saveBtn.onclick = () => {
-              alert("Image saved to library!");
+              showNotification("Image saved to library!", 'success');
               loadAIImagesHistory(); // Refresh history
             };
           }
@@ -3533,7 +4023,21 @@
           aiImgInput.value = "";
 
         } catch (err) {
-          alert("Image generation failed: " + err.message);
+          console.error('AI Image Generation Error:', err);
+
+          let errorMessage = "Image generation failed. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          }
+
+          try {
+            alert(errorMessage);
+          } catch (alertError) {
+            console.warn('Alert blocked, AI Image error message:', errorMessage);
+          }
+
           aiImgPreviewArea.innerHTML = `
             <div class="ai-img-preview-placeholder">
               <i class="fa-solid fa-exclamation-triangle"></i>
@@ -3738,6 +4242,9 @@
         } else {
           showSearchError();
         }
+
+        // Also log the error for debugging
+        console.error('Search failed:', error);
       }
     }
 
@@ -3916,7 +4423,7 @@
       mcqGenerateBtn.addEventListener("click", async () => {
         const text = mcqInput.value.trim();
         if (!text) {
-          alert("Please enter text content for MCQ generation");
+          showNotification("Please enter text content for MCQ generation", 'warning');
           return;
         }
 
@@ -3958,7 +4465,20 @@
           }
 
         } catch (err) {
-          alert("MCQ generation failed: " + err.message);
+          console.error('MCQ Generation Error:', err);
+
+          let errorMessage = "MCQ generation failed. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          }
+
+          try {
+            alert(errorMessage);
+          } catch (alertError) {
+            console.warn('Alert blocked, MCQ error message:', errorMessage);
+          }
         } finally {
           mcqGenerateBtn.disabled = false;
           mcqGenerateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Questions`;
@@ -4031,12 +4551,12 @@
         document.querySelectorAll(".mcq-explanation").forEach(exp => exp.style.display = "none");
         document.querySelectorAll(".mcq-answer").forEach(ans => ans.classList.remove("selected"));
 
-        alert("Practice session started! Click on answers to reveal explanations.");
+        showNotification("Practice session started! Click on answers to reveal explanations.", 'success');
       }
 
       if (e.target.closest(".mcq-action-btn:nth-child(1)")) {
         // Export as PDF
-        alert("PDF export feature coming soon!");
+        showNotification("PDF export feature coming soon!", 'info');
       }
 
       if (e.target.closest(".mcq-action-btn:nth-child(2)")) {
@@ -4056,7 +4576,7 @@
           });
         } else {
           navigator.clipboard.writeText(mcqText);
-          alert("MCQs copied to clipboard!");
+          showNotification("MCQs copied to clipboard!", 'success');
         }
       }
     });
@@ -4068,19 +4588,33 @@
 
       const featureType = featureCard.querySelector("h4").textContent.toLowerCase().replace(/\s+/g, '_');
 
-      // Get text from uploaded files or prompt input
-      let text = "";
-      const promptInput = document.querySelector(".prompt-input");
-      if (promptInput && promptInput.value.trim()) {
-        text = promptInput.value.trim();
-      } else {
-        // Try to get text from uploaded files (this would need enhancement)
-        alert("Please enter text in the prompt area or upload a document first");
+      // Get the button's built-in prompt content
+      const buttonTitle = featureCard.querySelector("h4").textContent;
+      const buttonDesc = featureCard.querySelector("p").textContent;
+
+      // Check if there are uploaded files
+      let fileContent = "";
+      if (window.nbFileManager && window.nbFileManager.recentFiles && window.nbFileManager.recentFiles.length > 0) {
+        // Get the most recent uploaded file
+        const recentFile = window.nbFileManager.recentFiles[0];
+        if (recentFile && recentFile.content) {
+          fileContent = recentFile.content;
+        }
+      }
+
+      if (!fileContent) {
+        showNotification("Upload a file before Processing.", 'warning');
         return;
       }
 
+      // Create the combined prompt with button content and actual file content
+      const combinedPrompt = `${buttonTitle}. ${buttonDesc}\n\nDocument Content:\n${fileContent}`;
+
+      // Use the combined prompt as the text for AI processing
+      let text = combinedPrompt;
+
       if (!text) {
-        alert("Please provide text content for AI processing");
+        showNotification("Content not found", 'error');
         return;
       }
 
@@ -4106,7 +4640,7 @@
             requestData.title = "Flashcards";
             break;
           default:
-            alert("Feature not implemented yet");
+            showNotification("Feature not implemented yet", 'info');
             return;
         }
 
@@ -4150,7 +4684,29 @@
         document.body.appendChild(resultModal);
 
       } catch (err) {
-        alert(`AI ${featureType.replace(/_/g, ' ')} failed: ${err.message}`);
+        // Handle different types of errors with specific messages
+        console.error('AI Processing Error:', err);
+
+        let errorMessage = "An unexpected error occurred. Please try again.";
+
+        if (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed to fetch')) {
+          errorMessage = "Sorry! Network connection issue. Please check your internet connection.";
+        } else if (err.message.includes('API') || err.message.includes('endpoint') || err.message.includes('404')) {
+          errorMessage = "Service temporarily unavailable. Please try again later.";
+        } else if (err.message.includes('No authentication token')) {
+          errorMessage = "Session expired. Please refresh the page and log in again.";
+        } else if (err.message.includes('403') || err.message.includes('Unauthorized')) {
+          errorMessage = "Access denied. Please check your permissions.";
+        } else if (err.message) {
+          errorMessage = `AI ${featureType.replace(/_/g, ' ')} failed: ${err.message}`;
+        }
+
+        // Try to show alert, fallback to console if blocked
+        try {
+          alert(errorMessage);
+        } catch (alertError) {
+          console.warn('Alert blocked, error message:', errorMessage);
+        }
       } finally {
         // Reset loading state
         featureCard.style.opacity = "1";

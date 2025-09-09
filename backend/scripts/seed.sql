@@ -1,9 +1,5 @@
-const Razorpay = require('razorpay');
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+-- Seed data for development
+-- Add INSERT statements here if needed for initial data
 
-const razorpay = new Razorpay({
-  key_id: process.env.RAZORPAY_KEY_ID,
-  key_secret: process.env.RAZORPAY_KEY_SECRET,
-});
-
-module.exports = { razorpay, stripe };
+-- Example:
+-- INSERT INTO users_app (id, name, email) VALUES ('uuid', 'Name', 'email@example.com');

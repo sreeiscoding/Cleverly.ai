@@ -147,6 +147,8 @@
   background: #f8fffe;
   border: 1px solid #14807a10;
   transition: all 0.3s ease;
+  font-family: "Poppins", sans-serif;
+  cursor: pointer;
 }
 
 .nb-feature-card:hover {

@@ -7,10 +7,8 @@ if (!SUPABASE_JWT_SECRET) {
 
 module.exports = (req, res, next) => {
   const authHeader = req.headers.authorization;
-  console.log('Auth middleware called with authHeader:', authHeader ? 'present' : 'missing');
 
   if (!authHeader) {
-    console.log('Auth header missing');
     return res.status(401).json({ error: 'Authorization header missing' });
   }
 
@@ -23,23 +21,12 @@ module.exports = (req, res, next) => {
   }
 
   if (!token) {
-    console.log('No token found in auth header');
     return res.status(401).json({ error: 'No token provided' });
   }
-  console.log('Token extracted, length:', token.length);
 
   try {
-    console.log('Attempting to verify token with secret...');
     // Try HS256 first (most common for Supabase)
     const payload = jwt.verify(token, SUPABASE_JWT_SECRET, { algorithms: ['HS256'] });
-    console.log('Token verified successfully, payload keys:', Object.keys(payload));
-    console.log('Token payload:', {
-      sub: payload.sub,
-      email: payload.email,
-      aud: payload.aud,
-      role: payload.role,
-      iss: payload.iss
-    });
 
     // Ensure we have the required fields
     if (!payload.sub) {
@@ -51,7 +38,6 @@ module.exports = (req, res, next) => {
       id: payload.sub,
       email: payload.email || payload.user_metadata?.email
     };
-    console.log('req.user set to:', req.user);
     next();
   } catch (error) {
     console.error('JWT verification failed:', error.message);

@@ -22,6 +22,7 @@ const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 
 // Middleware
+
 app.use(helmet());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -54,7 +55,5 @@ app.use(function (err, req, res, next) {
 const PORT = process.env.PORT || 4000;
 app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
-// Trigger nodemon restart
-// Another trigger
-// Third trigger
+  // Server started successfully on port ${PORT}
 });

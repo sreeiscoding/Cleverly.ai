@@ -479,10 +479,23 @@ exports.downloadFile = async (req, res, next) => {
       return res.status(404).json({ error: 'File not found or not completed' });
     }
 
+    // Get the file_id from upload_notes
+    const { data: noteRecord, error: noteError } = await supabaseAdmin
+      .from('upload_notes')
+      .select('file_id')
+      .eq('user_id', userId)
+      .eq('title', uploadRecord.file_name)
+      .order('created_at', { ascending: false })
+      .single();
+
+    if (noteError || !noteRecord) {
+      return res.status(404).json({ error: 'Note record not found' });
+    }
+
     // Get the file from Supabase storage
     const { data: fileData, error: downloadError } = await supabaseAdmin.storage
       .from('files')
-      .download(`${userId}/upload_notes/${uploadRecord.file_name}`);
+      .download(noteRecord.file_id);
 
     if (downloadError) {
       return res.status(500).json({ error: 'Failed to download file from storage' });

@@ -6,10 +6,13 @@ if (!OPENAI_API_KEY) {
   throw new Error('Missing OPENAI_API_KEY in env');
 }
 
+console.log('OpenAI API key loaded:', OPENAI_API_KEY.startsWith('sk-') ? 'present' : 'invalid format');
+
 const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
 
 const summarizeText = async (text) => {
   try {
+    console.log('Calling OpenAI summarize API with text length:', text.length);
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
@@ -18,15 +21,17 @@ const summarizeText = async (text) => {
       ],
       max_tokens: 150,
     });
+    console.log('OpenAI summarize API call successful');
     return response.choices[0].message.content.trim();
   } catch (error) {
-    console.error('OpenAI summarize error:', error);
+    console.error('OpenAI summarize error:', error.message);
     throw new Error('Failed to summarize text');
   }
 };
 
 const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
   try {
+    console.log('Calling OpenAI MCQ generation API with text length:', text.length, 'count:', count);
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
@@ -35,6 +40,7 @@ const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
       ],
       max_tokens: 1500,
     });
+    console.log('OpenAI MCQ generation API call successful');
     const content = response.choices[0].message.content.trim();
 
     // Try to extract JSON from response
@@ -52,7 +58,7 @@ const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
       throw new Error('Invalid JSON response from OpenAI');
     }
   } catch (error) {
-    console.error('OpenAI MCQ generation error:', error);
+    console.error('OpenAI MCQ generation error:', error.message);
     throw new Error('Failed to generate MCQs');
   }
 };
