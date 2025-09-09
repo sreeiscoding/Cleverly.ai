@@ -524,6 +524,11 @@
         border-color: #14807a;
       }
 
+      /* Hide file input elements */
+      .nb-file-input {
+        display: none !important;
+      }
+
       /* Responsive design for nb-quick-actions */
       @media (max-width: 768px) {
         .nb-quick-actions {
@@ -2226,10 +2231,26 @@
     // Initialize drag and drop functionality for file upload
     function initializeDragDrop() {
       const uploadBox = document.querySelector('.nb-upload-box');
-      const fileInput = document.getElementById('nb-file');
       let hasFile = false; // Track if any file is currently uploaded
+      let isDragDropOperation = false; // Flag to track drag & drop operations
+
+      // Function to get or create file input
+      function getFileInput() {
+        let fileInput = document.getElementById('nb-file');
+        if (!fileInput) {
+          // Create file input if it doesn't exist
+          fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.id = 'nb-file';
+          fileInput.className = 'nb-file-input';
+          fileInput.accept = '.pdf,.docx,.txt';
+          document.querySelector('.nb-upload-content').appendChild(fileInput);
+        }
+        return fileInput;
+      }
 
       // Ensure clean initial state
+      const fileInput = getFileInput();
       if (fileInput) {
         fileInput.value = '';
       }
@@ -2264,13 +2285,14 @@
           const fileName = file.name;
           const fileType = getFileTypeFromName(fileName);
           const iconClass = getFileIconClass(fileType);
+          const fileSize = formatFileSize(file.size);
 
           hasFile = true; // Mark that we have a file
 
           uploadContent.innerHTML = `
             <i class="fa-solid ${iconClass} nb-upload-icon"></i>
             <h3>${fileName}</h3>
-            <p class="nb-upload-text">${fileType.toUpperCase()} File</p>
+            <p class="nb-upload-text">${fileType.toUpperCase()} File • ${fileSize}</p>
             <button class="nb-remove-file" onclick="removeCurrentFile()" style="background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;">
               <i class="fa-solid fa-times"></i> Remove File
             </button>
@@ -2286,6 +2308,15 @@
             <input type="file" id="nb-file" class="nb-file-input" accept=".pdf,.docx,.txt">
           `;
         }
+      }
+
+      // Helper function to format file size
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
       }
 
       // Helper functions for file type detection
@@ -2334,14 +2365,20 @@
             return;
           }
 
+          // Mark that this is a drag & drop operation
+          isDragDropOperation = true;
+
           // Set files to input element
-          fileInput.files = files;
+          const currentFileInput = getFileInput();
+          currentFileInput.files = files;
 
           // Update UI to show file information
           updateFileDisplay(files);
 
-          // Note: We don't manually trigger change event here since we're handling the UI update directly
-          // The backend upload will be handled by the existing change event listener
+          // Reset the flag after a short delay
+          setTimeout(() => {
+            isDragDropOperation = false;
+          }, 100);
         }
       });
 
@@ -2351,30 +2388,40 @@
         if (fileInput) {
           fileInput.value = '';
           hasFile = false;
+          isDragDropOperation = false; // Reset drag & drop flag
+          // Reset to original state
           updateFileDisplay([]);
         }
       };
 
-      // Also update UI when files are selected via click
-      fileInput.addEventListener('change', (e) => {
-        const files = e.target.files;
+      // Also update UI when files are selected via click (using event delegation)
+      document.addEventListener('change', (e) => {
+        if (e.target.id === 'nb-file') {
+          const files = e.target.files;
 
-        // If no files selected (input was cleared), reset UI
-        if (files.length === 0) {
-          updateFileDisplay([]);
-          return;
+          // If no files selected (input was cleared), don't reset UI
+          // (this happens after upload, we want to keep the file display)
+          if (files.length === 0) {
+            return;
+          }
+
+          // If this is a drag & drop operation, skip the restriction check
+          // (the drag & drop handler already handled the UI update)
+          if (isDragDropOperation) {
+            return;
+          }
+
+          // Check if any file is already uploaded
+          if (hasFile) {
+            showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
+            // Clear the file input to prevent the change
+            e.target.value = '';
+            return;
+          }
+
+          // Update UI to show file information for choose file operations
+          updateFileDisplay(files);
         }
-
-        // Check if any file is already uploaded
-        if (hasFile) {
-          showRestrictionPopup('A file is already uploaded. Please remove the current file first before uploading a new one.');
-          // Clear the file input to prevent the change
-          e.target.value = '';
-          return;
-        }
-
-        // Update UI to show file information
-        updateFileDisplay(files);
       });
     }
 
@@ -2697,8 +2744,12 @@
       const file = files[0];
       await uploadFile(file);
 
-      // Don't clear the input here - let the UI update handle it
-      // The UI will be updated by our drag/drop change handler
+      // Clear input after upload for security (re-uploading same file)
+      setTimeout(() => {
+        fileInput.value = '';
+      }, 100);
+
+      // Load uploaded notes
       await loadUploadedNotes();
     });
 
