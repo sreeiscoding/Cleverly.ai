@@ -107,6 +107,12 @@ exports.me = async (req, res, next) => {
       account_type: data.account_type || 'student'
     };
 
+    // If user role is 'admin', set plan to 'Full Access' and account_type to 'Creator'
+    if (userWithAccountType.role === 'admin') {
+      userWithAccountType.plan = 'Full Access';
+      userWithAccountType.account_type = 'Creator';
+    }
+
     res.json({ user: userWithAccountType });
   } catch (err) {
     console.error('Unexpected error in me endpoint:', err);
