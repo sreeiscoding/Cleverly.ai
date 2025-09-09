@@ -152,6 +152,28 @@
         border-bottom: none;
       }
 
+      .nb-folder-actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .nb-folder-actions .nb-file-action {
+        padding: 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .nb-folder-actions .nb-file-action:hover {
+        background: rgba(20, 128, 122, 0.1);
+        color: #14807a;
+      }
+
+      .nb-folder-actions .nb-file-action[title="Delete folder"]:hover {
+        background: rgba(220, 53, 69, 0.1);
+        color: #dc3545;
+      }
+
       .nb-file-info,
       .nb-folder-info {
         margin-left: 12px;
@@ -639,6 +661,95 @@
       /* Hide file input elements */
       .nb-file-input {
         display: none !important;
+      }
+
+      /* Upload Success Popup Styles */
+      .upload-success-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease-out;
+      }
+
+      .upload-success-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      .upload-success-content {
+        position: relative;
+        background: white;
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 400px;
+        text-align: center;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease-out;
+      }
+
+      .upload-success-icon {
+        font-size: 48px;
+        color: #28a745;
+        margin-bottom: 16px;
+      }
+
+      .upload-success-content h3 {
+        color: #14807a;
+        margin: 0 0 8px 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+      }
+
+      .upload-success-content p {
+        color: #666;
+        margin: 0 0 24px 0;
+        font-size: 1rem;
+      }
+
+      .upload-success-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+      }
+
+      .upload-success-btn {
+        padding: 12px 24px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .upload-success-btn.primary {
+        background: #14807a;
+        color: white;
+      }
+
+      .upload-success-btn.primary:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+      }
+
+      .upload-success-btn.secondary {
+        background: #f8f9fa;
+        color: #666;
+        border: 1px solid #e0e0e0;
+      }
+
+      .upload-success-btn.secondary:hover {
+        background: #e9ecef;
       }
 
       /* Responsive design for nb-quick-actions */
@@ -1141,8 +1252,24 @@
 
         const result = await response.json();
 
-        // Show success notification
+        // Update global file state
+        const uploadedFileInfo = {
+          id: result.id,
+          name: file.name,
+          type: getFileTypeFromName(file.name),
+          size: file.size,
+          content: result.ai_analysis || '',
+          timestamp: new Date().toISOString()
+        };
+
+        uploadedFiles.push(uploadedFileInfo);
+        currentUploadedFile = uploadedFileInfo;
+
+        // Show success notification with popup
         showNotification('Upload success', 'success');
+
+        // Show success popup message
+        showUploadSuccessPopup(file.name);
 
         // Refresh the file list for Notes Breakdown section
         await loadUploadedNotes();
@@ -1173,7 +1300,7 @@
           errorMessage = "Network connection issue. Please check your internet connection.";
         } else if (error.message.includes('API') || error.message.includes('endpoint') || error.message.includes('404')) {
           errorMessage = "Service temporarily unavailable. Please try again later.";
-        } else if (error.message.includes('No authentication token')) {
+        } else if (error.message.includes('No authentication token') || error.message.includes('Invalid or expired token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
           errorType = 'warning';
         } else if (error.message.includes('403') || error.message.includes('Unauthorized')) {
@@ -2299,9 +2426,14 @@
               <span class="nb-folder-name">${folder.name}</span>
               <span class="nb-folder-count">${folder.files.length} files</span>
             </div>
-            <button class="nb-file-action" title="Add file" onclick="nbFileManager.showAddToFolderDialog('${folder.id}')">
-              <i class="fa-solid fa-plus"></i>
-            </button>
+            <div class="nb-folder-actions">
+              <button class="nb-file-action" title="Add file" onclick="nbFileManager.showAddToFolderDialog('${folder.id}')">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+              <button class="nb-file-action" title="Delete folder" onclick="nbFileManager.deleteFolder('${folder.id}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </div>
         `).join('');
 
@@ -2313,6 +2445,9 @@
             <div class="nb-folder-info">
               <span class="nb-folder-name" style="color: #14807a; cursor: pointer;" onclick="nbFileManager.showCreateFolderDialog()">Create New Folder</span>
               <span class="nb-folder-count"></span>
+            </div>
+            <div class="nb-folder-actions">
+              <!-- Empty actions for create folder row -->
             </div>
           </div>
         `;
@@ -2410,6 +2545,68 @@
         `).join('');
       }
 
+      // Delete folder
+      deleteFolder(folderId) {
+        const folder = this.library.find(f => f.id === folderId);
+        if (!folder) {
+          showNotification('Folder not found', 'error');
+          return;
+        }
+
+        // Show custom confirmation dialog
+        this.showDeleteFolderConfirmation(folder);
+      }
+
+      // Show custom delete confirmation dialog
+      showDeleteFolderConfirmation(folder) {
+        const hasFiles = folder.files && folder.files.length > 0;
+        const message = hasFiles
+          ? `This folder contains ${folder.files.length} file(s). Are you sure you want to delete "${folder.name}" and all its contents?`
+          : `Are you sure you want to delete the folder "${folder.name}"?`;
+
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'ai-result-modal';
+        modal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content" style="max-width: 450px;">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            <div style="text-align: center; padding: 20px 0;">
+              <div style="font-size: 48px; color: #dc3545; margin-bottom: 16px;">
+                <i class="fa-solid fa-trash-can"></i>
+              </div>
+              <h3 style="color: #333; margin-bottom: 12px; font-size: 1.2rem;">Delete Folder</h3>
+              <p style="color: #666; line-height: 1.5; margin-bottom: 24px;">${message}</p>
+              <div style="display: flex; gap: 12px; justify-content: center;">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>
+                <button id="confirm-delete-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Delete Folder</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add confirmation handler
+        const confirmBtn = modal.querySelector('#confirm-delete-btn');
+        confirmBtn.addEventListener('click', () => {
+          // Remove folder from library
+          this.library = this.library.filter(f => f.id !== folder.id);
+
+          // Save to localStorage
+          this.saveData();
+
+          // Update UI
+          this.updateLibraryUI();
+
+          // Remove modal
+          modal.remove();
+
+          // Show success notification
+          showNotification(`Folder "${folder.name}" deleted successfully`, 'success');
+        });
+      }
+
       // Helper methods
       getFileIcon(type) {
         const iconMap = {
@@ -2465,7 +2662,7 @@
         let errorMessage = "Failed to load recent uploads. Please refresh the page.";
         if (err.message.includes('fetch') || err.message.includes('network')) {
           errorMessage = "Network connection issue. Please check your internet connection.";
-        } else if (err.message.includes('No authentication token')) {
+        } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
         }
 
@@ -2513,6 +2710,59 @@
     // Global variables for drag and drop
     let hasFile = false; // Track if any file is currently uploaded
     let isDragDropOperation = false; // Flag to track drag & drop operations
+
+    // Global file upload state tracking
+    let uploadedFiles = []; // Array to store uploaded file information
+    let currentUploadedFile = null; // Current file being processed
+
+    // Function to show upload success popup
+    function showUploadSuccessPopup(fileName) {
+      // Create popup modal
+      const popup = document.createElement('div');
+      popup.className = 'upload-success-popup';
+      popup.innerHTML = `
+        <div class="upload-success-overlay" onclick="this.parentElement.remove()"></div>
+        <div class="upload-success-content">
+          <div class="upload-success-icon">
+            <i class="fa-solid fa-check-circle"></i>
+          </div>
+          <h3>File has been uploaded successfully</h3>
+          <p>Start AI Processing</p>
+          <div class="upload-success-actions">
+            <button class="upload-success-btn primary" onclick="startAIProcessing()">Start</button>
+            <button class="upload-success-btn secondary" onclick="this.closest('.upload-success-popup').remove()">Later</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(popup);
+
+      // Auto-remove after 10 seconds
+      setTimeout(() => {
+        if (popup.parentElement) {
+          popup.remove();
+        }
+      }, 10000);
+    }
+
+    // Function to start AI processing
+    function startAIProcessing() {
+      // Remove popup
+      const popup = document.querySelector('.upload-success-popup');
+      if (popup) popup.remove();
+
+      // Scroll to AI processing options
+      const aiOptions = document.querySelector('.nb-features-panel');
+      if (aiOptions) {
+        aiOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // Add highlight effect
+        aiOptions.style.boxShadow = '0 0 20px rgba(20, 128, 122, 0.3)';
+        setTimeout(() => {
+          aiOptions.style.boxShadow = '';
+        }, 2000);
+      }
+    }
 
     // Function to get or create file input
     function getFileInput() {
@@ -2767,7 +3017,7 @@
         let errorMessage = "Failed to load uploaded notes. Please refresh the page.";
         if (err.message.includes('fetch') || err.message.includes('network')) {
           errorMessage = "Network connection issue. Please check your internet connection.";
-        } else if (err.message.includes('No authentication token')) {
+        } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
         }
 
@@ -3151,7 +3401,7 @@
           let errorMessage = "Upload failed. Please try again.";
           if (err.message.includes('fetch') || err.message.includes('network')) {
             errorMessage = "Network connection issue. Please check your internet connection.";
-          } else if (err.message.includes('No authentication token')) {
+          } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
             errorMessage = "Session expired. Please refresh the page and log in again.";
           } else if (err.message.includes('413')) {
             errorMessage = "File is too large. Please choose a smaller file.";
@@ -3216,7 +3466,7 @@
             let errorMessage = "Upload failed. Please try again.";
             if (err.message.includes('fetch') || err.message.includes('network')) {
               errorMessage = "Network connection issue. Please check your internet connection.";
-            } else if (err.message.includes('No authentication token')) {
+            } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
               errorMessage = "Session expired. Please refresh the page and log in again.";
             } else if (err.message.includes('413')) {
               errorMessage = "File is too large. Please choose a smaller file.";
@@ -3277,7 +3527,7 @@
           let errorMessage = "Delete failed. Please try again.";
           if (err.message.includes('fetch') || err.message.includes('network')) {
             errorMessage = "Network connection issue. Please check your internet connection.";
-          } else if (err.message.includes('No authentication token')) {
+          } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
             errorMessage = "Session expired. Please refresh the page and log in again.";
           } else if (err.message.includes('404')) {
             errorMessage = "File not found. It may have already been deleted.";
@@ -3351,9 +3601,24 @@
               `;
             }
 
+            // Update global file state
+            const uploadedFileInfo = {
+              id: uploadId,
+              name: uploadData.file.name,
+              type: getFileTypeFromName(uploadData.file.name),
+              size: uploadData.file.size,
+              content: '', // Content will be extracted from the file later
+              timestamp: new Date().toISOString()
+            };
+
+            uploadedFiles.push(uploadedFileInfo);
+            currentUploadedFile = uploadedFileInfo;
+
+            // Show success popup
+            showUploadSuccessPopup(uploadData.file.name);
+
             // Add to recent files
-            const uploadData = this.activeUploads.get(uploadId);
-            if (uploadData && window.nbFileManager) {
+            if (window.nbFileManager) {
               window.nbFileManager.addRecentFile({
                 id: uploadId,
                 name: uploadData.file.name,
@@ -3386,7 +3651,7 @@
         let errorMessage = "Download failed. Please try again.";
         if (err.message.includes('fetch') || err.message.includes('network')) {
           errorMessage = "Network connection issue. Please check your internet connection.";
-        } else if (err.message.includes('No authentication token')) {
+        } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
         } else if (err.message.includes('404')) {
           errorMessage = "File not found. It may have been deleted.";
@@ -3678,17 +3943,30 @@
           console.error('AI Summarize Error:', err);
 
           let errorMessage = "AI summarize failed. Please try again.";
+          let notificationType = 'error';
+
           if (err.message.includes('fetch') || err.message.includes('network')) {
             errorMessage = "Network connection issue. Please check your internet connection.";
-          } else if (err.message.includes('No authentication token')) {
+          } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
             errorMessage = "Session expired. Please refresh the page and log in again.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
+            errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
+            errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service configuration error')) {
+            errorMessage = "AI service configuration error. Please contact support.";
+            notificationType = 'warning';
+          } else if (err.message.includes('Network connection issue')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+            notificationType = 'error';
+          } else if (err.message) {
+            errorMessage = err.message;
           }
 
-          try {
-            alert(errorMessage);
-          } catch (alertError) {
-            console.warn('Alert blocked, AI Summarize error message:', errorMessage);
-          }
+          showNotification(errorMessage, notificationType);
         } finally {
           promptSendBtn.disabled = false;
           promptSendBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
@@ -3699,7 +3977,32 @@
     });
 
     // On load, fetch uploaded notes to list for Upload Notes section
-    document.addEventListener("DOMContentLoaded", () => loadUploadedNotes());
+    document.addEventListener("DOMContentLoaded", async () => {
+      await loadUploadedNotes();
+
+      // Load existing uploaded files into global state
+      try {
+        const notes = await apiFetch("/upload/notes");
+        if (notes && notes.length > 0) {
+          // Update global state with existing files
+          uploadedFiles = notes.map(note => ({
+            id: note.id,
+            name: note.title,
+            type: getFileTypeFromName(note.title),
+            size: 0, // Size not stored in upload_notes table
+            content: note.ai_analysis || '',
+            timestamp: note.created_at
+          }));
+
+          // Set current file to the most recent one
+          if (uploadedFiles.length > 0) {
+            currentUploadedFile = uploadedFiles[uploadedFiles.length - 1];
+          }
+        }
+      } catch (err) {
+        console.log('No existing uploaded files found');
+      }
+    });
 
     // Upload Notes Processing Options
     document.addEventListener("click", async (e) => {
@@ -3816,19 +4119,32 @@
         console.error(`${action} Processing Error:`, err);
 
         let errorMessage = `${action.replace('-', ' ').toUpperCase()} failed. Please try again.`;
+        let notificationType = 'error';
+
         if (err.message.includes('fetch') || err.message.includes('network')) {
           errorMessage = "Network connection issue. Please check your internet connection.";
-        } else if (err.message.includes('No authentication token')) {
+        } else if (err.message.includes('No authentication token') || err.message.includes('Invalid or expired token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
+          notificationType = 'warning';
         } else if (err.message.includes('404')) {
           errorMessage = "Service not found. Please try again later.";
+        } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
+          errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
+          notificationType = 'warning';
+        } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
+          errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
+          notificationType = 'warning';
+        } else if (err.message.includes('AI service configuration error')) {
+          errorMessage = "AI service configuration error. Please contact support.";
+          notificationType = 'warning';
+        } else if (err.message.includes('Network connection issue')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+          notificationType = 'error';
+        } else if (err.message) {
+          errorMessage = err.message;
         }
 
-        try {
-          alert(errorMessage);
-        } catch (alertError) {
-          console.warn('Alert blocked, process error message:', errorMessage);
-        }
+        showNotification(errorMessage, notificationType);
       } finally {
         processBtn.disabled = false;
         const icon = processBtn.querySelector("i")?.className || "fa-solid fa-wand-magic-sparkles";
@@ -4026,17 +4342,30 @@
           console.error('AI Image Generation Error:', err);
 
           let errorMessage = "Image generation failed. Please try again.";
+          let notificationType = 'error';
+
           if (err.message.includes('fetch') || err.message.includes('network')) {
             errorMessage = "Network connection issue. Please check your internet connection.";
           } else if (err.message.includes('No authentication token')) {
             errorMessage = "Session expired. Please refresh the page and log in again.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
+            errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
+            errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service configuration error')) {
+            errorMessage = "AI service configuration error. Please contact support.";
+            notificationType = 'warning';
+          } else if (err.message.includes('Network connection issue')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+            notificationType = 'error';
+          } else if (err.message) {
+            errorMessage = err.message;
           }
 
-          try {
-            alert(errorMessage);
-          } catch (alertError) {
-            console.warn('Alert blocked, AI Image error message:', errorMessage);
-          }
+          showNotification(errorMessage, notificationType);
 
           aiImgPreviewArea.innerHTML = `
             <div class="ai-img-preview-placeholder">
@@ -4468,17 +4797,30 @@
           console.error('MCQ Generation Error:', err);
 
           let errorMessage = "MCQ generation failed. Please try again.";
+          let notificationType = 'error';
+
           if (err.message.includes('fetch') || err.message.includes('network')) {
             errorMessage = "Network connection issue. Please check your internet connection.";
           } else if (err.message.includes('No authentication token')) {
             errorMessage = "Session expired. Please refresh the page and log in again.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
+            errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
+            errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
+            notificationType = 'warning';
+          } else if (err.message.includes('AI service configuration error')) {
+            errorMessage = "AI service configuration error. Please contact support.";
+            notificationType = 'warning';
+          } else if (err.message.includes('Network connection issue')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+            notificationType = 'error';
+          } else if (err.message) {
+            errorMessage = err.message;
           }
 
-          try {
-            alert(errorMessage);
-          } catch (alertError) {
-            console.warn('Alert blocked, MCQ error message:', errorMessage);
-          }
+          showNotification(errorMessage, notificationType);
         } finally {
           mcqGenerateBtn.disabled = false;
           mcqGenerateBtn.innerHTML = `<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Questions`;
@@ -4588,24 +4930,30 @@
 
       const featureType = featureCard.querySelector("h4").textContent.toLowerCase().replace(/\s+/g, '_');
 
+      // Check if there are uploaded files
+      if (!currentUploadedFile && uploadedFiles.length === 0) {
+        showNotification("Upload files first", 'warning');
+        return;
+      }
+
+      // Get the most recent uploaded file content
+      let fileContent = "";
+      if (currentUploadedFile && currentUploadedFile.content) {
+        fileContent = currentUploadedFile.content;
+      } else if (uploadedFiles.length > 0) {
+        // Fallback to the most recent file in the array
+        const recentFile = uploadedFiles[uploadedFiles.length - 1];
+        fileContent = recentFile.content || "";
+      }
+
+      if (!fileContent.trim()) {
+        showNotification("No content found in uploaded file. Please try uploading again.", 'warning');
+        return;
+      }
+
       // Get the button's built-in prompt content
       const buttonTitle = featureCard.querySelector("h4").textContent;
       const buttonDesc = featureCard.querySelector("p").textContent;
-
-      // Check if there are uploaded files
-      let fileContent = "";
-      if (window.nbFileManager && window.nbFileManager.recentFiles && window.nbFileManager.recentFiles.length > 0) {
-        // Get the most recent uploaded file
-        const recentFile = window.nbFileManager.recentFiles[0];
-        if (recentFile && recentFile.content) {
-          fileContent = recentFile.content;
-        }
-      }
-
-      if (!fileContent) {
-        showNotification("Upload a file before Processing.", 'warning');
-        return;
-      }
 
       // Create the combined prompt with button content and actual file content
       const combinedPrompt = `${buttonTitle}. ${buttonDesc}\n\nDocument Content:\n${fileContent}`;
@@ -4688,25 +5036,35 @@
         console.error('AI Processing Error:', err);
 
         let errorMessage = "An unexpected error occurred. Please try again.";
+        let notificationType = 'error';
 
         if (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed to fetch')) {
-          errorMessage = "Sorry! Network connection issue. Please check your internet connection.";
+          errorMessage = "Network connection issue. Please check your internet connection.";
         } else if (err.message.includes('API') || err.message.includes('endpoint') || err.message.includes('404')) {
           errorMessage = "Service temporarily unavailable. Please try again later.";
         } else if (err.message.includes('No authentication token')) {
           errorMessage = "Session expired. Please refresh the page and log in again.";
+          notificationType = 'warning';
         } else if (err.message.includes('403') || err.message.includes('Unauthorized')) {
           errorMessage = "Access denied. Please check your permissions.";
+        } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
+          errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
+          notificationType = 'warning';
+        } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
+          errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
+          notificationType = 'warning';
+        } else if (err.message.includes('AI service configuration error')) {
+          errorMessage = "AI service configuration error. Please contact support.";
+          notificationType = 'warning';
+        } else if (err.message.includes('Network connection issue')) {
+          errorMessage = "Network connection issue. Please check your internet connection.";
+          notificationType = 'error';
         } else if (err.message) {
-          errorMessage = `AI ${featureType.replace(/_/g, ' ')} failed: ${err.message}`;
+          errorMessage = err.message;
         }
 
-        // Try to show alert, fallback to console if blocked
-        try {
-          alert(errorMessage);
-        } catch (alertError) {
-          console.warn('Alert blocked, error message:', errorMessage);
-        }
+        // Show custom notification
+        showNotification(errorMessage, notificationType);
       } finally {
         // Reset loading state
         featureCard.style.opacity = "1";

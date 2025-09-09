@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test AI Notifications</title>
+    <style>
+        /* Custom Notification System */
+        .custom-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            border-radius: 8px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-left: 4px solid #14807a;
+            z-index: 10000;
+            max-width: 400px;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .custom-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .custom-notification.error {
+            border-left-color: #dc3545;
+            background: #fff5f5;
+        }
+
+        .custom-notification.success {
+            border-left-color: #28a745;
+            background: #f8fff8;
+        }
+
+        .custom-notification.warning {
+            border-left-color: #ffc107;
+            background: #fffbf0;
+        }
+
+        .custom-notification.info {
+            border-left-color: #17a2b8;
+            background: #f0f8ff;
+        }
+
+        .custom-notification-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .custom-notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #333;
+            margin: 0;
+        }
+
+        .custom-notification-close {
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            color: #666;
+            padding: 0;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .custom-notification-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.4;
+            margin: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+
+        .test-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 300px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .ai-btn {
+            background: #14807a;
+            color: white;
+        }
+
+        .ai-btn:hover {
+            background: #0f6b63;
+        }
+
+        .ai-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test AI Notifications</h1>
+    <p>Click the buttons below to test different AI error scenarios:</p>
+
+    <div class="test-buttons">
+        <button class="ai-btn" onclick="testAPIKeyError()">Test API Key Error</button>
+        <button class="ai-btn" onclick="testNetworkError()">Test Network Error</button>
+        <button class="ai-btn" onclick="testRateLimitError()">Test Rate Limit Error</button>
+        <button class="ai-btn" onclick="testGenericError()">Test Generic Error</button>
+        <button class="ai-btn" onclick="testSuccess()">Test Success</button>
+    </div>
+
+    <script>
+        // Custom Notification System
+        function showNotification(message, type = 'info', duration = 5000) {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.custom-notification');
+            existingNotifications.forEach(notification => notification.remove());
+
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `custom-notification ${type}`;
+
+            notification.innerHTML = `
+                <div class="custom-notification-header">
+                    <h4 class="custom-notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+                    <button class="custom-notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                </div>
+                <p class="custom-notification-message">${message}</p>
+            `;
+
+            // Add to page
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => notification.classList.add('show'), 10);
+
+            // Auto-hide after duration
+            if (duration > 0) {
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.classList.remove('show');
+                        setTimeout(() => notification.remove(), 300);
+                    }
+                }, duration);
+            }
+
+            return notification;
+        }
+
+        // Test functions
+        function testAPIKeyError() {
+            showNotification('AI service unavailable: OpenAI API key not configured. Please contact support.', 'warning');
+        }
+
+        function testNetworkError() {
+            showNotification('AI service unavailable: Network connection failed. Please check your internet connection.', 'error');
+        }
+
+        function testRateLimitError() {
+            showNotification('AI service temporarily unavailable: Rate limit exceeded. Please try again later.', 'warning');
+        }
+
+        function testGenericError() {
+            showNotification('AI service error: Failed to generate summary. Please try again.', 'error');
+        }
+
+        function testSuccess() {
+            showNotification('AI processing completed successfully!', 'success');
+        }
+    </script>
+</body>
+</html>
