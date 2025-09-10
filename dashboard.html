@@ -1669,6 +1669,60 @@
     </div>
   </body>
   <script>
+    // Utility functions for file handling
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function getFileIcon(fileType) {
+      const type = fileType.toLowerCase();
+      if (type.includes('pdf')) return 'file-pdf';
+      if (type.includes('word') || type.includes('document')) return 'file-word';
+      if (type.includes('text')) return 'file-alt';
+      if (type.includes('image')) return 'file-image';
+      if (type.includes('video')) return 'file-video';
+      if (type.includes('audio')) return 'file-audio';
+      if (type.includes('zip') || type.includes('rar')) return 'file-archive';
+      return 'file';
+    }
+
+    function getFileTypeFromName(fileName) {
+      if (!fileName) return 'Unknown';
+      const extension = fileName.split('.').pop().toLowerCase();
+      const typeMap = {
+        'pdf': 'PDF',
+        'doc': 'Word Document',
+        'docx': 'Word Document',
+        'txt': 'Text File',
+        'rtf': 'Rich Text',
+        'html': 'HTML',
+        'htm': 'HTML',
+        'css': 'CSS',
+        'js': 'JavaScript',
+        'json': 'JSON',
+        'xml': 'XML',
+        'jpg': 'JPEG Image',
+        'jpeg': 'JPEG Image',
+        'png': 'PNG Image',
+        'gif': 'GIF Image',
+        'bmp': 'Bitmap Image',
+        'svg': 'SVG Image',
+        'mp4': 'MP4 Video',
+        'avi': 'AVI Video',
+        'mov': 'QuickTime Video',
+        'mp3': 'MP3 Audio',
+        'wav': 'WAV Audio',
+        'zip': 'ZIP Archive',
+        'rar': 'RAR Archive',
+        '7z': '7-Zip Archive'
+      };
+      return typeMap[extension] || extension.toUpperCase() + ' File';
+    }
+
     // Custom Notification System
     function showNotification(message, type = 'info', duration = 5000) {
       // Remove existing notifications
@@ -1737,10 +1791,13 @@
         // Show upload progress notification
         showNotification('Starting file upload...', 'info', 0);
 
-        // Create FormData for file upload
+        // Create FormData for file upload with enhanced metadata
         const formData = new FormData();
         formData.append('file', file);
         formData.append('title', file.name);
+        formData.append('file_name', file.name);
+        formData.append('file_type', getFileTypeFromName(file.name));
+        formData.append('file_size', file.size.toString());
 
         // Upload file directly to database
         const response = await fetch(API_BASE_URL + '/upload/notes', {
@@ -1767,14 +1824,21 @@
 
         // Safely extract data from response
         const uploadNote = result?.uploadNote || result || {};
-        const fileId = uploadNote.id || `temp_${Date.now()}`;
+
+        if (!uploadNote || !uploadNote.id) {
+          console.error('Invalid upload response:', result);
+          showNotification('Upload completed but response is invalid. Please refresh the page.', 'warning');
+          return;
+        }
+
+        const fileId = uploadNote.id;
 
         // Update global file state
         const uploadedFileInfo = {
           id: fileId,
-          name: file.name,
-          type: getFileTypeFromName(file.name),
-          size: file.size,
+          name: uploadNote.file_name || file.name,
+          type: uploadNote.file_type || getFileTypeFromName(file.name),
+          size: uploadNote.file_size || file.size,
           content: uploadNote.ai_analysis || '',
           timestamp: new Date().toISOString()
         };
@@ -1791,6 +1855,10 @@
         // Refresh the file list for Notes Breakdown section
         try {
           await loadUploadedNotes();
+          // Also refresh NbFileManager if it exists
+          if (window.nbFileManager) {
+            await window.nbFileManager.updateRecentFilesUI();
+          }
         } catch (loadError) {
           console.warn('Failed to refresh file list:', loadError);
         }
@@ -1970,33 +2038,61 @@
               <div class="nb-features-panel">
                 <h3>AI Processing Options</h3>
                 <div class="nb-features-grid">
-                  <button type="button" class="nb-feature-card">
+                  <button type="button" class="nb-feature-card" data-action="smart_summary">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-book-open-reader"></i>
                     </div>
                     <h4>Smart Summary</h4>
                     <p>Generate concise chapter summaries and key points</p>
                   </button>
-                  <button type="button" class="nb-feature-card">
+                  <button type="button" class="nb-feature-card" data-action="mind_map">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-diagram-project"></i>
                     </div>
                     <h4>Mind Map</h4>
                     <p>Create visual concept maps from your notes</p>
                   </button>
-                  <button type="button" class="nb-feature-card">
+                  <button type="button" class="nb-feature-card" data-action="study_guide">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-lightbulb"></i>
                     </div>
                     <h4>Study Guide</h4>
                     <p>Generate comprehensive study materials</p>
                   </button>
-                  <button type="button" class="nb-feature-card">
+                  <button type="button" class="nb-feature-card" data-action="flashcards">
                     <div class="nb-feature-icon">
                       <i class="fa-solid fa-cards-blank"></i>
                     </div>
                     <h4>Flashcards</h4>
                     <p>Create interactive flashcards for review</p>
+                  </button>
+                  <button type="button" class="nb-feature-card" data-action="key_points">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <h4>Key Points</h4>
+                    <p>Extract and organize key points from your content</p>
+                  </button>
+                  <button type="button" class="nb-feature-card" data-action="concept_map">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-sitemap"></i>
+                    </div>
+                    <h4>Concept Map</h4>
+                    <p>Generate detailed concept maps with relationships</p>
+                  </button>
+                  <button type="button" class="nb-feature-card" data-action="search">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h4>Search Notes</h4>
+                    <p>Search through all your processed notes</p>
+                  </button>
+                  <button type="button" class="nb-feature-card" data-action="statistics">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-chart-bar"></i>
+                    </div>
+                    <h4>Statistics</h4>
+                    <p>View processing statistics and insights</p>
                   </button>
                 </div>
               </div>
@@ -3636,16 +3732,16 @@
             </div>
           </div>
           <div class="nb-file-status">
-            <span class="nb-status-text nb-success">Processed</span>
+            <span class="nb-status-text nb-success">${note.ai_analysis ? 'AI Processed' : 'Uploaded'}</span>
           </div>
           <div class="nb-file-actions">
+            <button class="nb-action" title="View Details" onclick="viewFileDetails('${note.id}')">
+              <i class="fa-solid fa-eye"></i>
+            </button>
             <button class="nb-action" title="Download" onclick="downloadFile('${note.id}')">
               <i class="fa-solid fa-download"></i>
             </button>
-            <button class="nb-action" title="Share" onclick="shareFile('${note.id}')">
-              <i class="fa-solid fa-share"></i>
-            </button>
-            <button class="nb-action" title="Delete" onclick="deleteNote('${note.id}', targetContainer)">
+            <button class="nb-action" title="Delete" onclick="deleteNote('${note.id}')">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -4524,14 +4620,16 @@
           return;
         }
 
-        // Update global file state
+        // Update global file state with new database columns
         uploadedFiles = files.map(file => ({
           id: file.id,
-          name: file.title,
-          type: getFileTypeFromName(file.title),
-          size: 0, // Size not stored in upload_notes table
+          name: file.file_name || file.title || 'Untitled',
+          type: file.file_type || getFileTypeFromName(file.title || ''),
+          size: file.file_size || 0,
           content: file.ai_analysis || '',
-          timestamp: file.created_at
+          timestamp: file.created_at,
+          isFavorite: file.is_favorite || false,
+          folderId: file.folder_id || null
         }));
 
         // Set current file to the most recent one
@@ -4539,32 +4637,40 @@
           currentUploadedFile = uploadedFiles[uploadedFiles.length - 1];
         }
 
-        // Render files
-        targetContainer.innerHTML = files.map(file => `
-          <div class="nb-file-item" data-file-id="${file.id}">
-            <div class="nb-file-info">
-              <span class="nb-file-icon"><i class="fa-solid fa-file-${getFileIcon(file.title)}"></i></span>
-              <div class="nb-file-details">
-                <span class="nb-file-name">${file.title || 'Untitled'}</span>
-                <span class="nb-file-meta">${getFileTypeLabel(file.title)} • Uploaded ${new Date(file.created_at).toLocaleDateString()}</span>
+        // Render files with enhanced metadata
+        targetContainer.innerHTML = files.map(file => {
+          const fileName = file.file_name || file.title || 'Untitled';
+          const fileType = file.file_type || getFileTypeFromName(fileName);
+          const fileSize = file.file_size || 0;
+          const formattedSize = fileSize > 0 ? formatFileSize(fileSize) : '';
+          const isFavorite = file.is_favorite || false;
+
+          return `
+            <div class="nb-file-item ${isFavorite ? 'nb-favorite' : ''}" data-file-id="${file.id}">
+              <div class="nb-file-info">
+                <span class="nb-file-icon"><i class="fa-solid fa-file-${getFileIcon(fileType)}"></i></span>
+                <div class="nb-file-details">
+                  <span class="nb-file-name">${fileName}</span>
+                  <span class="nb-file-meta">${fileType.toUpperCase()} ${formattedSize ? '• ' + formattedSize : ''} • Uploaded ${new Date(file.created_at).toLocaleDateString()}</span>
+                </div>
+              </div>
+              <div class="nb-file-status">
+                <span class="nb-status-text nb-success">${file.ai_analysis ? 'AI Processed' : 'Uploaded'}</span>
+              </div>
+              <div class="nb-file-actions">
+                <button class="nb-action" title="View Details" onclick="viewFileDetails('${file.id}')">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <button class="nb-action" title="Download" onclick="downloadFile('${file.id}')">
+                  <i class="fa-solid fa-download"></i>
+                </button>
+                <button class="nb-action" title="Delete" onclick="deleteNote('${file.id}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
               </div>
             </div>
-            <div class="nb-file-status">
-              <span class="nb-status-text nb-success">${file.ai_analysis ? 'AI Processed' : 'Uploaded'}</span>
-            </div>
-            <div class="nb-file-actions">
-              <button class="nb-action" title="View Details" onclick="viewFileDetails('${file.id}')">
-                <i class="fa-solid fa-eye"></i>
-              </button>
-              <button class="nb-action" title="Download" onclick="downloadFile('${file.id}')">
-                <i class="fa-solid fa-download"></i>
-              </button>
-              <button class="nb-action" title="Delete" onclick="deleteNote('${file.id}')">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
 
       } catch (error) {
         console.error('Failed to load uploaded notes:', error);
@@ -4583,8 +4689,8 @@
       }
     }
 
-    // Update file display UI
-    function updateFileDisplay(files) {
+    // Update upload notes display UI
+    function updateUploadNotesDisplay(files) {
       const uploadZone = document.querySelector('.nb-upload-zone');
       const fileList = document.querySelector('.nb-uploaded-files');
 
@@ -5742,6 +5848,179 @@
     let selectedAIProcessingFiles = [];
     let currentAIProcessingType = '';
 
+    // Search Interface Functions
+    function openSearchInterface() {
+      const modal = document.createElement('div');
+      modal.className = 'ai-result-modal';
+      modal.innerHTML = `
+        <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+        <div class="ai-result-content" style="max-width: 600px;">
+          <button class="ai-result-close" onclick="this.parentElement.remove()">&times;</button>
+          <h3 style="color: #14807a; margin-bottom: 20px;">Search Notes Breakdown</h3>
+
+          <div style="margin-bottom: 20px;">
+            <input type="text" id="searchQuery" placeholder="Enter search terms..." style="width: 100%; padding: 12px; border: 1px solid #e0e0e0; border-radius: 8px; font-size: 14px;">
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Cancel</button>
+            <button id="performSearchBtn" style="padding: 10px 20px; background: #14807a; color: white; border: none; border-radius: 6px; cursor: pointer;">Search</button>
+          </div>
+
+          <div id="searchResults" style="margin-top: 20px; max-height: 300px; overflow-y: auto;"></div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      // Add search functionality
+      const searchBtn = modal.querySelector('#performSearchBtn');
+      const searchInput = modal.querySelector('#searchQuery');
+
+      searchBtn.addEventListener('click', () => performNotesSearch(searchInput.value, modal));
+      searchInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          performNotesSearch(searchInput.value, modal);
+        }
+      });
+    }
+
+    async function performNotesSearch(query, modal) {
+      if (!query.trim()) {
+        showNotification('Please enter a search query', 'warning');
+        return;
+      }
+
+      const searchBtn = modal.querySelector('#performSearchBtn');
+      const searchResults = modal.querySelector('#searchResults');
+
+      searchBtn.disabled = true;
+      searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Searching...';
+      searchResults.innerHTML = '<div style="text-align: center; padding: 20px;"><i class="fa-solid fa-spinner fa-spin"></i> Searching...</div>';
+
+      try {
+        const response = await apiFetch(`/notes-breakdown/search?q=${encodeURIComponent(query)}`);
+        const results = response.results || [];
+
+        if (results.length === 0) {
+          searchResults.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+              <i class="fa-solid fa-search" style="font-size: 48px; margin-bottom: 16px;"></i>
+              <h4>No results found</h4>
+              <p>No notes match your search for "${query}"</p>
+            </div>
+          `;
+        } else {
+          searchResults.innerHTML = `
+            <h4 style="margin-bottom: 16px; color: var(--text-primary);">Found ${results.length} result${results.length > 1 ? 's' : ''}:</h4>
+            ${results.map(result => `
+              <div style="margin-bottom: 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #14807a;">
+                <div style="font-weight: 500; margin-bottom: 8px; color: var(--text-primary);">${result.title || 'Untitled'}</div>
+                <div style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 8px;">${result.content ? result.content.substring(0, 150) + '...' : 'No content'}</div>
+                <div style="font-size: 0.8em; color: var(--text-muted);">Type: ${result.type || 'Unknown'} • ${result.timestamp ? new Date(result.timestamp).toLocaleDateString() : ''}</div>
+              </div>
+            `).join('')}
+          `;
+        }
+      } catch (error) {
+        console.error('Search failed:', error);
+        searchResults.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #dc3545;">
+            <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h4>Search failed</h4>
+            <p>Please try again later</p>
+          </div>
+        `;
+      } finally {
+        searchBtn.disabled = false;
+        searchBtn.innerHTML = 'Search';
+      }
+    }
+
+    // Statistics Interface Functions
+    function openStatisticsInterface() {
+      const modal = document.createElement('div');
+      modal.className = 'ai-result-modal';
+      modal.innerHTML = `
+        <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+        <div class="ai-result-content" style="max-width: 700px;">
+          <button class="ai-result-close" onclick="this.parentElement.remove()">&times;</button>
+          <h3 style="color: #14807a; margin-bottom: 20px;">Notes Breakdown Statistics</h3>
+
+          <div id="statsContent" style="margin-bottom: 20px;">
+            <div style="text-align: center; padding: 40px;">
+              <i class="fa-solid fa-spinner fa-spin" style="font-size: 48px; margin-bottom: 16px;"></i>
+              <p>Loading statistics...</p>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer;">Close</button>
+          </div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+      loadStatistics(modal);
+    }
+
+    async function loadStatistics(modal) {
+      const statsContent = modal.querySelector('#statsContent');
+
+      try {
+        const response = await apiFetch('/notes-breakdown/statistics');
+        const stats = response.statistics || {};
+
+        statsContent.innerHTML = `
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #14807a; margin-bottom: 8px;">${stats.totalFiles || 0}</div>
+              <div style="font-size: 0.9em; color: var(--text-secondary);">Total Files</div>
+            </div>
+            <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #14807a; margin-bottom: 8px;">${stats.processedFiles || 0}</div>
+              <div style="font-size: 0.9em; color: var(--text-secondary);">AI Processed</div>
+            </div>
+            <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #14807a; margin-bottom: 8px;">${stats.totalSummaries || 0}</div>
+              <div style="font-size: 0.9em; color: var(--text-secondary);">Summaries</div>
+            </div>
+            <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+              <div style="font-size: 24px; font-weight: bold; color: #14807a; margin-bottom: 8px;">${stats.totalMindMaps || 0}</div>
+              <div style="font-size: 0.9em; color: var(--text-secondary);">Mind Maps</div>
+            </div>
+          </div>
+
+          <div style="padding: 16px; background: var(--bg-primary); border-radius: 8px;">
+            <h4 style="margin-bottom: 12px; color: var(--text-primary);">Recent Activity</h4>
+            <div id="recentActivity" style="max-height: 200px; overflow-y: auto;">
+              ${stats.recentActivity && stats.recentActivity.length > 0
+                ? stats.recentActivity.map(activity => `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-light);">
+                      <div>
+                        <div style="font-weight: 500; color: var(--text-primary);">${activity.action}</div>
+                        <div style="font-size: 0.8em; color: var(--text-secondary);">${activity.fileName}</div>
+                      </div>
+                      <div style="font-size: 0.8em; color: var(--text-secondary);">${activity.timestamp ? new Date(activity.timestamp).toLocaleDateString() : ''}</div>
+                    </div>
+                  `).join('')
+                : '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">No recent activity</div>'
+              }
+            </div>
+          </div>
+        `;
+      } catch (error) {
+        console.error('Failed to load statistics:', error);
+        statsContent.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: #dc3545;">
+            <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h4>Failed to load statistics</h4>
+            <p>Please try again later</p>
+          </div>
+        `;
+      }
+    }
+
     // File Selector Popup Functions
     function openFileSelectorPopup(processingType) {
       currentAIProcessingType = processingType;
@@ -5756,7 +6035,9 @@
         'smart_summary': 'Select Files for Smart Summary',
         'mind_map': 'Select Files for Mind Map Generation',
         'study_guide': 'Select Files for Study Guide Creation',
-        'flashcards': 'Select Files for Flashcard Generation'
+        'flashcards': 'Select Files for Flashcard Generation',
+        'key_points': 'Select Files for Key Points Extraction',
+        'concept_map': 'Select Files for Concept Map Generation'
       };
       title.textContent = titles[processingType] || 'Select Files for AI Processing';
 
@@ -5898,6 +6179,16 @@
             requestData.title = 'Combined Flashcards';
             resultTitle = 'Flashcards';
             break;
+          case 'key_points':
+            endpoint = '/notes-breakdown/key-points';
+            requestData.title = 'Key Points Extraction';
+            resultTitle = 'Key Points';
+            break;
+          case 'concept_map':
+            endpoint = '/notes-breakdown/concept-map';
+            requestData.title = 'Concept Map Generation';
+            resultTitle = 'Concept Map';
+            break;
           default:
             throw new Error('Unknown processing type');
         }
@@ -5925,6 +6216,33 @@
               <strong>A:</strong> ${card.answer}
             </div>`;
           });
+        } else if (currentAIProcessingType === 'key_points') {
+          const keyPoints = response.key_points || [];
+          resultContent = `<h3>📝 Key Points (${keyPoints.length})</h3>`;
+          keyPoints.forEach((point, index) => {
+            resultContent += `<div style="margin-bottom: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #14807a;">
+              <strong>${index + 1}.</strong> ${point}
+            </div>`;
+          });
+        } else if (currentAIProcessingType === 'concept_map') {
+          const conceptMap = response.concept_map || {};
+          resultContent = `<h3>🗺️ Concept Map</h3>`;
+          if (conceptMap.nodes && conceptMap.nodes.length > 0) {
+            resultContent += `<div style="margin-bottom: 16px;"><strong>Key Concepts:</strong></div>`;
+            conceptMap.nodes.forEach((node, index) => {
+              resultContent += `<div style="margin-bottom: 8px; padding: 8px; background: var(--bg-primary); border-radius: 6px;">
+                <strong>${index + 1}.</strong> ${node}
+              </div>`;
+            });
+          }
+          if (conceptMap.relationships && conceptMap.relationships.length > 0) {
+            resultContent += `<div style="margin-top: 16px; margin-bottom: 16px;"><strong>Relationships:</strong></div>`;
+            conceptMap.relationships.forEach((rel, index) => {
+              resultContent += `<div style="margin-bottom: 8px; padding: 8px; background: var(--bg-primary); border-radius: 6px;">
+                <strong>${index + 1}.</strong> ${rel}
+              </div>`;
+            });
+          }
         }
 
         resultContent += `<div style="margin-top: 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; font-size: 0.9em; color: var(--text-secondary);">
@@ -6001,10 +6319,22 @@
       const featureCard = e.target.closest(".nb-feature-card");
       if (!featureCard) return;
 
-      const featureType = featureCard.querySelector("h4").textContent.toLowerCase().replace(/\s+/g, '_');
+      const action = featureCard.dataset.action;
+      if (!action) return;
 
-      // Open file selector instead of processing immediately
-      openFileSelectorPopup(featureType);
+      // Handle special cases that don't need file selection
+      if (action === 'search') {
+        openSearchInterface();
+        return;
+      }
+
+      if (action === 'statistics') {
+        openStatisticsInterface();
+        return;
+      }
+
+      // Open file selector for other features
+      openFileSelectorPopup(action);
     });
   </script>
 </html>

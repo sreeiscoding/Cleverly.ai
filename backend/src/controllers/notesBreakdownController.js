@@ -1,4 +1,4 @@
-const { generateMindMap, generateStudyGuide, generateFlashcards } = require('../lib/openai');
+const { generateMindMap, generateStudyGuide, generateFlashcards, generateKeyPoints, generateConceptMap } = require('../lib/openai');
 const { supabaseAdmin } = require('../lib/supabase');
 const { z } = require('zod');
 
@@ -438,6 +438,250 @@ exports.getUserUploadedFiles = async (req, res, next) => {
     }));
 
     res.json(processedFiles);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Generate key points from text
+exports.generateKeyPoints = async (req, res, next) => {
+  try {
+    const schema = z.object({
+      text: z.string().min(1).max(50000),
+      title: z.string().optional()
+    });
+    const { text, title = 'Key Points' } = schema.parse(req.body);
+
+    console.log(`[${new Date().toISOString()}] Generating key points for user ${req.user.id}, text length: ${text.length}`);
+
+    let keyPoints;
+    try {
+      keyPoints = await generateKeyPoints(text);
+    } catch (aiError) {
+      console.error('AI key points generation failed:', aiError.message);
+
+      // Provide fallback key points
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+      keyPoints = {
+        key_points: sentences.slice(0, 5).map(s => s.trim()),
+        main_themes: ['Main Content', 'Key Information'],
+        important_concepts: ['Core Concepts'],
+        generated_with_fallback: true,
+        error_message: aiError.message
+      };
+    }
+
+    // Save to database with error handling
+    const { data, error } = await supabaseAdmin.from('notes_breakdown')
+      .insert({
+        user_id: req.user.id,
+        type: 'key_points',
+        title,
+        content: text,
+        result: keyPoints,
+        created_at: new Date().toISOString()
+      })
+      .single();
+
+    if (error) {
+      console.error('Database insert error:', error);
+      return res.status(500).json({
+        error: 'Failed to save key points',
+        message: 'Your key points were generated but could not be saved. Please try again.'
+      });
+    }
+
+    console.log(`[${new Date().toISOString()}] Key points generated and saved successfully for user ${req.user.id}, ID: ${data.id}`);
+
+    res.json({
+      key_points: keyPoints,
+      id: data.id,
+      success: true,
+      message: keyPoints.generated_with_fallback ? 'Key points generated with fallback (AI service temporarily unavailable)' : 'Key points generated successfully'
+    });
+  } catch (err) {
+    console.error('Key points generation error:', err);
+    next(err);
+  }
+};
+
+// Generate concept map from text
+exports.generateConceptMap = async (req, res, next) => {
+  try {
+    const schema = z.object({
+      text: z.string().min(1).max(50000),
+      title: z.string().optional()
+    });
+    const { text, title = 'Concept Map' } = schema.parse(req.body);
+
+    console.log(`[${new Date().toISOString()}] Generating concept map for user ${req.user.id}, text length: ${text.length}`);
+
+    let conceptMap;
+    try {
+      conceptMap = await generateConceptMap(text);
+    } catch (aiError) {
+      console.error('AI concept map generation failed:', aiError.message);
+
+      // Provide fallback concept map
+      conceptMap = {
+        concepts: [
+          {
+            name: 'Main Topic',
+            definition: 'Primary subject matter from the text',
+            connections: ['Related Ideas'],
+            examples: ['Key examples identified']
+          }
+        ],
+        relationships: [
+          {
+            from: 'Main Topic',
+            to: 'Related Ideas',
+            type: 'contains',
+            description: 'Main topic encompasses related ideas'
+          }
+        ],
+        generated_with_fallback: true,
+        error_message: aiError.message
+      };
+    }
+
+    // Save to database with error handling
+    const { data, error } = await supabaseAdmin.from('notes_breakdown')
+      .insert({
+        user_id: req.user.id,
+        type: 'concept_map',
+        title,
+        content: text,
+        result: conceptMap,
+        created_at: new Date().toISOString()
+      })
+      .single();
+
+    if (error) {
+      console.error('Database insert error:', error);
+      return res.status(500).json({
+        error: 'Failed to save concept map',
+        message: 'Your concept map was generated but could not be saved. Please try again.'
+      });
+    }
+
+    console.log(`[${new Date().toISOString()}] Concept map generated and saved successfully for user ${req.user.id}, ID: ${data.id}`);
+
+    res.json({
+      concept_map: conceptMap,
+      id: data.id,
+      success: true,
+      message: conceptMap.generated_with_fallback ? 'Concept map generated with fallback (AI service temporarily unavailable)' : 'Concept map generated successfully'
+    });
+  } catch (err) {
+    console.error('Concept map generation error:', err);
+    next(err);
+  }
+};
+
+// Search within user's notes breakdowns
+exports.searchNotesBreakdown = async (req, res, next) => {
+  try {
+    const schema = z.object({
+      query: z.string().min(1),
+      type: z.enum(['all', 'mind_map', 'study_guide', 'flashcards', 'key_points', 'concept_map']).optional().default('all'),
+      limit: z.number().min(1).max(100).optional().default(20)
+    });
+    const { query, type, limit } = schema.parse(req.query);
+
+    let queryBuilder = supabaseAdmin
+      .from('notes_breakdown')
+      .select('id, type, title, content, result, created_at, updated_at')
+      .eq('user_id', req.user.id);
+
+    // Filter by type if specified
+    if (type !== 'all') {
+      queryBuilder = queryBuilder.eq('type', type);
+    }
+
+    // Search in title, content, and result
+    const { data, error } = await queryBuilder
+      .or(`title.ilike.%${query}%,content.ilike.%${query}%`)
+      .order('updated_at', { ascending: false })
+      .limit(limit);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // Also search within result JSON for more detailed matching
+    const filteredResults = data.filter(item => {
+      if (item.result && typeof item.result === 'object') {
+        const resultString = JSON.stringify(item.result).toLowerCase();
+        return resultString.includes(query.toLowerCase());
+      }
+      return true; // Include items that matched title/content search
+    });
+
+    res.json({
+      query,
+      type,
+      total_results: filteredResults.length,
+      results: filteredResults
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get breakdown statistics for user
+exports.getBreakdownStats = async (req, res, next) => {
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('notes_breakdown')
+      .select('type, created_at')
+      .eq('user_id', req.user.id);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    // Calculate statistics
+    const stats = {
+      total_breakdowns: data.length,
+      by_type: {},
+      recent_activity: [],
+      created_today: 0,
+      created_this_week: 0,
+      created_this_month: 0
+    };
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    data.forEach(item => {
+      // Count by type
+      stats.by_type[item.type] = (stats.by_type[item.type] || 0) + 1;
+
+      // Count recent activity
+      const createdDate = new Date(item.created_at);
+      if (createdDate >= today) {
+        stats.created_today++;
+      }
+      if (createdDate >= weekAgo) {
+        stats.created_this_week++;
+      }
+      if (createdDate >= monthAgo) {
+        stats.created_this_month++;
+      }
+    });
+
+    // Get recent activity (last 5 items)
+    const recentData = await supabaseAdmin
+      .from('notes_breakdown')
+      .select('id, type, title, created_at')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(5);
+
+    if (recentData.data) {
+      stats.recent_activity = recentData.data;
+    }
+
+    res.json(stats);
   } catch (err) {
     next(err);
   }

@@ -23,4 +23,15 @@ router.get('/notes', uploadsController.getNotes);
 router.get('/notes/search', uploadsController.searchUploadNotes);
 router.delete('/notes/:noteId', uploadsController.deleteNote);
 
+// New favorites endpoints
+router.post('/notes/:noteId/favorite', uploadsController.toggleFavorite);
+router.get('/favorites', uploadsController.getFavoriteFiles);
+
+// New folders endpoints
+router.post('/folders', uploadsController.createFolder);
+router.get('/folders', uploadsController.getFolders);
+router.post('/folders/add-file', uploadsController.addFileToFolder);
+router.get('/folders/:folderId/files', uploadsController.getFolderFiles);
+router.delete('/folders/:folderId', uploadsController.deleteFolder);
+
 module.exports = router;

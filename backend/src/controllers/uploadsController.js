@@ -289,7 +289,12 @@ const extractTextFromFile = async (buffer, mimetype) => {
 exports.uploadNote = async (req, res, next) => {
   const startTime = Date.now();
   try {
-    if (!req.file) return res.status(400).json({ error: 'File is required' });
+    if (!req.file) {
+      return res.status(400).json({
+        error: 'No file selected',
+        message: `${req.user?.name || 'User'} upload your files!..`
+      });
+    }
 
     // Enhanced user validation
     if (!req.user || !req.user.id) {
@@ -304,6 +309,7 @@ exports.uploadNote = async (req, res, next) => {
     }
 
     const userId = req.user.id;
+    const userName = req.user.name || 'User';
     const fileExtension = req.file.originalname.split('.').pop();
     const storagePath = `${userId}/upload_notes/${Date.now()}-${uuidv4()}.${fileExtension}`;
 
@@ -343,7 +349,7 @@ exports.uploadNote = async (req, res, next) => {
     const extractedText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
     console.log(`[${new Date().toISOString()}] Text extraction completed in ${Date.now() - extractStart}ms, extracted ${extractedText.length} characters`);
 
-    // Database insert
+    // Database insert with enhanced metadata
     const dbStart = Date.now();
     const { data: record, error: insertError } = await supabaseAdmin
       .from('upload_notes')
@@ -351,15 +357,32 @@ exports.uploadNote = async (req, res, next) => {
         user_id: userId,
         file_id: storagePath,
         title,
+        file_name: req.file.originalname,
+        file_type: req.file.mimetype,
+        file_size: req.file.size,
         ai_analysis: null, // Will be updated asynchronously
       })
+      .select()
       .single();
 
     if (insertError) {
       console.error(`[${new Date().toISOString()}] Database insert failed:`, insertError);
-      return res.status(500).json({ error: insertError.message });
+      return res.status(500).json({
+        error: 'Database insert failed',
+        details: insertError.message,
+        code: insertError.code
+      });
     }
-    console.log(`[${new Date().toISOString()}] Database insert completed in ${Date.now() - dbStart}ms`);
+
+    if (!record) {
+      console.error(`[${new Date().toISOString()}] Database insert returned null record`);
+      return res.status(500).json({
+        error: 'Database insert failed',
+        details: 'No record returned from insert operation'
+      });
+    }
+
+    console.log(`[${new Date().toISOString()}] Database insert completed in ${Date.now() - dbStart}ms, record ID: ${record.id}`);
 
     // Process AI analysis in background (non-blocking)
     if (extractedText && extractedText.trim().length > 0) {
@@ -370,8 +393,13 @@ exports.uploadNote = async (req, res, next) => {
     console.log(`[${new Date().toISOString()}] File upload completed successfully in ${totalTime}ms for user ${userId}`);
 
     res.status(201).json({
-      message: 'Note uploaded successfully',
-      uploadNote: record,
+      message: `Your "${req.file.originalname}" is uploaded successfully`,
+      uploadNote: {
+        ...record,
+        file_name: req.file.originalname,
+        file_type: req.file.mimetype,
+        file_size: req.file.size
+      },
       fileUrl: signedUrlData.signedUrl,
       processingTime: totalTime
     });
@@ -410,7 +438,7 @@ exports.getNotes = async (req, res, next) => {
 
     const { data, error } = await supabaseAdmin
       .from('upload_notes')
-      .select('id, title, file_id, ai_analysis, created_at, updated_at')
+      .select('id, title, file_id, ai_analysis, created_at, updated_at, file_name, file_type, file_size, is_favorite, folder_id')
       .eq('user_id', userId)
       .order('updated_at', { ascending: false })
       .limit(50); // Limit for performance
@@ -734,7 +762,7 @@ const finalizeUpload = async (uploadId, userId) => {
     // Extract text and generate AI summary asynchronously
     const extractedText = await extractTextFromFile(fileBuffer, uploadRecord.file_type);
 
-    // Save to upload_notes table
+    // Save to upload_notes table with enhanced metadata
     const dbStart = Date.now();
     const { data: noteRecord, error: insertError } = await supabaseAdmin
       .from('upload_notes')
@@ -742,8 +770,12 @@ const finalizeUpload = async (uploadId, userId) => {
         user_id: userId,
         file_id: storagePath,
         title: uploadRecord.file_name,
+        file_name: uploadRecord.file_name,
+        file_type: uploadRecord.file_type,
+        file_size: uploadRecord.file_size,
         ai_analysis: null, // Will be updated asynchronously
       })
+      .select()
       .single();
 
     if (insertError) {
@@ -1070,6 +1102,304 @@ exports.downloadFile = async (req, res, next) => {
 
   } catch (err) {
     console.error('Download error:', err);
+    next(err);
+  }
+};
+
+// Toggle favorite status for a file
+exports.toggleFavorite = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const { noteId } = req.params;
+    const userId = req.user.id;
+
+    // Get current favorite status
+    const { data: currentNote, error: fetchError } = await supabaseAdmin
+      .from('upload_notes')
+      .select('is_favorite')
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError || !currentNote) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    // Toggle favorite status
+    const newFavoriteStatus = !currentNote.is_favorite;
+
+    const { data, error } = await supabaseAdmin
+      .from('upload_notes')
+      .update({
+        is_favorite: newFavoriteStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({
+      message: newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites',
+      is_favorite: newFavoriteStatus,
+      note: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get favorite files
+exports.getFavoriteFiles = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const userId = req.user.id;
+
+    const { data, error } = await supabaseAdmin
+      .from('upload_notes')
+      .select('id, title, file_name, file_type, file_size, ai_analysis, created_at, updated_at, folder_id')
+      .eq('user_id', userId)
+      .eq('is_favorite', true)
+      .order('updated_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Create a new folder
+exports.createFolder = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const schema = z.object({
+      name: z.string().min(1).max(100),
+      description: z.string().optional(),
+      color: z.string().optional().default('#14807a')
+    });
+
+    const { name, description, color } = schema.parse(req.body);
+    const userId = req.user.id;
+
+    const { data, error } = await supabaseAdmin
+      .from('notes_folders')
+      .insert({
+        user_id: userId,
+        name,
+        description,
+        color
+      })
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.status(201).json({
+      message: 'Folder created successfully',
+      folder: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get all folders for user
+exports.getFolders = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const userId = req.user.id;
+
+    const { data, error } = await supabaseAdmin
+      .from('notes_folders')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json(data);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Add file to folder
+exports.addFileToFolder = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const schema = z.object({
+      noteId: z.string().uuid(),
+      folderId: z.string().uuid()
+    });
+
+    const { noteId, folderId } = schema.parse(req.body);
+    const userId = req.user.id;
+
+    // Verify file ownership
+    const { data: fileData, error: fileError } = await supabaseAdmin
+      .from('upload_notes')
+      .select('id')
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .single();
+
+    if (fileError || !fileData) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    // Verify folder ownership
+    const { data: folderData, error: folderError } = await supabaseAdmin
+      .from('notes_folders')
+      .select('id')
+      .eq('id', folderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (folderError || !folderData) {
+      return res.status(404).json({ error: 'Folder not found' });
+    }
+
+    // Update file with folder assignment
+    const { data, error } = await supabaseAdmin
+      .from('upload_notes')
+      .update({
+        folder_id: folderId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', noteId)
+      .eq('user_id', userId)
+      .select()
+      .single();
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({
+      message: 'File added to folder successfully',
+      note: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Get files in a specific folder
+exports.getFolderFiles = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const { folderId } = req.params;
+    const userId = req.user.id;
+
+    // Verify folder ownership
+    const { data: folderData, error: folderError } = await supabaseAdmin
+      .from('notes_folders')
+      .select('*')
+      .eq('id', folderId)
+      .eq('user_id', userId)
+      .single();
+
+    if (folderError || !folderData) {
+      return res.status(404).json({ error: 'Folder not found' });
+    }
+
+    // Get files in folder
+    const { data, error } = await supabaseAdmin
+      .from('upload_notes')
+      .select('id, title, file_name, file_type, file_size, ai_analysis, created_at, updated_at, is_favorite')
+      .eq('user_id', userId)
+      .eq('folder_id', folderId)
+      .order('updated_at', { ascending: false });
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({
+      folder: folderData,
+      files: data
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Delete folder
+exports.deleteFolder = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
+    const { folderId } = req.params;
+    const userId = req.user.id;
+
+    // Check if folder has files
+    const { data: filesInFolder, error: filesError } = await supabaseAdmin
+      .from('upload_notes')
+      .select('id')
+      .eq('folder_id', folderId)
+      .eq('user_id', userId);
+
+    if (filesError) return res.status(500).json({ error: filesError.message });
+
+    if (filesInFolder && filesInFolder.length > 0) {
+      return res.status(400).json({
+        error: 'Cannot delete folder with files',
+        message: 'Please move or delete all files in this folder first'
+      });
+    }
+
+    // Delete folder
+    const { error } = await supabaseAdmin
+      .from('notes_folders')
+      .delete()
+      .eq('id', folderId)
+      .eq('user_id', userId);
+
+    if (error) return res.status(500).json({ error: error.message });
+
+    res.json({ message: 'Folder deleted successfully' });
+  } catch (err) {
     next(err);
   }
 };

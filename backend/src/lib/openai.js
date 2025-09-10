@@ -31,8 +31,8 @@ const summarizeText = async (text) => {
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that summarizes text. Keep summaries concise and clear.' },
-        { role: 'user', content: `Summarize the following text:\n\n${text}` }
+        { role: 'system', content: 'You are a helpful assistant that summarizes text. Generate concise chapter summaries and key points.' },
+        { role: 'user', content: `Generate concise chapter summaries and key points from the following text:\n\n${text}` }
       ],
       max_tokens: 500,
       temperature: 0.3,
@@ -169,7 +169,20 @@ const generateMindMap = async (text) => {
       model: OLLAMA_MODEL,
       messages: [
         { role: 'system', content: 'You are a helpful assistant that creates mind maps from text content. Always respond with valid JSON only, no additional text or explanations.' },
-        { role: 'user', content: `Create a detailed mind map structure from the following text. Format as JSON with this exact structure: {"central_topic": "Main Topic", "branches": [{"topic": "Subtopic 1", "key_points": ["Point 1", "Point 2"]}, {"topic": "Subtopic 2", "key_points": ["Point 1", "Point 2"]}]}.\n\nText: ${text}` }
+        { role: 'user', content: `Create a detailed mind map structure from the following text. Format as JSON with this exact structure:
+{
+  "central_topic": "Main Topic",
+  "branches": [
+    {
+      "topic": "Branch Topic",
+      "subtopics": ["Subtopic 1", "Subtopic 2"],
+      "key_points": ["Point 1", "Point 2"]
+    }
+  ]
+}
+
+Text to analyze:
+${text}` }
       ],
       max_tokens: 1500,
       temperature: 0.5,
@@ -178,58 +191,44 @@ const generateMindMap = async (text) => {
     console.log(`[${new Date().toISOString()}] Ollama mind map API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
-    // Enhanced JSON extraction with multiple fallback strategies
+    // Try to extract JSON from response
     let jsonContent = content;
-
-    // Strategy 1: Look for JSON object
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       jsonContent = jsonMatch[0];
-    } else {
-      // Strategy 2: Look for JSON array (in case of multiple mind maps)
-      const arrayMatch = content.match(/\[[\s\S]*\]/);
-      if (arrayMatch) {
-        jsonContent = arrayMatch[0];
-      }
     }
 
     try {
       const parsed = JSON.parse(jsonContent);
 
       // Validate the structure
-      if (typeof parsed === 'object' && parsed !== null) {
-        // Ensure it has the expected structure
-        if (!parsed.central_topic && !parsed.branches) {
-          // Try to create a basic structure from whatever we got
-          return {
-            central_topic: "Generated Mind Map",
-            branches: [{
-              topic: "Key Concepts",
-              key_points: typeof parsed === 'string' ? [parsed] : ["Content extracted from text"]
-            }]
-          };
-        }
-        return parsed;
-      } else {
-        throw new Error('Invalid structure');
+      if (!parsed.central_topic || !Array.isArray(parsed.branches)) {
+        throw new Error('Invalid mind map structure');
       }
+
+      return parsed;
     } catch (parseError) {
-      console.error('JSON parse error:', parseError);
+      console.error('JSON parse error for mind map:', parseError);
       console.error('Response content:', content);
 
-      // Fallback: Create a basic mind map structure from the text
+      // Fallback: Create a basic mind map structure
+      console.log('Creating fallback mind map structure');
       const fallbackMindMap = {
-        central_topic: "Mind Map",
-        branches: [{
-          topic: "Extracted Content",
-          key_points: [
-            content.substring(0, 100) + (content.length > 100 ? "..." : ""),
-            "Note: AI response format was not as expected"
-          ]
-        }]
+        central_topic: text.split(' ').slice(0, 3).join(' ') + '...',
+        branches: [
+          {
+            topic: 'Key Concepts',
+            subtopics: ['Main ideas', 'Important points'],
+            key_points: text.split('.').slice(0, 3).map(s => s.trim()).filter(s => s.length > 0)
+          },
+          {
+            topic: 'Summary',
+            subtopics: ['Overview', 'Conclusions'],
+            key_points: ['Content processed', 'Basic structure created']
+          }
+        ]
       };
 
-      console.log('Using fallback mind map structure');
       return fallbackMindMap;
     }
   } catch (error) {
@@ -259,8 +258,8 @@ const generateStudyGuide = async (text) => {
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that creates comprehensive study guides from text content.' },
-        { role: 'user', content: `Create a detailed study guide from the following text. Include key concepts, definitions, examples, and practice questions.\n\n${text}` }
+        { role: 'system', content: 'You are a helpful assistant that creates comprehensive study guides from text content. Generate comprehensive study guide.' },
+        { role: 'user', content: `Generate comprehensive study guide from the following text. Include key concepts, definitions, examples, and practice questions.\n\n${text}` }
       ],
       max_tokens: 2000,
       temperature: 0.4,
@@ -296,7 +295,16 @@ const generateFlashcards = async (text, count = 10) => {
       model: OLLAMA_MODEL,
       messages: [
         { role: 'system', content: 'You are a helpful assistant that creates flashcards from text content. Always respond with valid JSON only, no additional text or explanations.' },
-        { role: 'user', content: `Generate ${count} flashcards from the following text. Format as JSON array with this exact structure: [{"question": "Question text", "answer": "Answer text"}, {"question": "Question 2", "answer": "Answer 2"}].\n\nText: ${text}` }
+        { role: 'user', content: `Generate ${count} flashcards from the following text. Format as JSON array with each object having 'question' and 'answer' properties.
+
+Text to process:
+${text}
+
+Example format:
+[
+  {"question": "What is photosynthesis?", "answer": "The process by which plants convert sunlight into energy"},
+  {"question": "Who wrote Romeo and Juliet?", "answer": "William Shakespeare"}
+]` }
       ],
       max_tokens: 2000,
       temperature: 0.6,
@@ -305,69 +313,57 @@ const generateFlashcards = async (text, count = 10) => {
     console.log(`[${new Date().toISOString()}] Ollama flashcards API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
-    // Enhanced JSON extraction with multiple fallback strategies
+    // Try to extract JSON from response
     let jsonContent = content;
-
-    // Strategy 1: Look for JSON array
-    const arrayMatch = content.match(/\[[\s\S]*\]/);
-    if (arrayMatch) {
-      jsonContent = arrayMatch[0];
-    } else {
-      // Strategy 2: Look for JSON object (in case of single flashcard)
-      const objectMatch = content.match(/\{[\s\S]*\}/);
-      if (objectMatch) {
-        jsonContent = `[${objectMatch[0]}]`;
-      }
+    const jsonMatch = content.match(/\[[\s\S]*\]/);
+    if (jsonMatch) {
+      jsonContent = jsonMatch[0];
     }
 
     try {
-      const parsed = JSON.parse(jsonContent);
+      const flashcards = JSON.parse(jsonContent);
 
       // Validate the structure
-      if (Array.isArray(parsed)) {
-        // Ensure each item has question and answer
-        const validatedFlashcards = parsed.filter(card =>
+      if (Array.isArray(flashcards) && flashcards.length > 0) {
+        // Ensure each flashcard has question and answer
+        const validFlashcards = flashcards.filter(card =>
           card && typeof card === 'object' && card.question && card.answer
         );
 
-        if (validatedFlashcards.length === 0) {
-          throw new Error('No valid flashcards found');
+        if (validFlashcards.length > 0) {
+          return validFlashcards.slice(0, count); // Limit to requested count
         }
-
-        return validatedFlashcards;
-      } else if (typeof parsed === 'object' && parsed.question && parsed.answer) {
-        // Single flashcard object
-        return [parsed];
-      } else {
-        throw new Error('Invalid structure');
       }
+
+      throw new Error('Invalid flashcard structure');
     } catch (parseError) {
-      console.error('JSON parse error:', parseError);
+      console.error('JSON parse error for flashcards:', parseError);
       console.error('Response content:', content);
 
-      // Fallback: Create basic flashcards from text content
-      const fallbackFlashcards = [];
+      // Fallback: Create basic flashcards from text
+      console.log('Creating fallback flashcards');
+      const flashcards = [];
       const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
 
       for (let i = 0; i < Math.min(count, sentences.length); i++) {
         const sentence = sentences[i].trim();
         if (sentence.length > 20) {
-          fallbackFlashcards.push({
-            question: `What is the main idea of: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`,
+          flashcards.push({
+            question: `What is the main idea of: "${sentence.substring(0, 80)}${sentence.length > 80 ? '...' : ''}"`,
             answer: sentence
           });
         }
       }
 
-      if (fallbackFlashcards.length === 0) {
-        fallbackFlashcards.push({
-          question: "What is the main topic of this text?",
+      // If still no flashcards, create a basic one
+      if (flashcards.length === 0) {
+        flashcards.push({
+          question: "What is the main topic discussed in this text?",
           answer: text.substring(0, 200) + (text.length > 200 ? "..." : "")
         });
       }
 
-      console.log(`Using fallback flashcards: generated ${fallbackFlashcards.length} cards`);
-      return fallbackFlashcards;
+      return flashcards;
     }
   } catch (error) {
     console.error('Ollama flashcards generation error:', error);
@@ -385,4 +381,185 @@ const generateFlashcards = async (text, count = 10) => {
   }
 };
 
-module.exports = { summarizeText, generateMCQs, generateImage, generateMindMap, generateStudyGuide, generateFlashcards };
+const generateKeyPoints = async (text) => {
+  if (!apiKeyConfigured) {
+    throw new Error('AI service is currently unavailable. Please make sure Ollama is running.');
+  }
+
+  try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama key points API with text length: ${text.length}`);
+    const response = await openai.chat.completions.create({
+      model: OLLAMA_MODEL,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that extracts key points from text content. Always respond with valid JSON only, no additional text or explanations.' },
+        { role: 'user', content: `Extract the most important key points from the following text. Format as JSON with this structure:
+{
+  "key_points": [
+    "Point 1",
+    "Point 2",
+    "Point 3"
+  ],
+  "main_themes": ["Theme 1", "Theme 2"],
+  "important_concepts": ["Concept 1", "Concept 2"]
+}
+
+Text to analyze:
+${text}` }
+      ],
+      max_tokens: 1000,
+      temperature: 0.3,
+    });
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama key points API call successful in ${endTime - startTime}ms`);
+    const content = response.choices[0].message.content.trim();
+
+    // Try to extract JSON from response
+    let jsonContent = content;
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonContent = jsonMatch[0];
+    }
+
+    try {
+      const parsed = JSON.parse(jsonContent);
+
+      // Validate the structure
+      if (!parsed.key_points || !Array.isArray(parsed.key_points)) {
+        throw new Error('Invalid key points structure');
+      }
+
+      return parsed;
+    } catch (parseError) {
+      console.error('JSON parse error for key points:', parseError);
+      console.error('Response content:', content);
+
+      // Fallback: Extract basic key points
+      console.log('Creating fallback key points');
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+      const fallbackKeyPoints = {
+        key_points: sentences.slice(0, 5).map(s => s.trim()),
+        main_themes: ['Main Content', 'Key Information'],
+        important_concepts: ['Core Concepts']
+      };
+
+      return fallbackKeyPoints;
+    }
+  } catch (error) {
+    console.error('Ollama key points generation error:', error);
+
+    // Handle Ollama-specific errors
+    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
+      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
+    } else if (error.status === 404) {
+      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
+    } else if (error.status === 500) {
+      throw new Error('Ollama server error. Please check Ollama logs.');
+    } else {
+      throw new Error('AI service error: Failed to extract key points. Please try again.');
+    }
+  }
+};
+
+const generateConceptMap = async (text) => {
+  if (!apiKeyConfigured) {
+    throw new Error('AI service is currently unavailable. Please make sure Ollama is running.');
+  }
+
+  try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama concept map API with text length: ${text.length}`);
+    const response = await openai.chat.completions.create({
+      model: OLLAMA_MODEL,
+      messages: [
+        { role: 'system', content: 'You are a helpful assistant that creates concept maps from text content. Always respond with valid JSON only, no additional text or explanations.' },
+        { role: 'user', content: `Create a concept map from the following text. Format as JSON with this structure:
+{
+  "concepts": [
+    {
+      "name": "Concept Name",
+      "definition": "Brief definition",
+      "connections": ["Related Concept 1", "Related Concept 2"],
+      "examples": ["Example 1", "Example 2"]
+    }
+  ],
+  "relationships": [
+    {
+      "from": "Concept A",
+      "to": "Concept B",
+      "type": "relationship_type",
+      "description": "How they relate"
+    }
+  ]
+}
+
+Text to analyze:
+${text}` }
+      ],
+      max_tokens: 1500,
+      temperature: 0.4,
+    });
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama concept map API call successful in ${endTime - startTime}ms`);
+    const content = response.choices[0].message.content.trim();
+
+    // Try to extract JSON from response
+    let jsonContent = content;
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      jsonContent = jsonMatch[0];
+    }
+
+    try {
+      const parsed = JSON.parse(jsonContent);
+
+      // Validate the structure
+      if (!parsed.concepts || !Array.isArray(parsed.concepts)) {
+        throw new Error('Invalid concept map structure');
+      }
+
+      return parsed;
+    } catch (parseError) {
+      console.error('JSON parse error for concept map:', parseError);
+      console.error('Response content:', content);
+
+      // Fallback: Create basic concept map
+      console.log('Creating fallback concept map');
+      const fallbackConceptMap = {
+        concepts: [
+          {
+            name: 'Main Topic',
+            definition: 'Primary subject matter',
+            connections: ['Related Ideas'],
+            examples: ['Key examples from text']
+          }
+        ],
+        relationships: [
+          {
+            from: 'Main Topic',
+            to: 'Related Ideas',
+            type: 'contains',
+            description: 'Main topic encompasses related ideas'
+          }
+        ]
+      };
+
+      return fallbackConceptMap;
+    }
+  } catch (error) {
+    console.error('Ollama concept map generation error:', error);
+
+    // Handle Ollama-specific errors
+    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
+      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
+    } else if (error.status === 404) {
+      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
+    } else if (error.status === 500) {
+      throw new Error('Ollama server error. Please check Ollama logs.');
+    } else {
+      throw new Error('AI service error: Failed to generate concept map. Please try again.');
+    }
+  }
+};
+
+module.exports = { summarizeText, generateMCQs, generateImage, generateMindMap, generateStudyGuide, generateFlashcards, generateKeyPoints, generateConceptMap };
