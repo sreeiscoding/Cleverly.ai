@@ -35,9 +35,9 @@ module.exports = (req, res, next) => {
     const payload = jwt.verify(token, SUPABASE_JWT_SECRET, { algorithms: ['HS256'] });
 
     // Ensure we have the required fields
-    if (!payload.sub) {
-      console.error(`[${new Date().toISOString()}] Auth failed: Token missing sub (user ID) field`);
-      return res.status(401).json({ error: 'Invalid token structure - missing user ID' });
+    if (!payload.sub || typeof payload.sub !== 'string' || payload.sub.trim() === '' || payload.sub === 'null') {
+      console.error(`[${new Date().toISOString()}] Auth failed: Token missing or invalid sub (user ID) field: ${payload.sub}`);
+      return res.status(401).json({ error: 'Invalid token structure - missing or invalid user ID' });
     }
 
     req.user = {

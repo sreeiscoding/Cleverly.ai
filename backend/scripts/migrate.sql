@@ -37,11 +37,23 @@ CREATE TABLE IF NOT EXISTS notes_breakdown (
   original_text TEXT,
   breakdown_result TEXT,
   ai_options_used JSONB,
+  type TEXT, -- mind_map, study_guide, flashcards
+  title TEXT,
+  content TEXT,
+  result JSONB,
+  original_upload_id UUID, -- Link to upload_notes table
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE notes_breakdown ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "User access notes_breakdown" ON notes_breakdown
   FOR ALL USING (user_id = auth.uid());
+
+-- Add indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_notes_breakdown_user_id ON notes_breakdown(user_id);
+CREATE INDEX IF NOT EXISTS idx_notes_breakdown_type ON notes_breakdown(type);
+CREATE INDEX IF NOT EXISTS idx_notes_breakdown_created_at ON notes_breakdown(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notes_breakdown_original_upload_id ON notes_breakdown(original_upload_id);
 
 -- ai_images
 CREATE TABLE IF NOT EXISTS ai_images (
@@ -87,11 +99,15 @@ CREATE TABLE IF NOT EXISTS upload_notes (
   file_id TEXT,
   title TEXT,
   ai_analysis JSONB,
-  created_at TIMESTAMPTZ DEFAULT NOW()
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 ALTER TABLE upload_notes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "User access upload_notes" ON upload_notes
   FOR ALL USING (user_id = auth.uid());
+
+-- Add updated_at column if it doesn't exist
+ALTER TABLE upload_notes ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- dictionary
 CREATE TABLE IF NOT EXISTS dictionary (

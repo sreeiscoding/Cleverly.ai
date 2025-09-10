@@ -123,7 +123,8 @@ const processAIAnalysisAsync = async (noteId, extractedText, userId) => {
       .from('upload_notes')
       .update({
         ai_analysis: analysisText,
-        ai_analysis_json: analysis // Store structured data too
+        ai_analysis_json: analysis, // Store structured data too
+        updated_at: new Date().toISOString()
       })
       .eq('id', noteId)
       .eq('user_id', userId);
@@ -153,7 +154,7 @@ const processAIAnalysisAsync = async (noteId, extractedText, userId) => {
 
       await supabaseAdmin
         .from('upload_notes')
-        .update({ ai_analysis: fallbackAnalysis })
+        .update({ ai_analysis: fallbackAnalysis, updated_at: new Date().toISOString() })
         .eq('id', noteId)
         .eq('user_id', userId);
 
@@ -165,7 +166,7 @@ const processAIAnalysisAsync = async (noteId, extractedText, userId) => {
       try {
         await supabaseAdmin
           .from('upload_notes')
-          .update({ ai_analysis: 'AI analysis failed - please try regenerating. The file may be too large or complex for processing.' })
+          .update({ ai_analysis: 'AI analysis failed - please try regenerating. The file may be too large or complex for processing.', updated_at: new Date().toISOString() })
           .eq('id', noteId)
           .eq('user_id', userId);
       } catch (finalError) {
@@ -192,47 +193,96 @@ const extractTextFromFile = async (buffer, mimetype) => {
     if (mimetype === 'application/pdf') {
       console.log(`[${new Date().toISOString()}] Starting PDF text extraction, size: ${buffer.length} bytes`);
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('PDF extraction timeout')), timeoutMs)
-      );
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('PDF extraction timeout')), timeoutMs)
+        );
 
-      const extractPromise = pdfParse(buffer);
-      const data = await Promise.race([extractPromise, timeoutPromise]);
+        const extractPromise = pdfParse(buffer);
+        const data = await Promise.race([extractPromise, timeoutPromise]);
 
-      extractedText = data.text;
-      console.log(`[${new Date().toISOString()}] PDF extraction completed, extracted ${extractedText.length} characters`);
+        extractedText = data.text || '';
 
-    } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        if (!extractedText.trim()) {
+          console.warn(`[${new Date().toISOString()}] PDF extraction returned empty text`);
+          extractedText = 'PDF appears to contain no extractable text. This may be an image-based PDF or corrupted file.';
+        } else {
+          console.log(`[${new Date().toISOString()}] PDF extraction completed, extracted ${extractedText.length} characters`);
+        }
+      } catch (pdfError) {
+        console.error(`[${new Date().toISOString()}] PDF extraction failed:`, pdfError.message);
+        extractedText = 'PDF text extraction failed. The file may be corrupted, password-protected, or contain only images.';
+      }
+
+    } else if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+               mimetype === 'application/msword') {
       console.log(`[${new Date().toISOString()}] Starting Word document text extraction, size: ${buffer.length} bytes`);
 
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Word extraction timeout')), timeoutMs)
-      );
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Word extraction timeout')), timeoutMs)
+        );
 
-      const extractPromise = mammoth.extractRawText({ buffer });
-      const result = await Promise.race([extractPromise, timeoutPromise]);
+        const extractPromise = mammoth.extractRawText({ buffer });
+        const result = await Promise.race([extractPromise, timeoutPromise]);
 
-      extractedText = result.value;
-      console.log(`[${new Date().toISOString()}] Word extraction completed, extracted ${extractedText.length} characters`);
+        extractedText = result.value || '';
+
+        if (!extractedText.trim()) {
+          console.warn(`[${new Date().toISOString()}] Word extraction returned empty text`);
+          extractedText = 'Word document appears to contain no extractable text. This may be an image-based document or corrupted file.';
+        } else {
+          console.log(`[${new Date().toISOString()}] Word extraction completed, extracted ${extractedText.length} characters`);
+        }
+      } catch (wordError) {
+        console.error(`[${new Date().toISOString()}] Word extraction failed:`, wordError.message);
+        extractedText = 'Word document text extraction failed. The file may be corrupted, password-protected, or in an unsupported format.';
+      }
+
+    } else if (mimetype.startsWith('text/') || mimetype === 'application/json' || mimetype === 'application/javascript') {
+      // For text-based files
+      console.log(`[${new Date().toISOString()}] Starting text file extraction, size: ${buffer.length} bytes`);
+
+      try {
+        extractedText = buffer.toString('utf-8');
+
+        // Basic validation for text content
+        if (!extractedText.trim()) {
+          extractedText = 'Text file appears to be empty or contains no readable content.';
+        } else {
+          console.log(`[${new Date().toISOString()}] Text file extraction completed, extracted ${extractedText.length} characters`);
+        }
+      } catch (textError) {
+        console.error(`[${new Date().toISOString()}] Text extraction failed:`, textError.message);
+        extractedText = 'Text file extraction failed. The file may be corrupted or in an unsupported encoding.';
+      }
 
     } else {
-      // For other text files
-      console.log(`[${new Date().toISOString()}] Starting text file extraction, size: ${buffer.length} bytes`);
-      extractedText = buffer.toString('utf-8');
-      console.log(`[${new Date().toISOString()}] Text file extraction completed, extracted ${extractedText.length} characters`);
+      console.warn(`[${new Date().toISOString()}] Unsupported file type for text extraction: ${mimetype}`);
+      extractedText = `File type '${mimetype}' is not supported for text extraction. AI analysis will not be available for this file.`;
     }
 
-    // Truncate if too long
-    if (extractedText.length > maxTextLength) {
-      console.log(`[${new Date().toISOString()}] Truncating extracted text from ${extractedText.length} to ${maxTextLength} characters`);
-      extractedText = extractedText.substring(0, maxTextLength) + '...[truncated]';
+    // Clean up the extracted text
+    if (extractedText) {
+      // Remove excessive whitespace and normalize line breaks
+      extractedText = extractedText
+        .replace(/\r\n/g, '\n')
+        .replace(/\r/g, '\n')
+        .replace(/\n{3,}/g, '\n\n')
+        .trim();
+
+      // Truncate if too long
+      if (extractedText.length > maxTextLength) {
+        console.log(`[${new Date().toISOString()}] Truncating extracted text from ${extractedText.length} to ${maxTextLength} characters`);
+        extractedText = extractedText.substring(0, maxTextLength) + '...[truncated due to length limit]';
+      }
     }
 
     return extractedText;
 
   } catch (error) {
     console.error(`[${new Date().toISOString()}] Text extraction error:`, error.message);
-    return 'Text extraction failed. AI analysis will not be available for this file.';
+    return `Text extraction failed: ${error.message}. AI analysis will not be available for this file.`;
   }
 };
 
@@ -360,9 +410,9 @@ exports.getNotes = async (req, res, next) => {
 
     const { data, error } = await supabaseAdmin
       .from('upload_notes')
-      .select('id, title, file_id, ai_analysis, created_at')
+      .select('id, title, file_id, ai_analysis, created_at, updated_at')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(50); // Limit for performance
 
     if (error) {
@@ -390,6 +440,18 @@ exports.getNotes = async (req, res, next) => {
 
 exports.searchUploadNotes = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Search upload notes failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const userId = req.user.id;
     const { q } = req.query;
 
@@ -402,7 +464,7 @@ exports.searchUploadNotes = async (req, res, next) => {
       .select('*')
       .eq('user_id', userId)
       .or(`title.ilike.%${q}%,ai_analysis.ilike.%${q}%`)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .limit(20);
 
     if (error) return res.status(500).json({ error: error.message });
@@ -412,6 +474,18 @@ exports.searchUploadNotes = async (req, res, next) => {
 
 exports.deleteNote = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Delete note failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const userId = req.user.id;
     const { noteId } = req.params;
 
@@ -464,6 +538,18 @@ exports.deleteNote = async (req, res, next) => {
 // Initialize chunked upload
 exports.initChunkedUpload = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Init chunked upload failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again to upload files'
+      });
+    }
+
     const userId = req.user.id;
     const { fileName, fileSize, fileType } = req.body;
 
@@ -518,6 +604,18 @@ exports.initChunkedUpload = async (req, res, next) => {
 exports.uploadChunk = async (req, res, next) => {
   const startTime = Date.now();
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Upload chunk failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again to upload files'
+      });
+    }
+
     const { uploadId, chunkIndex, totalChunks } = req.body;
     const chunk = req.file.buffer;
 
@@ -706,6 +804,18 @@ const finalizeUpload = async (uploadId, userId) => {
 // Pause upload
 exports.pauseUpload = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Pause upload failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const { uploadId } = req.params;
 
     const { error } = await supabaseAdmin
@@ -730,6 +840,18 @@ exports.pauseUpload = async (req, res, next) => {
 // Resume upload
 exports.resumeUpload = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Resume upload failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const { uploadId } = req.params;
 
     const { error } = await supabaseAdmin
@@ -754,6 +876,18 @@ exports.resumeUpload = async (req, res, next) => {
 // Delete upload
 exports.deleteUpload = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Delete upload failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const { uploadId } = req.params;
 
     // Get upload record
@@ -797,6 +931,18 @@ exports.deleteUpload = async (req, res, next) => {
 // Get upload progress
 exports.getUploadProgress = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Get upload progress failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const { uploadId } = req.params;
 
     const { data: uploadRecord, error } = await supabaseAdmin
@@ -828,6 +974,18 @@ exports.getUploadProgress = async (req, res, next) => {
 // Get all user uploads
 exports.getUserUploads = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Get user uploads failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const userId = req.user.id;
 
     const { data, error } = await supabaseAdmin
@@ -849,6 +1007,18 @@ exports.getUserUploads = async (req, res, next) => {
 // Download file
 exports.downloadFile = async (req, res, next) => {
   try {
+    // Enhanced user validation
+    if (!req.user || !req.user.id) {
+      console.error(`[${new Date().toISOString()}] Download file failed: User not authenticated or missing ID`, {
+        user: req.user,
+        headers: req.headers.authorization ? 'present' : 'missing'
+      });
+      return res.status(401).json({
+        error: 'Authentication required',
+        message: 'Please log in again'
+      });
+    }
+
     const { uploadId } = req.params;
     const userId = req.user.id;
 
@@ -871,7 +1041,7 @@ exports.downloadFile = async (req, res, next) => {
       .select('file_id')
       .eq('user_id', userId)
       .eq('title', uploadRecord.file_name)
-      .order('created_at', { ascending: false })
+      .order('updated_at', { ascending: false })
       .single();
 
     if (noteError || !noteRecord) {

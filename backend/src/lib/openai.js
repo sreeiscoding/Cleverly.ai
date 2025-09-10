@@ -168,8 +168,8 @@ const generateMindMap = async (text) => {
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that creates mind maps from text content. Always respond with valid JSON only.' },
-        { role: 'user', content: `Create a detailed mind map structure from the following text. Format as JSON with a central topic and branches containing subtopics and key points.\n\n${text}` }
+        { role: 'system', content: 'You are a helpful assistant that creates mind maps from text content. Always respond with valid JSON only, no additional text or explanations.' },
+        { role: 'user', content: `Create a detailed mind map structure from the following text. Format as JSON with this exact structure: {"central_topic": "Main Topic", "branches": [{"topic": "Subtopic 1", "key_points": ["Point 1", "Point 2"]}, {"topic": "Subtopic 2", "key_points": ["Point 1", "Point 2"]}]}.\n\nText: ${text}` }
       ],
       max_tokens: 1500,
       temperature: 0.5,
@@ -178,19 +178,59 @@ const generateMindMap = async (text) => {
     console.log(`[${new Date().toISOString()}] Ollama mind map API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
-    // Try to extract JSON from response
+    // Enhanced JSON extraction with multiple fallback strategies
     let jsonContent = content;
+
+    // Strategy 1: Look for JSON object
     const jsonMatch = content.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       jsonContent = jsonMatch[0];
+    } else {
+      // Strategy 2: Look for JSON array (in case of multiple mind maps)
+      const arrayMatch = content.match(/\[[\s\S]*\]/);
+      if (arrayMatch) {
+        jsonContent = arrayMatch[0];
+      }
     }
 
     try {
-      return JSON.parse(jsonContent);
+      const parsed = JSON.parse(jsonContent);
+
+      // Validate the structure
+      if (typeof parsed === 'object' && parsed !== null) {
+        // Ensure it has the expected structure
+        if (!parsed.central_topic && !parsed.branches) {
+          // Try to create a basic structure from whatever we got
+          return {
+            central_topic: "Generated Mind Map",
+            branches: [{
+              topic: "Key Concepts",
+              key_points: typeof parsed === 'string' ? [parsed] : ["Content extracted from text"]
+            }]
+          };
+        }
+        return parsed;
+      } else {
+        throw new Error('Invalid structure');
+      }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       console.error('Response content:', content);
-      throw new Error('AI service error: Invalid response format. Please try again.');
+
+      // Fallback: Create a basic mind map structure from the text
+      const fallbackMindMap = {
+        central_topic: "Mind Map",
+        branches: [{
+          topic: "Extracted Content",
+          key_points: [
+            content.substring(0, 100) + (content.length > 100 ? "..." : ""),
+            "Note: AI response format was not as expected"
+          ]
+        }]
+      };
+
+      console.log('Using fallback mind map structure');
+      return fallbackMindMap;
     }
   } catch (error) {
     console.error('Ollama mind map generation error:', error);
@@ -255,8 +295,8 @@ const generateFlashcards = async (text, count = 10) => {
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
-        { role: 'system', content: 'You are a helpful assistant that creates flashcards from text content. Always respond with valid JSON only.' },
-        { role: 'user', content: `Generate ${count} flashcards from the following text. Format as JSON array with each object having 'question' and 'answer' properties.\n\n${text}` }
+        { role: 'system', content: 'You are a helpful assistant that creates flashcards from text content. Always respond with valid JSON only, no additional text or explanations.' },
+        { role: 'user', content: `Generate ${count} flashcards from the following text. Format as JSON array with this exact structure: [{"question": "Question text", "answer": "Answer text"}, {"question": "Question 2", "answer": "Answer 2"}].\n\nText: ${text}` }
       ],
       max_tokens: 2000,
       temperature: 0.6,
@@ -265,19 +305,69 @@ const generateFlashcards = async (text, count = 10) => {
     console.log(`[${new Date().toISOString()}] Ollama flashcards API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
-    // Try to extract JSON from response
+    // Enhanced JSON extraction with multiple fallback strategies
     let jsonContent = content;
-    const jsonMatch = content.match(/\[[\s\S]*\]/);
-    if (jsonMatch) {
-      jsonContent = jsonMatch[0];
+
+    // Strategy 1: Look for JSON array
+    const arrayMatch = content.match(/\[[\s\S]*\]/);
+    if (arrayMatch) {
+      jsonContent = arrayMatch[0];
+    } else {
+      // Strategy 2: Look for JSON object (in case of single flashcard)
+      const objectMatch = content.match(/\{[\s\S]*\}/);
+      if (objectMatch) {
+        jsonContent = `[${objectMatch[0]}]`;
+      }
     }
 
     try {
-      return JSON.parse(jsonContent);
+      const parsed = JSON.parse(jsonContent);
+
+      // Validate the structure
+      if (Array.isArray(parsed)) {
+        // Ensure each item has question and answer
+        const validatedFlashcards = parsed.filter(card =>
+          card && typeof card === 'object' && card.question && card.answer
+        );
+
+        if (validatedFlashcards.length === 0) {
+          throw new Error('No valid flashcards found');
+        }
+
+        return validatedFlashcards;
+      } else if (typeof parsed === 'object' && parsed.question && parsed.answer) {
+        // Single flashcard object
+        return [parsed];
+      } else {
+        throw new Error('Invalid structure');
+      }
     } catch (parseError) {
       console.error('JSON parse error:', parseError);
       console.error('Response content:', content);
-      throw new Error('AI service error: Invalid response format. Please try again.');
+
+      // Fallback: Create basic flashcards from text content
+      const fallbackFlashcards = [];
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 10);
+
+      for (let i = 0; i < Math.min(count, sentences.length); i++) {
+        const sentence = sentences[i].trim();
+        if (sentence.length > 20) {
+          fallbackFlashcards.push({
+            question: `What is the main idea of: "${sentence.substring(0, 100)}${sentence.length > 100 ? '...' : ''}"`,
+            answer: sentence
+          });
+        }
+      }
+
+      if (fallbackFlashcards.length === 0) {
+        fallbackFlashcards.push({
+          question: "What is the main topic of this text?",
+          answer: text.substring(0, 200) + (text.length > 200 ? "..." : "")
+        });
+      }
+
+      console.log(`Using fallback flashcards: generated ${fallbackFlashcards.length} cards`);
+      return fallbackFlashcards;
     }
   } catch (error) {
     console.error('Ollama flashcards generation error:', error);

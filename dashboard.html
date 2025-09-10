@@ -1706,11 +1706,23 @@
       return notification;
     }
 
+
+    // View uploaded file function
+    function viewUploadedFile(fileName) {
+      // Navigate to Notes Breakdown section
+      const sidebarLinks = document.querySelectorAll('.sidebar-nav ul li ul li a');
+      sidebarLinks.forEach(link => {
+        if (link.textContent.trim().replace('Beta', '').trim() === 'Notes Breakdown') {
+          link.click();
+        }
+      });
+    }
+
     // Direct Upload Handler
     async function handleDirectUpload() {
       const fileInput = document.getElementById('nb-file');
       if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
-        showNotification('Warning\nPlease select a file first using "Drag & Drop Files or Choose Files" button', 'warning');
+        showNotification('Please select a file first using "Drag & Drop Files or Choose Files" button', 'warning');
         return;
       }
 
@@ -1751,33 +1763,42 @@
         }
 
         const result = await response.json();
+        console.log('Upload successful, result:', result);
+
+        // Safely extract data from response
+        const uploadNote = result?.uploadNote || result || {};
+        const fileId = uploadNote.id || `temp_${Date.now()}`;
 
         // Update global file state
         const uploadedFileInfo = {
-          id: result.id,
+          id: fileId,
           name: file.name,
           type: getFileTypeFromName(file.name),
           size: file.size,
-          content: result.ai_analysis || '',
+          content: uploadNote.ai_analysis || '',
           timestamp: new Date().toISOString()
         };
 
         uploadedFiles.push(uploadedFileInfo);
         currentUploadedFile = uploadedFileInfo;
 
-        // Show success notification with popup
-        showNotification('Upload success', 'success');
+        // Show success notification
+        showNotification('File uploaded successfully!', 'success');
 
         // Show success popup message
         showUploadSuccessPopup(file.name);
 
         // Refresh the file list for Notes Breakdown section
-        await loadUploadedNotes();
+        try {
+          await loadUploadedNotes();
+        } catch (loadError) {
+          console.warn('Failed to refresh file list:', loadError);
+        }
 
         // Clear the file input after successful upload
         fileInput.value = '';
         // Reset UI to show drag & drop area again
-        // Note: updateFileDisplay function may need to be updated to work with the new container structure
+        updateFileDisplay([]);
 
       } catch (error) {
         console.error('File upload error:', error);
@@ -1794,7 +1815,7 @@
         } else if (error.message.includes('File type not supported')) {
           showNotification('File type not supported. Please use PDF, Word, or text files.', 'warning');
         } else {
-          handleError(error, 'File Upload');
+          showNotification(`Upload failed: ${error.message}`, 'error');
         }
       } finally {
         // Re-enable button
@@ -3316,35 +3337,6 @@
     let uploadedFiles = []; // Array to store uploaded file information
     let currentUploadedFile = null; // Current file being processed
 
-    // Function to show upload success popup
-    function showUploadSuccessPopup(fileName) {
-      // Create popup modal
-      const popup = document.createElement('div');
-      popup.className = 'upload-success-popup';
-      popup.innerHTML = `
-        <div class="upload-success-overlay" onclick="this.parentElement.remove()"></div>
-        <div class="upload-success-content">
-          <div class="upload-success-icon">
-            <i class="fa-solid fa-check-circle"></i>
-          </div>
-          <h3>File has been uploaded successfully</h3>
-          <p>Start AI Processing</p>
-          <div class="upload-success-actions">
-            <button class="upload-success-btn primary" onclick="startAIProcessing()">Start</button>
-            <button class="upload-success-btn secondary" onclick="this.closest('.upload-success-popup').remove()">Later</button>
-          </div>
-        </div>
-      `;
-
-      document.body.appendChild(popup);
-
-      // Auto-remove after 10 seconds
-      setTimeout(() => {
-        if (popup.parentElement) {
-          popup.remove();
-        }
-      }, 10000);
-    }
 
     // Function to start AI processing
     function startAIProcessing() {
@@ -3382,44 +3374,56 @@
 
     // Function to update UI with file information
     function updateFileDisplay(files) {
-      const uploadContent = document.querySelector('.nb-upload-content');
-      if (!uploadContent) return;
-
-      let icon = uploadContent.querySelector('.nb-upload-icon');
-      let h3 = uploadContent.querySelector('h3');
-      let p = uploadContent.querySelector('.nb-upload-text');
-      let removeBtn = uploadContent.querySelector('.nb-remove-file');
-
-      if (files && files.length > 0) {
-        const file = files[0]; // Show first file info
-        const fileName = file.name;
-        const fileType = getFileTypeFromName(fileName);
-        const iconClass = getFileIconClass(fileType);
-        const fileSize = formatFileSize(file.size);
-
-        hasFile = true; // Mark that we have a file
-
-        if (icon) icon.className = `fa-solid ${iconClass} nb-upload-icon`;
-        if (h3) h3.textContent = fileName;
-        if (p) p.textContent = `${fileType.toUpperCase()} File • ${fileSize}`;
-
-        if (!removeBtn) {
-          removeBtn = document.createElement('button');
-          removeBtn.className = 'nb-remove-file';
-          removeBtn.onclick = removeCurrentFile;
-          removeBtn.style.cssText = 'background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;';
-          removeBtn.innerHTML = '<i class="fa-solid fa-times"></i> Remove File';
-          uploadContent.appendChild(removeBtn);
-        } else {
-          removeBtn.style.display = 'inline-block';
+      try {
+        const uploadContent = document.querySelector('.nb-upload-content');
+        if (!uploadContent) {
+          console.warn('Upload content element not found');
+          return;
         }
-      } else {
-        // Reset to original state
-        hasFile = false;
-        if (icon) icon.className = 'fa-solid fa-cloud-arrow-up nb-upload-icon';
-        if (h3) h3.textContent = 'Drag & Drop Files Here';
-        if (p) p.textContent = 'or click to browse';
-        if (removeBtn) removeBtn.style.display = 'none';
+
+        let icon = uploadContent.querySelector('.nb-upload-icon');
+        let h3 = uploadContent.querySelector('h3');
+        let p = uploadContent.querySelector('.nb-upload-text');
+        let removeBtn = uploadContent.querySelector('.nb-remove-file');
+
+        if (files && files.length > 0) {
+          const file = files[0]; // Show first file info
+          if (!file || !file.name) {
+            console.warn('Invalid file object:', file);
+            return;
+          }
+
+          const fileName = file.name;
+          const fileType = getFileTypeFromName(fileName);
+          const iconClass = getFileIconClass(fileType);
+          const fileSize = formatFileSize(file.size || 0);
+
+          hasFile = true; // Mark that we have a file
+
+          if (icon) icon.className = `fa-solid ${iconClass} nb-upload-icon`;
+          if (h3) h3.textContent = fileName;
+          if (p) p.textContent = `${fileType.toUpperCase()} File • ${fileSize}`;
+
+          if (!removeBtn) {
+            removeBtn = document.createElement('button');
+            removeBtn.className = 'nb-remove-file';
+            removeBtn.onclick = removeCurrentFile;
+            removeBtn.style.cssText = 'background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-top: 8px;';
+            removeBtn.innerHTML = '<i class="fa-solid fa-times"></i> Remove File';
+            uploadContent.appendChild(removeBtn);
+          } else {
+            removeBtn.style.display = 'inline-block';
+          }
+        } else {
+          // Reset to original state
+          hasFile = false;
+          if (icon) icon.className = 'fa-solid fa-cloud-arrow-up nb-upload-icon';
+          if (h3) h3.textContent = 'Drag & Drop Files Here';
+          if (p) p.textContent = 'or click to browse';
+          if (removeBtn) removeBtn.style.display = 'none';
+        }
+      } catch (error) {
+        console.error('Error updating file display:', error);
       }
     }
 
@@ -3587,24 +3591,48 @@
         // If no container provided, determine based on current context
         targetContainer = nbFileListContainer || fileListContainer;
       }
-      if (!targetContainer) return;
+      if (!targetContainer) {
+        console.warn('[DEBUG] No target container found for loading notes');
+        return;
+      }
 
       try {
         const notes = await apiFetch("/upload/notes");
+        console.log('[DEBUG] Loaded notes:', notes);
+
+        if (!Array.isArray(notes)) {
+          console.warn('[DEBUG] Notes response is not an array:', notes);
+          return;
+        }
+
         targetContainer.innerHTML = ""; // Clear existing list
         notes.forEach((note) => {
-          const fileType = getFileTypeFromName(note.title);
+          if (!note || !note.id) {
+            console.warn('[DEBUG] Invalid note data:', note);
+            return;
+          }
+
+          const fileType = getFileTypeFromName(note.title || 'Unknown');
           const iconClass = getFileIconClass(fileType);
+
+          // Safely format date
+          let dateString = 'Unknown date';
+          try {
+            if (note.created_at) {
+              dateString = new Date(note.created_at).toLocaleString();
+            }
+          } catch (dateError) {
+            console.warn('[DEBUG] Invalid date format:', note.created_at);
+          }
+
           const div = document.createElement("div");
           div.className = "nb-file-item nb-item-complete";
           div.innerHTML = `
           <div class="nb-file-info">
             <span class="nb-file-icon"><i class="fa-solid ${iconClass}"></i></span>
             <div class="nb-file-details">
-              <span class="nb-file-name">${note.title}</span>
-              <span class="nb-file-meta">${fileType.toUpperCase()} • Uploaded • ${new Date(
-                note.created_at
-              ).toLocaleString()}</span>
+              <span class="nb-file-name">${note.title || 'Untitled'}</span>
+              <span class="nb-file-meta">${fileType.toUpperCase()} • Uploaded • ${dateString}</span>
             </div>
           </div>
           <div class="nb-file-status">
@@ -3624,6 +3652,8 @@
         `;
           targetContainer.appendChild(div);
         });
+
+        console.log('[DEBUG] Successfully loaded', notes.length, 'notes');
       } catch (err) {
         console.error("Failed to load uploaded notes:", err);
 
@@ -3634,11 +3664,8 @@
           errorMessage = "Session expired. Please refresh the page and log in again.";
         }
 
-        try {
-          alert(errorMessage);
-        } catch (alertError) {
-          console.warn('Alert blocked, load notes error message:', errorMessage);
-        }
+        // Use notification instead of alert
+        showNotification(errorMessage, 'error');
       }
     }
 
@@ -3954,7 +3981,7 @@
 
     // File upload input and handlers for Notes Breakdown
     const nbFileInput = document.getElementById("nb-file");
-    const nbFileListContainer = document.querySelector(".nb-file-list .nb-file-items-container");
+    const nbFileListContainer = document.querySelector(".nb-file-items-container");
 
     // Modified to work with single file system and not interfere with UI updates
     fileInput.addEventListener("change", async (e) => {
@@ -4349,6 +4376,35 @@
       return typeMap[extension] || 'file';
     }
 
+    // Additional helper functions
+    function getFileIcon(fileName) {
+      const type = getFileTypeFromName(fileName);
+      const iconMap = {
+        'pdf': 'pdf',
+        'word': 'word',
+        'text': 'lines',
+        'image': 'image',
+        'powerpoint': 'powerpoint',
+        'excel': 'excel',
+        'file': 'file'
+      };
+      return iconMap[type] || 'file';
+    }
+
+    function getFileTypeLabel(fileName) {
+      const type = getFileTypeFromName(fileName);
+      const labelMap = {
+        'pdf': 'PDF',
+        'word': 'Word',
+        'text': 'Text',
+        'image': 'Image',
+        'powerpoint': 'PowerPoint',
+        'excel': 'Excel',
+        'file': 'File'
+      };
+      return labelMap[type] || 'FILE';
+    }
+
     function getFileIconClass(fileType) {
       const iconMap = {
         'pdf': 'fa-file-pdf',
@@ -4446,6 +4502,147 @@
         sizes = ["B", "KB", "MB", "GB", "TB"],
         i = Math.floor(Math.log(bytes) / Math.log(k));
       return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+    }
+
+    // Load uploaded notes from backend
+    async function loadUploadedNotes(containerElement = null) {
+      const targetContainer = containerElement || nbFileListContainer || fileListContainer;
+
+      if (!targetContainer) return;
+
+      try {
+        const files = await apiFetch('/upload/notes');
+
+        if (!files || files.length === 0) {
+          targetContainer.innerHTML = `
+            <div class="nb-empty-state">
+              <i class="fa-solid fa-cloud-upload" style="font-size: 48px; color: #14807a; margin-bottom: 16px;"></i>
+              <h4 style="color: #14807a; margin-bottom: 8px;">No Files Uploaded Yet</h4>
+              <p style="color: #666; margin: 0;">Uploaded files will show here</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Update global file state
+        uploadedFiles = files.map(file => ({
+          id: file.id,
+          name: file.title,
+          type: getFileTypeFromName(file.title),
+          size: 0, // Size not stored in upload_notes table
+          content: file.ai_analysis || '',
+          timestamp: file.created_at
+        }));
+
+        // Set current file to the most recent one
+        if (uploadedFiles.length > 0) {
+          currentUploadedFile = uploadedFiles[uploadedFiles.length - 1];
+        }
+
+        // Render files
+        targetContainer.innerHTML = files.map(file => `
+          <div class="nb-file-item" data-file-id="${file.id}">
+            <div class="nb-file-info">
+              <span class="nb-file-icon"><i class="fa-solid fa-file-${getFileIcon(file.title)}"></i></span>
+              <div class="nb-file-details">
+                <span class="nb-file-name">${file.title || 'Untitled'}</span>
+                <span class="nb-file-meta">${getFileTypeLabel(file.title)} • Uploaded ${new Date(file.created_at).toLocaleDateString()}</span>
+              </div>
+            </div>
+            <div class="nb-file-status">
+              <span class="nb-status-text nb-success">${file.ai_analysis ? 'AI Processed' : 'Uploaded'}</span>
+            </div>
+            <div class="nb-file-actions">
+              <button class="nb-action" title="View Details" onclick="viewFileDetails('${file.id}')">
+                <i class="fa-solid fa-eye"></i>
+              </button>
+              <button class="nb-action" title="Download" onclick="downloadFile('${file.id}')">
+                <i class="fa-solid fa-download"></i>
+              </button>
+              <button class="nb-action" title="Delete" onclick="deleteNote('${file.id}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Failed to load uploaded notes:', error);
+
+        if (targetContainer) {
+          targetContainer.innerHTML = `
+            <div class="nb-empty-state">
+              <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; color: #dc3545; margin-bottom: 16px;"></i>
+              <h4 style="color: #dc3545; margin-bottom: 8px;">Failed to Load Files</h4>
+              <p style="color: #666; margin: 0;">Please refresh the page to try again</p>
+            </div>
+          `;
+        }
+
+        showNotification('Failed to load uploaded files. Please refresh the page.', 'error');
+      }
+    }
+
+    // Update file display UI
+    function updateFileDisplay(files) {
+      const uploadZone = document.querySelector('.nb-upload-zone');
+      const fileList = document.querySelector('.nb-uploaded-files');
+
+      if (!uploadZone || !fileList) return;
+
+      if (files && files.length > 0) {
+        // Show uploaded files
+        uploadZone.style.display = 'none';
+        fileList.style.display = 'block';
+
+        fileList.innerHTML = files.map(file => `
+          <div class="nb-uploaded-file">
+            <div class="nb-file-icon">
+              <i class="fa-solid fa-file-${getFileIcon(file.type)}"></i>
+            </div>
+            <div class="nb-file-info">
+              <div class="nb-file-name">${file.name}</div>
+              <div class="nb-file-size">${formatFileSize(file.size)}</div>
+            </div>
+            <div class="nb-file-status">
+              <span class="nb-status-text">Ready for upload</span>
+            </div>
+          </div>
+        `).join('');
+      } else {
+        // Show upload zone
+        uploadZone.style.display = 'block';
+        fileList.style.display = 'none';
+      }
+    }
+
+    // View file details
+    function viewFileDetails(fileId) {
+      // Find file in uploadedFiles array
+      const file = uploadedFiles.find(f => f.id === fileId);
+      if (!file) {
+        showNotification('File not found', 'error');
+        return;
+      }
+
+      // Show file details in a modal or popup
+      const detailsModal = document.createElement('div');
+      detailsModal.className = 'ai-result-modal';
+      detailsModal.innerHTML = `
+        <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+        <div class="ai-result-content">
+          <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+          <h3>File Details</h3>
+          <div class="file-details">
+            <p><strong>Name:</strong> ${file.name}</p>
+            <p><strong>Type:</strong> ${file.type}</p>
+            <p><strong>Uploaded:</strong> ${new Date(file.timestamp).toLocaleString()}</p>
+            <p><strong>Content:</strong></p>
+            <div class="file-content">${file.content || 'No content available'}</div>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(detailsModal);
     }
 
     // Simulate AI processing progress bar for uploaded file
