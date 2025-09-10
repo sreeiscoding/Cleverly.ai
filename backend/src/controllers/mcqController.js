@@ -4,7 +4,13 @@ const { z } = require('zod');
 
 exports.getAllMCQs = async (req, res, next) => {
   try {
-    const { data, error } = await supabaseAdmin.from('mcq_generator').select('*').eq('user_id', req.user.id);
+    const { data, error } = await supabaseAdmin
+      .from('mcq_generator')
+      .select('id, source_text, question_count, difficulty, created_at, updated_at')
+      .eq('user_id', req.user.id)
+      .order('created_at', { ascending: false })
+      .limit(50); // Limit results for performance
+
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);
   } catch (err) { next(err); }

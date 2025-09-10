@@ -92,10 +92,12 @@ exports.generateFlashcards = async (req, res, next) => {
 
 exports.getUserNotesBreakdown = async (req, res, next) => {
   try {
-    const { data, error } = await supabaseAdmin.from('notes_breakdown')
-      .select('*')
+    const { data, error } = await supabaseAdmin
+      .from('notes_breakdown')
+      .select('id, type, title, content, result, created_at')
       .eq('user_id', req.user.id)
-      .order('created_at', { ascending: false });
+      .order('created_at', { ascending: false })
+      .limit(100); // Limit results for performance
 
     if (error) return res.status(500).json({ error: error.message });
     res.json(data);

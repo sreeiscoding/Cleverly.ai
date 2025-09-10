@@ -14,7 +14,10 @@ const rateLimit = (maxRequests = 10, windowMs = 60000) => {
     // Remove old requests outside the window
     const validRequests = requests.filter(time => time > windowStart);
 
+    console.log(`[${new Date().toISOString()}] Rate limit check for ${key}: ${validRequests.length}/${maxRequests} requests in window`);
+
     if (validRequests.length >= maxRequests) {
+      console.log(`[${new Date().toISOString()}] Rate limit exceeded for ${key}`);
       return res.status(429).json({
         error: 'Too many requests. Please try again later.'
       });

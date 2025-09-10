@@ -26,7 +26,8 @@ const summarizeText = async (text) => {
   }
 
   try {
-    console.log('Calling Ollama summarize API with text length:', text.length);
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama summarize API with text length: ${text.length}`);
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
@@ -36,7 +37,8 @@ const summarizeText = async (text) => {
       max_tokens: 500,
       temperature: 0.3,
     });
-    console.log('Ollama summarize API call successful');
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama summarize API call successful in ${endTime - startTime}ms`);
     return response.choices[0].message.content.trim();
   } catch (error) {
     console.error('Ollama summarize error:', error.message);
@@ -60,7 +62,8 @@ const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
   }
 
   try {
-    console.log('Calling Ollama MCQ generation API with text length:', text.length, 'count:', count);
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama MCQ generation API with text length: ${text.length}, count: ${count}`);
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
@@ -70,7 +73,8 @@ const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
       max_tokens: 2000,
       temperature: 0.7,
     });
-    console.log('Ollama MCQ generation API call successful');
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama MCQ generation API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
     // Try to extract JSON from response
@@ -109,6 +113,8 @@ const generateImage = async (prompt, style = 'modern') => {
   }
 
   try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama image generation API with prompt length: ${prompt.length}`);
     const stylePrompts = {
       modern: 'Modern, clean, professional design',
       classic: 'Classic, elegant, timeless design',
@@ -127,6 +133,9 @@ const generateImage = async (prompt, style = 'modern') => {
       max_tokens: 300,
       temperature: 0.7,
     });
+
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama image generation API call successful in ${endTime - startTime}ms`);
 
     // Return a placeholder URL with the description as a data URL
     const description = response.choices[0].message.content.trim();
@@ -154,6 +163,8 @@ const generateMindMap = async (text) => {
   }
 
   try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama mind map API with text length: ${text.length}`);
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
@@ -163,6 +174,8 @@ const generateMindMap = async (text) => {
       max_tokens: 1500,
       temperature: 0.5,
     });
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama mind map API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
     // Try to extract JSON from response
@@ -201,6 +214,8 @@ const generateStudyGuide = async (text) => {
   }
 
   try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama study guide API with text length: ${text.length}`);
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
@@ -210,6 +225,8 @@ const generateStudyGuide = async (text) => {
       max_tokens: 2000,
       temperature: 0.4,
     });
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama study guide API call successful in ${endTime - startTime}ms`);
     return response.choices[0].message.content.trim();
   } catch (error) {
     console.error('Ollama study guide generation error:', error);
@@ -233,6 +250,8 @@ const generateFlashcards = async (text, count = 10) => {
   }
 
   try {
+    const startTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Calling Ollama flashcards API with text length: ${text.length}, count: ${count}`);
     const response = await openai.chat.completions.create({
       model: OLLAMA_MODEL,
       messages: [
@@ -242,6 +261,8 @@ const generateFlashcards = async (text, count = 10) => {
       max_tokens: 2000,
       temperature: 0.6,
     });
+    const endTime = Date.now();
+    console.log(`[${new Date().toISOString()}] Ollama flashcards API call successful in ${endTime - startTime}ms`);
     const content = response.choices[0].message.content.trim();
 
     // Try to extract JSON from response

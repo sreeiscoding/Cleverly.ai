@@ -21,5 +21,6 @@ router.get('/user/uploads', uploadsController.getUserUploads);
 // Existing endpoints
 router.get('/notes', uploadsController.getNotes);
 router.get('/notes/search', uploadsController.searchUploadNotes);
+router.delete('/notes/:noteId', uploadsController.deleteNote);
 
 module.exports = router;

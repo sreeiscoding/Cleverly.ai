@@ -436,6 +436,362 @@
         font-size: 1.2rem;
       }
 
+      /* Custom AI Results Popup Styles */
+      .ai-results-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .ai-results-popup.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .ai-results-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+
+      .ai-results-content {
+        position: relative;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        width: 90%;
+        margin: 20px;
+      }
+
+      .ai-results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .ai-results-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .ai-results-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .ai-results-close:hover {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .ai-results-body {
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
+
+      .ai-results-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .ai-results-copy-btn {
+        background: #14807a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .ai-results-copy-btn:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+      }
+
+      .ai-results-copy-btn.copied {
+        background: #28a745;
+      }
+
+      .ai-results-copy-btn.copied:hover {
+        background: #218838;
+      }
+
+      /* File Selector Popup Styles */
+      .file-selector-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .file-selector-popup.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .file-selector-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+
+      .file-selector-content {
+        position: relative;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        width: 90%;
+        margin: 20px;
+      }
+
+      .file-selector-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .file-selector-title {
+        color: var(--text-primary);
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .file-selector-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-close:hover {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .file-selector-body {
+        margin-bottom: 20px;
+      }
+
+      .file-selector-instructions {
+        color: var(--text-secondary);
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: var(--bg-primary);
+        border-radius: 8px;
+        border-left: 4px solid #14807a;
+      }
+
+      .file-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .file-item:last-child {
+        border-bottom: none;
+      }
+
+      .file-item:hover {
+        background: var(--bg-primary);
+      }
+
+      .file-item.selected {
+        background: rgba(20, 128, 122, 0.1);
+        border-left: 4px solid #14807a;
+      }
+
+      .file-checkbox {
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: #14807a;
+      }
+
+      .file-info {
+        flex-grow: 1;
+      }
+
+      .file-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .file-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .file-selector-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .file-selector-process-btn {
+        background: #14807a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-process-btn:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+      }
+
+      .file-selector-process-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .file-selector-cancel-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-cancel-btn:hover {
+        background: var(--bg-secondary);
+      }
+
+      /* Loading state for AI processing */
+      .ai-processing-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px;
+        color: var(--text-secondary);
+      }
+
+      .ai-processing-loading i {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+
+      /* Dark mode support for popups */
+      [data-theme="dark"] .ai-results-content,
+      [data-theme="dark"] .file-selector-content {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+      }
+
+      [data-theme="dark"] .ai-results-title,
+      [data-theme="dark"] .file-selector-title {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .ai-results-body {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .file-name {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .file-meta {
+        color: var(--text-secondary);
+      }
+
       /* Custom Notification System */
       .custom-notification {
         position: fixed;
@@ -786,24 +1142,80 @@
 
       // Redirect to login page if no token
       if (!AUTH_TOKEN) {
+        console.log('No auth token found, redirecting to login');
         window.location.href = "signin.html";
+      } else {
+        console.log('Auth token found:', AUTH_TOKEN.substring(0, 20) + '...');
       }
 
     //   You can integrate the AI Notes and MCQ generation backend calls inside the existing dashboard JS using the apiFetch helper and the stored token to enable authorized calls.
 
       // Helper function for authenticated API fetch
       async function apiFetch(path, options = {}) {
+        // Check if token exists
+        if (!AUTH_TOKEN) {
+          console.error('No auth token found, redirecting to login');
+          localStorage.removeItem("authToken");
+          window.location.href = "signin.html";
+          throw new Error("Authentication required");
+        }
+
         options.headers = {
           ...options.headers,
           Authorization: `Bearer ${AUTH_TOKEN}`,
         };
+
         const res = await fetch(API_BASE_URL + path, options);
+
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          throw new Error(errorData.error || "API Error");
+
+          // Handle authentication errors
+          if (res.status === 401) {
+            console.error('Authentication failed:', errorData);
+            localStorage.removeItem("authToken");
+            showNotification('Session expired. Please log in again.', 'warning');
+            setTimeout(() => {
+              window.location.href = "signin.html";
+            }, 2000);
+            throw new Error("Authentication expired");
+          }
+
+          throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
         }
+
         return res.json();
       }
+
+      // Debug function for authentication troubleshooting
+      window.debugAuth = function() {
+        console.log('=== AUTH DEBUG INFO ===');
+        console.log('AUTH_TOKEN exists:', !!AUTH_TOKEN);
+        console.log('AUTH_TOKEN preview:', AUTH_TOKEN ? AUTH_TOKEN.substring(0, 50) + '...' : 'null');
+        console.log('API_BASE_URL:', API_BASE_URL);
+        console.log('Current location:', window.location.href);
+        console.log('localStorage authToken:', localStorage.getItem('authToken') ? 'present' : 'missing');
+        return {
+          hasToken: !!AUTH_TOKEN,
+          tokenLength: AUTH_TOKEN ? AUTH_TOKEN.length : 0,
+          apiUrl: API_BASE_URL
+        };
+      };
+
+      // Test authentication function
+      window.testAuth = async function() {
+        try {
+          console.log('Testing authentication...');
+          const result = await apiFetch('/auth/me');
+          console.log('✅ Authentication successful:', result);
+          showNotification('Authentication test passed!', 'success');
+          return result;
+        } catch (error) {
+          console.error('❌ Authentication failed:', error);
+          showNotification('Authentication test failed. Please log in again.', 'error');
+          return null;
+        }
+      };
 
       // Attach logout handler
       document.addEventListener("DOMContentLoaded", () => {
@@ -821,9 +1233,33 @@
         // Initialize dark mode
         initializeDarkMode();
 
+        // Update authentication status
+        function updateAuthStatus(status, message = '') {
+          const authStatus = document.getElementById('authStatus');
+          if (!authStatus) return;
+
+          const icon = authStatus.querySelector('i');
+          const textSpan = authStatus.querySelector('span');
+
+          if (status === 'authenticated') {
+            icon.style.color = '#28a745';
+            if (textSpan) textSpan.textContent = 'Authenticated';
+          } else if (status === 'expired') {
+            icon.style.color = '#ffc107';
+            if (textSpan) textSpan.textContent = 'Session Expired';
+          } else if (status === 'error') {
+            icon.style.color = '#dc3545';
+            if (textSpan) textSpan.textContent = 'Auth Error';
+          } else if (status === 'loading') {
+            icon.style.color = '#ffc107';
+            if (textSpan) textSpan.textContent = message || 'Checking...';
+          }
+        }
+
         // Fetch and display user name
         (async () => {
           try {
+            updateAuthStatus('loading', 'Checking...');
             const response = await apiFetch("/auth/me");
             const userName = response.user.name || response.user.email.split('@')[0];
             const plan = response.user.plan || 'free';
@@ -831,14 +1267,21 @@
             const accountTypeDisplay = accountType.charAt(0).toUpperCase() + accountType.slice(1);
 
             document.getElementById("user-welcome").innerHTML = `Welcome, ${userName}<br><small style="color: var(--text-secondary); font-size: 0.8em;">${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan • ${accountTypeDisplay} Account</small>`;
+            updateAuthStatus('authenticated');
           } catch (err) {
             console.error("Failed to fetch user:", err);
+            updateAuthStatus('error');
 
             let errorMessage = "Failed to load user information. Using default settings.";
             if (err.message.includes('fetch') || err.message.includes('network')) {
               errorMessage = "Network connection issue. Please check your internet connection.";
-            } else if (err.message.includes('No authentication token')) {
+            } else if (err.message.includes('No authentication token') || err.message.includes('Authentication expired')) {
               errorMessage = "Session expired. Please refresh the page and log in again.";
+              updateAuthStatus('expired');
+              setTimeout(() => {
+                localStorage.removeItem("authToken");
+                window.location.href = "signin.html";
+              }, 3000);
             }
 
             handleError(new Error(errorMessage), 'User Info Fetch');
@@ -1065,6 +1508,12 @@
         <header class="topbar">
           <div id="user-welcome" style="font-weight: 500; color: var(--text-primary);">Loading...</div>
           <div style="display: flex; align-items: center; margin-left: auto;">
+            <!-- Authentication Status Indicator -->
+            <div id="authStatus" class="auth-status" style="margin-right: 12px; font-size: 0.8rem; color: var(--text-secondary);">
+              <i class="fa-solid fa-circle" style="color: #ffc107; margin-right: 4px;"></i>
+              <span>Checking...</span>
+            </div>
+
             <button class="dark-mode-toggle" id="darkModeToggle" aria-label="Toggle dark mode">
               <i class="fa-solid fa-sun sun-icon"></i>
               <i class="fa-solid fa-moon moon-icon"></i>
@@ -1166,6 +1615,57 @@
           </div>
         </section>
       </main>
+    </div>
+
+    <!-- Custom AI Results Popup -->
+    <div id="aiResultsPopup" class="ai-results-popup">
+      <div class="ai-results-overlay" onclick="closeAIResultsPopup()"></div>
+      <div class="ai-results-content">
+        <div class="ai-results-header">
+          <h2 id="aiResultsTitle" class="ai-results-title">AI Processing Results</h2>
+          <button class="ai-results-close" onclick="closeAIResultsPopup()">&times;</button>
+        </div>
+        <div id="aiResultsBody" class="ai-results-body">
+          <!-- AI results will be displayed here -->
+        </div>
+        <div class="ai-results-actions">
+          <button id="copyResultsBtn" class="ai-results-copy-btn" onclick="copyAIResults()">
+            <i class="fa-solid fa-copy"></i>
+            Copy Results
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- File Selector Popup -->
+    <div id="fileSelectorPopup" class="file-selector-popup">
+      <div class="file-selector-overlay" onclick="closeFileSelectorPopup()"></div>
+      <div class="file-selector-content">
+        <div class="file-selector-header">
+          <h2 id="fileSelectorTitle" class="file-selector-title">Select Files for AI Processing</h2>
+          <button class="file-selector-close" onclick="closeFileSelectorPopup()">&times;</button>
+        </div>
+        <div class="file-selector-body">
+          <div class="file-selector-instructions">
+            <strong>Select the files you want to process with AI:</strong><br>
+            Choose one or more uploaded files to generate AI content from their content.
+          </div>
+          <div id="fileList" class="file-list">
+            <!-- File list will be populated dynamically -->
+            <div class="ai-processing-loading">
+              <i class="fa-solid fa-spinner"></i>
+              <span>Loading uploaded files...</span>
+            </div>
+          </div>
+        </div>
+        <div class="file-selector-actions">
+          <button class="file-selector-cancel-btn" onclick="closeFileSelectorPopup()">Cancel</button>
+          <button id="processSelectedFilesBtn" class="file-selector-process-btn" onclick="processSelectedFiles()" disabled>
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            Process Selected Files
+          </button>
+        </div>
+      </div>
     </div>
   </body>
   <script>
@@ -1280,7 +1780,22 @@
         // Note: updateFileDisplay function may need to be updated to work with the new container structure
 
       } catch (error) {
-        handleError(error, 'File Upload');
+        console.error('File upload error:', error);
+
+        // Handle specific error types
+        if (error.message.includes('Authentication') || error.message.includes('401')) {
+          showNotification('Session expired. Please log in again.', 'warning');
+          setTimeout(() => {
+            localStorage.removeItem("authToken");
+            window.location.href = "signin.html";
+          }, 2000);
+        } else if (error.message.includes('File too large')) {
+          showNotification('File is too large. Please choose a smaller file.', 'warning');
+        } else if (error.message.includes('File type not supported')) {
+          showNotification('File type not supported. Please use PDF, Word, or text files.', 'warning');
+        } else {
+          handleError(error, 'File Upload');
+        }
       } finally {
         // Re-enable button
         uploadBtn.disabled = false;
@@ -2363,9 +2878,14 @@
               <span class="nb-file-name">${file.name}</span>
               <span class="nb-file-date">${file.type.toUpperCase()} • ${this.formatDate(file.timestamp)}</span>
             </div>
-            <button class="nb-file-action ${this.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="Add to favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
-              <i class="fa-${this.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
-            </button>
+            <div class="nb-file-actions">
+              <button class="nb-file-action ${this.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="Add to favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
+                <i class="fa-${this.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
+              </button>
+              <button class="nb-file-action" title="Delete file" onclick="nbFileManager.deleteFile('${file.id}')">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
           </div>
         `).join('');
       }
@@ -2605,6 +3125,87 @@
           // Show success notification
           showNotification(`Folder "${folder.name}" deleted successfully`, 'success');
         });
+      }
+
+      // Delete file
+      async deleteFile(fileId) {
+        const file = this.recentFiles.find(f => f.id === fileId);
+        if (!file) {
+          showNotification('File not found', 'error');
+          return;
+        }
+
+        // Show custom confirmation modal
+        this.showDeleteConfirmationModal(file);
+      }
+
+      // Show custom delete confirmation modal
+      showDeleteConfirmationModal(file) {
+        // Create confirmation modal
+        const modal = document.createElement('div');
+        modal.className = 'ai-result-modal';
+        modal.innerHTML = `
+          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
+          <div class="ai-result-content" style="max-width: 450px;">
+            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+            <div style="text-align: center; padding: 20px 0;">
+              <div style="font-size: 48px; color: #dc3545; margin-bottom: 16px;">
+                <i class="fa-solid fa-trash-can"></i>
+              </div>
+              <h3 style="color: #333; margin-bottom: 12px; font-size: 1.2rem;">Delete File</h3>
+              <p style="color: #666; line-height: 1.5; margin-bottom: 24px;">Are you sure you want to delete "${file.name}"? This action cannot be undone.</p>
+              <div style="display: flex; gap: 12px; justify-content: center;">
+                <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">Cancel</button>
+                <button id="confirm-delete-btn" style="padding: 10px 20px; background: #dc3545; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Delete File</button>
+              </div>
+            </div>
+          </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add confirmation handler
+        const confirmBtn = modal.querySelector('#confirm-delete-btn');
+        confirmBtn.addEventListener('click', async () => {
+          modal.remove();
+          await this.performDelete(file);
+        });
+      }
+
+      // Perform the actual delete operation
+      async performDelete(file) {
+        try {
+          // Call delete API
+          await apiFetch(`/upload/notes/${file.id}`, {
+            method: 'DELETE'
+          });
+
+          // Remove from recent files
+          this.recentFiles = this.recentFiles.filter(f => f.id !== file.id);
+
+          // Remove from favorites if it was favorited
+          this.favorites = this.favorites.filter(f => f.id !== file.id);
+
+          // Save to localStorage
+          this.saveData();
+
+          // Update UI
+          this.updateRecentFilesUI();
+          this.updateFavoritesUI();
+
+          showNotification(`"${file.name}" deleted successfully`, 'success');
+        } catch (err) {
+          console.error('Delete file error:', err);
+          let errorMessage = "Failed to delete file. Please try again.";
+          if (err.message.includes('fetch') || err.message.includes('network')) {
+            errorMessage = "Network connection issue. Please check your internet connection.";
+          } else if (err.message.includes('No authentication token')) {
+            errorMessage = "Session expired. Please refresh the page and log in again.";
+          } else if (err.message.includes('404')) {
+            errorMessage = "File not found. It may have already been deleted.";
+          }
+          showNotification(errorMessage, 'error');
+        }
       }
 
       // Helper methods
@@ -2968,6 +3569,18 @@
 
     // Load already uploaded notes from backend
     async function loadUploadedNotes(container = null) {
+      console.log('[DEBUG] loadUploadedNotes called with container:', container);
+
+      // Check authentication first
+      if (!AUTH_TOKEN) {
+        console.error('[DEBUG] No auth token found');
+        showNotification('Authentication required. Please log in again.', 'error');
+        setTimeout(() => window.location.href = "signin.html", 2000);
+        return;
+      }
+
+      console.log('[DEBUG] Auth token present, making API call...');
+
       // Use the provided container or default to nbFileListContainer for Notes Breakdown
       let targetContainer = container;
       if (!targetContainer) {
@@ -4000,7 +4613,12 @@
           }
         }
       } catch (err) {
-        console.log('No existing uploaded files found');
+        console.log('No existing uploaded files found or failed to load:', err.message);
+
+        // Show user-friendly message if it's a network/database error
+        if (err.message.includes('Failed to load recent uploads')) {
+          showNotification('Unable to load your uploaded files. Please refresh the page to try again.', 'warning');
+        }
       }
     });
 
@@ -4923,153 +5541,273 @@
       }
     });
 
-    // Notes Breakdown AI Features
+    // Global variables for file selection and AI processing
+    let selectedAIProcessingFiles = [];
+    let currentAIProcessingType = '';
+
+    // File Selector Popup Functions
+    function openFileSelectorPopup(processingType) {
+      currentAIProcessingType = processingType;
+      selectedAIProcessingFiles = [];
+
+      const popup = document.getElementById('fileSelectorPopup');
+      const title = document.getElementById('fileSelectorTitle');
+      const fileList = document.getElementById('fileList');
+
+      // Update title based on processing type
+      const titles = {
+        'smart_summary': 'Select Files for Smart Summary',
+        'mind_map': 'Select Files for Mind Map Generation',
+        'study_guide': 'Select Files for Study Guide Creation',
+        'flashcards': 'Select Files for Flashcard Generation'
+      };
+      title.textContent = titles[processingType] || 'Select Files for AI Processing';
+
+      // Show popup
+      popup.classList.add('show');
+
+      // Load uploaded files
+      loadUploadedFilesForSelection();
+    }
+
+    function closeFileSelectorPopup() {
+      const popup = document.getElementById('fileSelectorPopup');
+      popup.classList.remove('show');
+      selectedAIProcessingFiles = [];
+      currentAIProcessingType = '';
+    }
+
+    async function loadUploadedFilesForSelection() {
+      const fileList = document.getElementById('fileList');
+
+      try {
+        const files = await apiFetch('/upload/notes');
+
+        if (!files || files.length === 0) {
+          fileList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+              <i class="fa-solid fa-file-circle-xmark" style="font-size: 48px; margin-bottom: 16px;"></i>
+              <h4>No uploaded files found</h4>
+              <p>Please upload some files first to use AI processing features.</p>
+            </div>
+          `;
+          return;
+        }
+
+        fileList.innerHTML = files.map(file => `
+          <div class="file-item" onclick="toggleFileSelection('${file.id}')">
+            <input type="checkbox" class="file-checkbox" id="file-${file.id}" onchange="toggleFileSelection('${file.id}')">
+            <div class="file-info">
+              <span class="file-name">${file.title || 'Untitled'}</span>
+              <span class="file-meta">
+                Uploaded: ${new Date(file.created_at).toLocaleDateString()}
+                ${file.ai_analysis ? ' • AI Processed' : ' • Not Processed'}
+              </span>
+            </div>
+          </div>
+        `).join('');
+
+      } catch (error) {
+        console.error('Failed to load uploaded files:', error);
+        fileList.innerHTML = `
+          <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+            <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+            <h4>Failed to load files</h4>
+            <p>Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    function toggleFileSelection(fileId) {
+      const checkbox = document.getElementById(`file-${fileId}`);
+      const fileItem = checkbox.closest('.file-item');
+
+      if (checkbox.checked) {
+        selectedAIProcessingFiles.push(fileId);
+        fileItem.classList.add('selected');
+      } else {
+        selectedAIProcessingFiles = selectedAIProcessingFiles.filter(id => id !== fileId);
+        fileItem.classList.remove('selected');
+      }
+
+      // Update process button state
+      const processBtn = document.getElementById('processSelectedFilesBtn');
+      processBtn.disabled = selectedAIProcessingFiles.length === 0;
+      processBtn.innerHTML = selectedAIProcessingFiles.length === 0
+        ? '<i class="fa-solid fa-wand-magic-sparkles"></i> Process Selected Files'
+        : `<i class="fa-solid fa-wand-magic-sparkles"></i> Process ${selectedAIProcessingFiles.length} File${selectedAIProcessingFiles.length > 1 ? 's' : ''}`;
+    }
+
+    async function processSelectedFiles() {
+      if (selectedAIProcessingFiles.length === 0) {
+        showNotification('Please select at least one file', 'warning');
+        return;
+      }
+
+      closeFileSelectorPopup();
+      showAIResultsPopup(`Processing ${selectedAIProcessingFiles.length} file${selectedAIProcessingFiles.length > 1 ? 's' : ''}...`, 'Processing...');
+
+      try {
+        // Get file contents
+        const fileContents = [];
+        for (const fileId of selectedAIProcessingFiles) {
+          try {
+            const fileData = await apiFetch(`/upload/notes/${fileId}`);
+            if (fileData && fileData.ai_analysis) {
+              fileContents.push({
+                id: fileId,
+                title: fileData.title,
+                content: fileData.ai_analysis
+              });
+            }
+          } catch (error) {
+            console.error(`Failed to load file ${fileId}:`, error);
+          }
+        }
+
+        if (fileContents.length === 0) {
+          throw new Error('No valid file content found');
+        }
+
+        // Combine all file contents
+        const combinedContent = fileContents.map(file =>
+          `=== ${file.title} ===\n${file.content}`
+        ).join('\n\n');
+
+        // Process with AI based on selected type
+        let endpoint = '';
+        let requestData = { text: combinedContent };
+        let resultTitle = '';
+
+        switch (currentAIProcessingType) {
+          case 'smart_summary':
+            endpoint = '/ai/summarize';
+            resultTitle = 'Smart Summary';
+            break;
+          case 'mind_map':
+            endpoint = '/notes-breakdown/mind-map';
+            requestData.title = 'Combined Mind Map';
+            resultTitle = 'Mind Map';
+            break;
+          case 'study_guide':
+            endpoint = '/notes-breakdown/study-guide';
+            requestData.title = 'Combined Study Guide';
+            resultTitle = 'Study Guide';
+            break;
+          case 'flashcards':
+            endpoint = '/notes-breakdown/flashcards';
+            requestData.count = Math.min(15, selectedAIProcessingFiles.length * 5);
+            requestData.title = 'Combined Flashcards';
+            resultTitle = 'Flashcards';
+            break;
+          default:
+            throw new Error('Unknown processing type');
+        }
+
+        const response = await apiFetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestData),
+        });
+
+        // Format and display results
+        let resultContent = '';
+        if (currentAIProcessingType === 'smart_summary') {
+          resultContent = `<h3>📄 Smart Summary</h3><p>${response.summary}</p>`;
+        } else if (currentAIProcessingType === 'mind_map') {
+          resultContent = `<h3>🗺️ Mind Map</h3><pre style="white-space: pre-wrap; font-family: monospace;">${JSON.stringify(response.mind_map, null, 2)}</pre>`;
+        } else if (currentAIProcessingType === 'study_guide') {
+          resultContent = `<h3>📚 Study Guide</h3><div style="white-space: pre-wrap;">${response.study_guide}</div>`;
+        } else if (currentAIProcessingType === 'flashcards') {
+          const flashcards = response.flashcards || [];
+          resultContent = `<h3>🎴 Flashcards (${flashcards.length})</h3>`;
+          flashcards.forEach((card, index) => {
+            resultContent += `<div style="margin-bottom: 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #14807a;">
+              <strong>Q${index + 1}:</strong> ${card.question}<br>
+              <strong>A:</strong> ${card.answer}
+            </div>`;
+          });
+        }
+
+        resultContent += `<div style="margin-top: 16px; padding: 12px; background: var(--bg-primary); border-radius: 8px; font-size: 0.9em; color: var(--text-secondary);">
+          <strong>Processed Files:</strong> ${fileContents.map(f => f.title).join(', ')}<br>
+          <strong>Generated on:</strong> ${new Date().toLocaleString()}
+        </div>`;
+
+        showAIResultsPopup(resultTitle, resultContent);
+
+      } catch (error) {
+        console.error('AI processing error:', error);
+        let errorMessage = 'AI processing failed. Please try again.';
+
+        if (error.message.includes('timeout')) {
+          errorMessage = 'AI processing timed out. Please try with fewer files or smaller content.';
+        } else if (error.message.includes('network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+
+        showAIResultsPopup('Processing Failed', `<div style="color: #dc3545; text-align: center; padding: 20px;">
+          <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+          <h4>Error</h4>
+          <p>${errorMessage}</p>
+        </div>`);
+      }
+    }
+
+    // AI Results Popup Functions
+    function showAIResultsPopup(title, content) {
+      const popup = document.getElementById('aiResultsPopup');
+      const titleElement = document.getElementById('aiResultsTitle');
+      const bodyElement = document.getElementById('aiResultsBody');
+
+      titleElement.textContent = title;
+      bodyElement.innerHTML = content;
+
+      popup.classList.add('show');
+    }
+
+    function closeAIResultsPopup() {
+      const popup = document.getElementById('aiResultsPopup');
+      popup.classList.remove('show');
+    }
+
+    async function copyAIResults() {
+      const bodyElement = document.getElementById('aiResultsBody');
+      const copyBtn = document.getElementById('copyResultsBtn');
+
+      try {
+        // Get text content, removing HTML tags
+        const textContent = bodyElement.textContent || bodyElement.innerText;
+
+        await navigator.clipboard.writeText(textContent);
+
+        // Visual feedback
+        const originalHTML = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+          copyBtn.innerHTML = originalHTML;
+          copyBtn.classList.remove('copied');
+        }, 2000);
+
+        showNotification('Results copied to clipboard!', 'success');
+      } catch (error) {
+        console.error('Failed to copy:', error);
+        showNotification('Failed to copy to clipboard', 'error');
+      }
+    }
+
+    // Updated Notes Breakdown AI Features with file selector
     document.addEventListener("click", async (e) => {
       const featureCard = e.target.closest(".nb-feature-card");
       if (!featureCard) return;
 
       const featureType = featureCard.querySelector("h4").textContent.toLowerCase().replace(/\s+/g, '_');
 
-      // Check if there are uploaded files
-      if (!currentUploadedFile && uploadedFiles.length === 0) {
-        showNotification("Upload files first", 'warning');
-        return;
-      }
-
-      // Get the most recent uploaded file content
-      let fileContent = "";
-      if (currentUploadedFile && currentUploadedFile.content) {
-        fileContent = currentUploadedFile.content;
-      } else if (uploadedFiles.length > 0) {
-        // Fallback to the most recent file in the array
-        const recentFile = uploadedFiles[uploadedFiles.length - 1];
-        fileContent = recentFile.content || "";
-      }
-
-      if (!fileContent.trim()) {
-        showNotification("No content found in uploaded file. Please try uploading again.", 'warning');
-        return;
-      }
-
-      // Get the button's built-in prompt content
-      const buttonTitle = featureCard.querySelector("h4").textContent;
-      const buttonDesc = featureCard.querySelector("p").textContent;
-
-      // Create the combined prompt with button content and actual file content
-      const combinedPrompt = `${buttonTitle}. ${buttonDesc}\n\nDocument Content:\n${fileContent}`;
-
-      // Use the combined prompt as the text for AI processing
-      let text = combinedPrompt;
-
-      if (!text) {
-        showNotification("Content not found", 'error');
-        return;
-      }
-
-      try {
-        let endpoint = "";
-        let requestData = { text };
-
-        switch (featureType) {
-          case "smart_summary":
-            endpoint = "/ai/summarize";
-            break;
-          case "mind_map":
-            endpoint = "/notes-breakdown/mind-map";
-            requestData.title = "Mind Map";
-            break;
-          case "study_guide":
-            endpoint = "/notes-breakdown/study-guide";
-            requestData.title = "Study Guide";
-            break;
-          case "flashcards":
-            endpoint = "/notes-breakdown/flashcards";
-            requestData.count = 10;
-            requestData.title = "Flashcards";
-            break;
-          default:
-            showNotification("Feature not implemented yet", 'info');
-            return;
-        }
-
-        // Show loading state
-        featureCard.style.opacity = "0.7";
-        featureCard.style.pointerEvents = "none";
-
-        const response = await apiFetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(requestData),
-        });
-
-        // Display result
-        let resultHtml = "";
-        if (featureType === "smart_summary") {
-          resultHtml = `<div class="ai-result"><h3>Summary</h3><p>${response.summary}</p></div>`;
-        } else if (featureType === "mind_map") {
-          resultHtml = `<div class="ai-result"><h3>Mind Map Generated</h3><pre>${JSON.stringify(response.mind_map, null, 2)}</pre></div>`;
-        } else if (featureType === "study_guide") {
-          resultHtml = `<div class="ai-result"><h3>Study Guide</h3><div>${response.study_guide.replace(/\n/g, '<br>')}</div></div>`;
-        } else if (featureType === "flashcards") {
-          const flashcards = response.flashcards;
-          resultHtml = `<div class="ai-result"><h3>Flashcards (${flashcards.length})</h3>`;
-          flashcards.forEach((card, index) => {
-            resultHtml += `<div class="flashcard"><strong>Q${index + 1}:</strong> ${card.question}<br><strong>A:</strong> ${card.answer}</div>`;
-          });
-          resultHtml += "</div>";
-        }
-
-        // Create result modal or display area
-        const resultModal = document.createElement("div");
-        resultModal.className = "ai-result-modal";
-        resultModal.innerHTML = `
-          <div class="ai-result-overlay" onclick="this.parentElement.remove()"></div>
-          <div class="ai-result-content">
-            <button class="ai-result-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
-            ${resultHtml}
-          </div>
-        `;
-        document.body.appendChild(resultModal);
-
-      } catch (err) {
-        // Handle different types of errors with specific messages
-        console.error('AI Processing Error:', err);
-
-        let errorMessage = "An unexpected error occurred. Please try again.";
-        let notificationType = 'error';
-
-        if (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('Failed to fetch')) {
-          errorMessage = "Network connection issue. Please check your internet connection.";
-        } else if (err.message.includes('API') || err.message.includes('endpoint') || err.message.includes('404')) {
-          errorMessage = "Service temporarily unavailable. Please try again later.";
-        } else if (err.message.includes('No authentication token')) {
-          errorMessage = "Session expired. Please refresh the page and log in again.";
-          notificationType = 'warning';
-        } else if (err.message.includes('403') || err.message.includes('Unauthorized')) {
-          errorMessage = "Access denied. Please check your permissions.";
-        } else if (err.message.includes('AI service is currently unavailable') || err.message.includes('API key not configured')) {
-          errorMessage = "AI service is currently unavailable. Please contact support to enable AI features.";
-          notificationType = 'warning';
-        } else if (err.message.includes('AI service is temporarily busy') || err.message.includes('Rate limit exceeded')) {
-          errorMessage = "AI service is temporarily busy. Please try again in a few minutes.";
-          notificationType = 'warning';
-        } else if (err.message.includes('AI service configuration error')) {
-          errorMessage = "AI service configuration error. Please contact support.";
-          notificationType = 'warning';
-        } else if (err.message.includes('Network connection issue')) {
-          errorMessage = "Network connection issue. Please check your internet connection.";
-          notificationType = 'error';
-        } else if (err.message) {
-          errorMessage = err.message;
-        }
-
-        // Show custom notification
-        showNotification(errorMessage, notificationType);
-      } finally {
-        // Reset loading state
-        featureCard.style.opacity = "1";
-        featureCard.style.pointerEvents = "auto";
-      }
+      // Open file selector instead of processing immediately
+      openFileSelectorPopup(featureType);
     });
   </script>
 </html>
