@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -1324,12 +1325,11 @@
         console.log('Auth token found:', AUTH_TOKEN.substring(0, 20) + '...');
       }
 
-    //   You can integrate the AI Notes and MCQ generation backend calls inside the existing dashboard JS using the apiFetch helper and the stored token to enable authorized calls.
-
-      // Helper function for authenticated API fetch
+      // Consolidated Helper function for authenticated API fetch
       async function apiFetch(path, options = {}) {
         // Check if token exists
-        if (!AUTH_TOKEN) {
+        const token = AUTH_TOKEN || localStorage.getItem("authToken");
+        if (!token) {
           console.error('No auth token found, redirecting to login');
           localStorage.removeItem("authToken");
           window.location.href = "signin.html";
@@ -1338,7 +1338,7 @@
 
         options.headers = {
           ...options.headers,
-          Authorization: `Bearer ${AUTH_TOKEN}`,
+          Authorization: `Bearer ${token}`,
         };
 
         const res = await fetch(API_BASE_URL + path, options);
@@ -1553,11 +1553,7 @@
       }
 
       // Integrate MCQ AI processing
-      async function generateMCQsAI(
-        text,
-        count = 10,
-        difficulty = "intermediate"
-      ) {
+      async function generateMCQsAI(text, count = 10, difficulty = "intermediate") {
         try {
           const response = await apiFetch("/mcq", {
             method: "POST",

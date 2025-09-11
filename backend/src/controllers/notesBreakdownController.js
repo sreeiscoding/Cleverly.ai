@@ -71,28 +71,82 @@ exports.generateMindMap = async (req, res, next) => {
 exports.generateStudyGuide = async (req, res, next) => {
   try {
     const schema = z.object({
-      text: z.string().min(1),
+      text: z.string().min(1).max(50000), // Add reasonable text limit
       title: z.string().optional()
     });
     const { text, title = 'Study Guide' } = schema.parse(req.body);
 
-    const studyGuide = await generateStudyGuide(text);
+    console.log(`[${new Date().toISOString()}] Generating study guide for user ${req.user.id}, text length: ${text.length}`);
 
-    // Save to database
+    let studyGuide;
+    try {
+      studyGuide = await generateStudyGuide(text);
+    } catch (aiError) {
+      console.error('AI study guide generation failed:', aiError.message);
+
+      // Provide fallback study guide structure
+      const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 20);
+      const keyPoints = sentences.slice(0, 8).map(s => s.trim());
+
+      studyGuide = `# Study Guide - ${title}
+
+## Overview
+This study guide was generated using fallback processing due to temporary AI service unavailability.
+
+## Key Points
+${keyPoints.map(point => `- ${point}`).join('\n')}
+
+## Important Concepts
+- Main topics from the provided text
+- Key information and relationships
+- Core ideas and principles
+
+## Study Tips
+- Review the key points above
+- Focus on understanding the main concepts
+- Practice explaining these ideas in your own words
+
+## Practice Questions
+1. What are the main topics covered in this material?
+2. How do the key concepts relate to each other?
+3. What are the most important points to remember?
+
+---
+*Note: This is a fallback study guide. For more detailed analysis, please try again when the AI service is available.*`;
+
+      studyGuide = studyGuide + `\n\n---\n*AI Service Error: ${aiError.message}*`;
+    }
+
+    // Save to database with error handling
     const { data, error } = await supabaseAdmin.from('notes_breakdown')
       .insert({
         user_id: req.user.id,
         type: 'study_guide',
         title,
         content: text,
-        result: studyGuide
+        result: studyGuide,
+        created_at: new Date().toISOString()
       })
       .single();
 
-    if (error) return res.status(500).json({ error: error.message });
+    if (error) {
+      console.error('Database insert error:', error);
+      return res.status(500).json({
+        error: 'Failed to save study guide',
+        message: 'Your study guide was generated but could not be saved. Please try again.'
+      });
+    }
 
-    res.json({ study_guide: studyGuide, id: data.id });
+    console.log(`[${new Date().toISOString()}] Study guide generated and saved successfully for user ${req.user.id}, ID: ${data.id}`);
+
+    res.json({
+      study_guide: studyGuide,
+      id: data.id,
+      success: true,
+      message: studyGuide.includes('fallback processing') ? 'Study guide generated with fallback (AI service temporarily unavailable)' : 'Study guide generated successfully'
+    });
   } catch (err) {
+    console.error('Study guide generation error:', err);
     next(err);
   }
 };

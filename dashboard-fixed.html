@@ -1,0 +1,1754 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard - Fixed</title>
+    <link rel="stylesheet" href="dashboard.css" />
+    <link rel="stylesheet" href="upload-notes.css" />
+    <link rel="stylesheet" href="notes-breakdown.css" />
+    <link rel="stylesheet" href="ai-images.css" />
+    <link rel="stylesheet" href="mcq-generator.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* CSS Variables for Dark Mode */
+      :root {
+        --bg-primary: #f2ece3;
+        --bg-secondary: #ffffff;
+        --bg-sidebar: #ffffff;
+        --text-primary: #333333;
+        --text-secondary: #666666;
+        --text-muted: #7b8fa1;
+        --border-color: #e0e0e0;
+        --border-light: #f0f0f0;
+        --accent-color: #14807a;
+        --accent-hover: #0f6b63;
+        --shadow: rgba(0, 0, 0, 0.1);
+        --input-bg: #ffffff;
+        --input-readonly-bg: #f8f9fa;
+        --btn-secondary-bg: #f8f9fa;
+        --btn-secondary-hover: #e9ecef;
+        --breadcrumb-separator: #ccc;
+      }
+
+      /* Dark Mode Variables */
+      [data-theme="dark"] {
+        --bg-primary: #1a1a1a;
+        --bg-secondary: #2d2d2d;
+        --bg-sidebar: #2d2d2d;
+        --text-primary: #ffffff;
+        --text-secondary: #cccccc;
+        --text-muted: #aaaaaa;
+        --border-color: #404040;
+        --border-light: #404040;
+        --accent-color: #14807a;
+        --accent-hover: #0f6b63;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --input-bg: #3d3d3d;
+        --input-readonly-bg: #2d2d2d;
+        --btn-secondary-bg: #3d3d3d;
+        --btn-secondary-hover: #454545;
+        --breadcrumb-separator: #666666;
+      }
+
+      /* AI Processing Button Styles */
+      .nb-feature-card.processing {
+        background: #14807a !important;
+        color: white !important;
+        border-color: #14807a !important;
+        box-shadow: 0 4px 12px rgba(20, 128, 122, 0.3);
+        transform: translateY(-2px);
+        position: relative;
+      }
+
+      .nb-feature-card.processing::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      .nb-feature-card.processing .nb-feature-icon i {
+        color: white !important;
+      }
+
+      .nb-feature-card.processing h4,
+      .nb-feature-card.processing p,
+      .nb-feature-card.processing small {
+        color: white !important;
+      }
+
+      @keyframes spin {
+        0% { transform: translateY(-50%) rotate(0deg); }
+        100% { transform: translateY(-50%) rotate(360deg); }
+      }
+
+      /* File Selector Popup Styles */
+      .file-selector-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10001;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .file-selector-popup.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .file-selector-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+
+      .file-selector-content {
+        position: relative;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 600px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        width: 90%;
+        margin: 20px;
+      }
+
+      .file-selector-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .file-selector-title {
+        color: var(--text-primary);
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .file-selector-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-close:hover {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .file-list {
+        max-height: 300px;
+        overflow-y: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+      }
+
+      .file-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+        cursor: pointer;
+      }
+
+      .file-item:last-child {
+        border-bottom: none;
+      }
+
+      .file-item:hover {
+        background: var(--bg-primary);
+      }
+
+      .file-item.selected {
+        background: rgba(20, 128, 122, 0.1);
+        border-left: 4px solid #14807a;
+      }
+
+      .file-checkbox {
+        margin-right: 12px;
+        width: 18px;
+        height: 18px;
+        accent-color: #14807a;
+      }
+
+      .file-info {
+        flex-grow: 1;
+      }
+
+      .file-name {
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+        display: block;
+      }
+
+      .file-meta {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+      }
+
+      .file-selector-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .file-selector-process-btn {
+        background: #14807a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-process-btn:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+      }
+
+      .file-selector-process-btn:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .file-selector-cancel-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+      }
+
+      .file-selector-cancel-btn:hover {
+        background: var(--bg-secondary);
+      }
+
+      /* AI Results Popup Styles */
+      .ai-results-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .ai-results-popup.show {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .ai-results-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(5px);
+      }
+
+      .ai-results-content {
+        position: relative;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 800px;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border-color);
+        width: 90%;
+        margin: 20px;
+      }
+
+      .ai-results-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .ai-results-title {
+        color: var(--text-primary);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .ai-results-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        color: var(--text-secondary);
+        padding: 4px;
+        border-radius: 6px;
+        transition: all 0.2s ease;
+      }
+
+      .ai-results-close:hover {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+      }
+
+      .ai-results-body {
+        color: var(--text-primary);
+        line-height: 1.6;
+        font-size: 1rem;
+        margin-bottom: 20px;
+      }
+
+      .ai-results-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: flex-end;
+        padding-top: 16px;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .ai-results-copy-btn {
+        background: #14807a;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .ai-results-copy-btn:hover {
+        background: #0f6b63;
+        transform: translateY(-1px);
+      }
+
+      .ai-results-copy-btn.copied {
+        background: #28a745;
+      }
+
+      .ai-results-copy-btn.copied:hover {
+        background: #218838;
+      }
+
+      .ai-results-close-btn {
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 12px 24px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+      }
+
+      .ai-results-close-btn:hover {
+        background: var(--bg-secondary);
+        transform: translateY(-1px);
+      }
+
+      /* Custom Notification System */
+      .custom-notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: white;
+        border-radius: 8px;
+        padding: 16px 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        border-left: 4px solid #14807a;
+        z-index: 10000;
+        max-width: 400px;
+        opacity: 0;
+        transform: translateX(100%);
+        transition: all 0.3s ease;
+        font-family: inherit;
+      }
+
+      .custom-notification.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+
+      .custom-notification.error {
+        border-left-color: #dc3545;
+        background: #fff5f5;
+      }
+
+      .custom-notification.success {
+        border-left-color: #28a745;
+        background: #f8fff8;
+      }
+
+      .custom-notification.warning {
+        border-left-color: #ffc107;
+        background: #fffbf0;
+      }
+
+      .custom-notification.info {
+        border-left-color: #17a2b8;
+        background: #f0f8ff;
+      }
+
+      .custom-notification-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+      }
+
+      .custom-notification-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #333;
+        margin: 0;
+      }
+
+      .custom-notification-close {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+        color: #666;
+        padding: 0;
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .custom-notification-message {
+        font-size: 14px;
+        color: #666;
+        line-height: 1.4;
+        margin: 0;
+      }
+
+      /* Dark mode support for popups */
+      [data-theme="dark"] .ai-results-content,
+      [data-theme="dark"] .file-selector-content {
+        background: var(--bg-secondary);
+        border-color: var(--border-color);
+      }
+
+      [data-theme="dark"] .ai-results-title,
+      [data-theme="dark"] .file-selector-title {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .ai-results-body {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .file-name {
+        color: var(--text-primary);
+      }
+
+      [data-theme="dark"] .file-meta {
+        color: var(--text-secondary);
+      }
+
+      /* Loading state for AI processing */
+      .ai-processing-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 20px;
+        color: var(--text-secondary);
+      }
+
+      .ai-processing-loading i {
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body style="background-color: var(--bg-primary); min-height: 100vh;">
+    <script>
+      const API_BASE_URL = "http://localhost:4000";
+      let AUTH_TOKEN = localStorage.getItem("authToken");
+
+      // Redirect to login page if no token
+      if (!AUTH_TOKEN) {
+        console.log('No auth token found, redirecting to login');
+        window.location.href = "signin.html";
+      } else {
+        console.log('Auth token found:', AUTH_TOKEN.substring(0, 20) + '...');
+      }
+
+      // Helper function for authenticated API fetch
+      async function apiFetch(path, options = {}) {
+        // Check if token exists
+        if (!AUTH_TOKEN) {
+          console.error('No auth token found, redirecting to login');
+          localStorage.removeItem("authToken");
+          window.location.href = "signin.html";
+          throw new Error("Authentication required");
+        }
+
+        options.headers = {
+          ...options.headers,
+          Authorization: `Bearer ${AUTH_TOKEN}`,
+        };
+
+        const res = await fetch(API_BASE_URL + path, options);
+
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+
+          // Handle authentication errors
+          if (res.status === 401) {
+            console.error('Authentication failed:', errorData);
+            localStorage.removeItem("authToken");
+            showNotification('Session expired. Please log in again.', 'warning');
+            setTimeout(() => {
+              window.location.href = "signin.html";
+            }, 2000);
+            throw new Error("Authentication expired");
+          }
+
+          throw new Error(errorData.error || `HTTP ${res.status}: ${res.statusText}`);
+        }
+
+        return res.json();
+      }
+
+      // Custom Notification System
+      function showNotification(message, type = 'info', duration = 5000) {
+        // Remove existing notifications
+        const existingNotifications = document.querySelectorAll('.custom-notification');
+        existingNotifications.forEach(notification => notification.remove());
+
+        // Create notification element
+        const notification = document.createElement('div');
+        notification.className = `custom-notification ${type}`;
+
+        notification.innerHTML = `
+          <div class="custom-notification-header">
+            <h4 class="custom-notification-title">${type.charAt(0).toUpperCase() + type.slice(1)}</h4>
+            <button class="custom-notification-close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+          </div>
+          <p class="custom-notification-message">${message}</p>
+        `;
+
+        // Add to page
+        document.body.appendChild(notification);
+
+        // Show notification
+        setTimeout(() => notification.classList.add('show'), 10);
+
+        // Auto-hide after duration
+        if (duration > 0) {
+          setTimeout(() => {
+            if (notification.parentElement) {
+              notification.classList.remove('show');
+              setTimeout(() => notification.remove(), 300);
+            }
+          }, duration);
+        }
+
+        return notification;
+      }
+
+      // Initialize dark mode
+      function initializeDarkMode() {
+        const body = document.body;
+        const toggleBtn = document.getElementById('darkModeToggle');
+
+        // Load saved preference
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+          body.setAttribute('data-theme', 'dark');
+        }
+
+        // Update toggle button state
+        updateToggleButton();
+
+        // Add event listener to main toggle button
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', toggleDarkMode);
+        }
+      }
+
+      function toggleDarkMode() {
+        const body = document.body;
+        const isDark = body.hasAttribute('data-theme');
+
+        if (isDark) {
+          body.removeAttribute('data-theme');
+          localStorage.setItem('theme', 'light');
+        } else {
+          body.setAttribute('data-theme', 'dark');
+          localStorage.setItem('theme', 'dark');
+        }
+
+        updateToggleButton();
+      }
+
+      function updateToggleButton() {
+        const body = document.body;
+        const toggleBtn = document.getElementById('darkModeToggle');
+
+        if (toggleBtn) {
+          const isDark = body.hasAttribute('data-theme');
+          toggleBtn.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+        }
+      }
+
+      // File Manager Class
+      class NbFileManager {
+        constructor() {
+          this.recentFiles = JSON.parse(localStorage.getItem('nb-recent-files') || '[]');
+          this.favorites = JSON.parse(localStorage.getItem('nb-favorites') || '[]');
+          this.library = JSON.parse(localStorage.getItem('nb-library') || '[]');
+          this.maxRecentFiles = 20;
+          window.nbFileManager = this;
+        }
+
+        saveData() {
+          localStorage.setItem('nb-recent-files', JSON.stringify(this.recentFiles));
+          localStorage.setItem('nb-favorites', JSON.stringify(this.favorites));
+          localStorage.setItem('nb-library', JSON.stringify(this.library));
+        }
+
+        addRecentFile(fileData) {
+          const file = {
+            id: fileData.id || Date.now().toString(),
+            name: fileData.name,
+            type: fileData.type || 'document',
+            size: fileData.size || 0,
+            timestamp: fileData.timestamp || new Date().toISOString(),
+            content: fileData.content || '',
+            source: fileData.source || 'upload'
+          };
+
+          // Remove if already exists
+          this.recentFiles = this.recentFiles.filter(f => f.id !== file.id);
+
+          // Add to beginning
+          this.recentFiles.unshift(file);
+
+          // Limit to max recent files
+          if (this.recentFiles.length > this.maxRecentFiles) {
+            this.recentFiles = this.recentFiles.slice(0, this.maxRecentFiles);
+          }
+
+          this.saveData();
+          this.updateRecentFilesUI();
+          return file.id;
+        }
+
+        async toggleFavorite(fileId) {
+          const file = this.recentFiles.find(f => f.id === fileId);
+          if (!file) return false;
+
+          try {
+            const response = await apiFetch(`/upload/notes/${fileId}/favorite`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' }
+            });
+
+            const newFavoriteStatus = response.is_favorite;
+
+            if (newFavoriteStatus) {
+              if (!this.favorites.some(f => f.id === fileId)) {
+                this.favorites.push({ ...file, favoritedAt: new Date().toISOString() });
+              }
+            } else {
+              this.favorites = this.favorites.filter(f => f.id !== fileId);
+            }
+
+            const recentFile = this.recentFiles.find(f => f.id === fileId);
+            if (recentFile) {
+              recentFile.isFavorite = newFavoriteStatus;
+            }
+
+            this.saveData();
+            this.updateFavoritesUI();
+            this.updateRecentFilesUI();
+
+            showNotification(
+              newFavoriteStatus ? `"${file.name}" added to favorites` : `"${file.name}" removed from favorites`,
+              'success'
+            );
+
+            return newFavoriteStatus;
+          } catch (error) {
+            console.error('Failed to toggle favorite:', error);
+            showNotification('Failed to update favorite status. Please try again.', 'error');
+            return false;
+          }
+        }
+
+        updateRecentFilesUI() {
+          const container = document.querySelector('#nb-recent .nb-recent-files');
+          if (!container) return;
+
+          if (this.recentFiles.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No recent files here</p>';
+            return;
+          }
+
+          container.innerHTML = this.recentFiles.map(file => `
+            <div class="nb-file-row" data-file-id="${file.id}">
+              <i class="fa-solid fa-file-${this.getFileIcon(file.type)}"></i>
+              <div class="nb-file-info">
+                <span class="nb-file-name">${file.name}</span>
+                <span class="nb-file-date">${file.type.toUpperCase()} • ${this.formatDate(file.timestamp)}</span>
+              </div>
+              <div class="nb-file-actions">
+                <button class="nb-file-action ${file.isFavorite || this.favorites.some(f => f.id === file.id) ? 'active' : ''}" title="${file.isFavorite || this.favorites.some(f => f.id === file.id) ? 'Remove from favorites' : 'Add to favorites'}" onclick="nbFileManager.toggleFavorite('${file.id}')">
+                  <i class="fa-${file.isFavorite || this.favorites.some(f => f.id === file.id) ? 'solid' : 'regular'} fa-star"></i>
+                </button>
+                <button class="nb-file-action" title="Delete file" onclick="nbFileManager.deleteFile('${file.id}')">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+          `).join('');
+        }
+
+        updateFavoritesUI() {
+          const container = document.querySelector('#nb-favorites .nb-favorites-list');
+          if (!container) return;
+
+          const validFavorites = this.favorites.filter(fav => this.recentFiles.some(rf => rf.id === fav.id));
+
+          if (validFavorites.length !== this.favorites.length) {
+            this.favorites = validFavorites;
+            this.saveData();
+          }
+
+          if (validFavorites.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">No favorites yet</p>';
+            return;
+          }
+
+          container.innerHTML = validFavorites.map(file => `
+            <div class="nb-file-row" data-file-id="${file.id}">
+              <i class="fa-solid fa-file-${this.getFileIcon(file.type)}"></i>
+              <div class="nb-file-info">
+                <span class="nb-file-name">${file.name}</span>
+                <span class="nb-file-date">${file.type.toUpperCase()} • Added to favorites</span>
+              </div>
+              <button class="nb-file-action active" title="Remove from favorites" onclick="nbFileManager.toggleFavorite('${file.id}')">
+                <i class="fa-solid fa-star"></i>
+              </button>
+            </div>
+          `).join('');
+        }
+
+        async deleteFile(fileId) {
+          const file = this.recentFiles.find(f => f.id === fileId);
+          if (!file) {
+            showNotification('File not found', 'error');
+            return;
+          }
+
+          if (!confirm(`Are you sure you want to delete "${file.name}"? This action cannot be undone.`)) {
+            return;
+          }
+
+          try {
+            await apiFetch(`/upload/notes/${file.id}`, {
+              method: 'DELETE'
+            });
+
+            this.recentFiles = this.recentFiles.filter(f => f.id !== file.id);
+            this.favorites = this.favorites.filter(f => f.id !== file.id);
+
+            this.saveData();
+            this.updateRecentFilesUI();
+            this.updateFavoritesUI();
+
+            showNotification(`"${file.name}" deleted successfully`, 'success');
+          } catch (err) {
+            console.error('Delete file error:', err);
+            showNotification('Failed to delete file. Please try again.', 'error');
+          }
+        }
+
+        getFileIcon(type) {
+          const iconMap = {
+            'pdf': 'pdf',
+            'docx': 'word',
+            'doc': 'word',
+            'txt': 'lines',
+            'notes': 'lines',
+            'mcq': 'question',
+            'image': 'image'
+          };
+          return iconMap[type] || 'lines';
+        }
+
+        formatDate(dateString) {
+          const date = new Date(dateString);
+          const now = new Date();
+          const diffMs = now - date;
+          const diffMins = Math.floor(diffMs / (1000 * 60));
+          const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+          if (diffMins < 1) return 'Just now';
+          if (diffMins < 60) return `${diffMins} mins ago`;
+          if (diffHours < 24) return `${diffHours} hours ago`;
+          if (diffDays < 7) return `${diffDays} days ago`;
+
+          return date.toLocaleDateString();
+        }
+      }
+
+      // Global variables for AI processing
+      let selectedAIProcessingFiles = [];
+      let currentAIProcessingType = '';
+
+      // File selector functions
+      function openFileSelectorPopup(processingType) {
+        currentAIProcessingType = processingType;
+        selectedAIProcessingFiles = [];
+
+        const popup = document.getElementById('fileSelectorPopup');
+        const title = document.getElementById('fileSelectorTitle');
+
+        const titles = {
+          'smart_summary': 'Select Files for Smart Summary',
+          'mind_map': 'Select Files for Mind Map Generation',
+          'study_guide': 'Select Files for Study Guide Creation',
+          'flashcards': 'Select Files for Flashcard Generation',
+          'key_points': 'Select Files for Key Points Extraction',
+          'concept_map': 'Select Files for Concept Map Generation'
+        };
+        title.textContent = titles[processingType] || 'Select Files for AI Processing';
+
+        popup.classList.add('show');
+        document.body.style.overflow = 'hidden';
+
+        document.addEventListener('keydown', handleFileSelectorKeydown);
+        loadUploadedFilesForSelection();
+      }
+
+      function closeFileSelectorPopup() {
+        const popup = document.getElementById('fileSelectorPopup');
+        popup.classList.remove('show');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleFileSelectorKeydown);
+        selectedAIProcessingFiles = [];
+        currentAIProcessingType = '';
+        resetAIProcessingButton();
+      }
+
+      function handleFileSelectorKeydown(event) {
+        if (event.key === 'Escape') {
+          closeFileSelectorPopup();
+        }
+      }
+
+      async function loadUploadedFilesForSelection() {
+        const fileList = document.getElementById('fileList');
+
+        try {
+          const files = await apiFetch('/upload/notes');
+
+          if (!files || files.length === 0) {
+            fileList.innerHTML = `
+              <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                <i class="fa-solid fa-file-circle-xmark" style="font-size: 48px; margin-bottom: 16px;"></i>
+                <h4>No uploaded files found</h4>
+                <p>Please upload some files first to use AI processing features.</p>
+              </div>
+            `;
+            return;
+          }
+
+          fileList.innerHTML = files.map(file => `
+            <div class="file-item" onclick="toggleFileSelection('${file.id}')">
+              <input type="checkbox" class="file-checkbox" id="file-${file.id}" onchange="toggleFileSelection('${file.id}')">
+              <div class="file-info">
+                <span class="file-name">${file.title || 'Untitled'}</span>
+                <span class="file-meta">
+                  Uploaded: ${new Date(file.created_at).toLocaleDateString()}
+                  ${file.ai_analysis ? ' • AI Processed' : ' • Not Processed'}
+                </span>
+              </div>
+            </div>
+          `).join('');
+
+        } catch (error) {
+          console.error('Failed to load uploaded files:', error);
+          fileList.innerHTML = `
+            <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+              <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+              <h4>Failed to load files</h4>
+              <p>Please try again later.</p>
+            </div>
+          `;
+        }
+      }
+
+      function toggleFileSelection(fileId) {
+        const checkbox = document.getElementById(`file-${fileId}`);
+        const fileItem = checkbox.closest('.file-item');
+
+        if (checkbox.checked) {
+          selectedAIProcessingFiles.push(fileId);
+          fileItem.classList.add('selected');
+        } else {
+          selectedAIProcessingFiles = selectedAIProcessingFiles.filter(id => id !== fileId);
+          fileItem.classList.remove('selected');
+        }
+
+        const processBtn = document.getElementById('processSelectedFilesBtn');
+        processBtn.disabled = selectedAIProcessingFiles.length === 0;
+        processBtn.innerHTML = selectedAIProcessingFiles.length === 0
+          ? '<i class="fa-solid fa-wand-magic-sparkles"></i> Process Selected Files'
+          : `<i class="fa-solid fa-wand-magic-sparkles"></i> Process ${selectedAIProcessingFiles.length} File${selectedAIProcessingFiles.length > 1 ? 's' : ''}`;
+      }
+
+      async function processSelectedFiles() {
+        if (selectedAIProcessingFiles.length === 0) {
+          showNotification('Please select at least one file', 'warning');
+          return;
+        }
+
+        closeFileSelectorPopup();
+
+        const loadingContent = `
+          <div class="ai-processing-loading">
+            <i class="fa-solid fa-spinner"></i>
+            <span>Processing ${selectedAIProcessingFiles.length} file${selectedAIProcessingFiles.length > 1 ? 's' : ''}...</span>
+          </div>
+          <div style="text-align: center; margin-top: 20px; color: var(--text-secondary); font-size: 0.9em;">
+            This may take a few moments depending on file size and complexity.
+          </div>
+        `;
+        showAIResultsPopup(`Processing Files...`, loadingContent);
+
+        try {
+          const fileContents = [];
+          for (const fileId of selectedAIProcessingFiles) {
+            try {
+              const fileData = await apiFetch(`/upload/notes/${fileId}`);
+              if (fileData && fileData.ai_analysis) {
+                fileContents.push({
+                  id: fileId,
+                  title: fileData.title || fileData.file_name || 'Untitled',
+                  content: fileData.ai_analysis,
+                  file_type: fileData.file_type || 'Unknown',
+                  created_at: fileData.created_at
+                });
+              }
+            } catch (error) {
+              console.error(`Failed to load file ${fileId}:`, error);
+            }
+          }
+
+          if (fileContents.length === 0) {
+            throw new Error('No valid file content found. Please ensure selected files have been processed by AI analysis.');
+          }
+
+          const combinedContent = fileContents.map(file =>
+            `=== ${file.title} ===\n${file.content}`
+          ).join('\n\n');
+
+          let endpoint = '';
+          let requestData = { text: combinedContent };
+          let resultTitle = '';
+          let processingType = '';
+
+          switch (currentAIProcessingType) {
+            case 'smart_summary':
+              endpoint = '/ai/summarize';
+              resultTitle = 'Smart Summary';
+              processingType = 'Smart Summary';
+              break;
+            case 'mind_map':
+              endpoint = '/notes-breakdown/mind-map';
+              requestData.title = 'Combined Mind Map';
+              resultTitle = 'Mind Map';
+              processingType = 'Mind Map';
+              break;
+            case 'study_guide':
+              endpoint = '/notes-breakdown/study-guide';
+              requestData.title = 'Combined Study Guide';
+              resultTitle = 'Study Guide';
+              processingType = 'Study Guide';
+              break;
+            case 'flashcards':
+              endpoint = '/notes-breakdown/flashcards';
+              requestData.count = Math.min(15, selectedAIProcessingFiles.length * 5);
+              requestData.title = 'Combined Flashcards';
+              resultTitle = 'Flashcards';
+              processingType = 'Flash Cards';
+              break;
+            case 'key_points':
+              endpoint = '/notes-breakdown/key-points';
+              requestData.title = 'Key Points Extraction';
+              resultTitle = 'Key Points';
+              processingType = 'Key Points';
+              break;
+            case 'concept_map':
+              endpoint = '/notes-breakdown/concept-map';
+              requestData.title = 'Concept Map Generation';
+              resultTitle = 'Concept Map';
+              processingType = 'Concept Map';
+              break;
+            default:
+              throw new Error('Unknown processing type');
+          }
+
+          const response = await apiFetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestData),
+          });
+
+          const processingTime = new Date().toLocaleString();
+          let resultContent = `
+            <div style="background: var(--bg-primary); padding: 16px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #14807a;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin-bottom: 12px;">
+                <div>
+                  <strong style="color: var(--text-primary);">Processing Type:</strong><br>
+                  <span style="color: var(--text-secondary);">${processingType}</span>
+                </div>
+                <div>
+                  <strong style="color: var(--text-primary);">Files Processed:</strong><br>
+                  <span style="color: var(--text-secondary);">${fileContents.length}</span>
+                </div>
+                <div>
+                  <strong style="color: var(--text-primary);">Generated:</strong><br>
+                  <span style="color: var(--text-secondary);">${processingTime}</span>
+                </div>
+              </div>
+              <div>
+                <strong style="color: var(--text-primary);">Source Files:</strong><br>
+                <span style="color: var(--text-secondary); font-size: 0.9em;">${fileContents.map(f => f.title).join(', ')}</span>
+              </div>
+            </div>
+          `;
+
+          if (currentAIProcessingType === 'smart_summary') {
+            resultContent += `<h3>📄 Smart Summary</h3><div style="line-height: 1.6; margin-bottom: 20px;">${response.summary}</div>`;
+          } else if (currentAIProcessingType === 'mind_map') {
+            resultContent += `<h3>🗺️ Mind Map</h3><pre style="white-space: pre-wrap; font-family: monospace; background: var(--bg-primary); padding: 16px; border-radius: 8px; margin-bottom: 20px;">${JSON.stringify(response.mind_map, null, 2)}</pre>`;
+          } else if (currentAIProcessingType === 'study_guide') {
+            resultContent += `<h3>📚 Study Guide</h3><div style="white-space: pre-wrap; line-height: 1.6; margin-bottom: 20px;">${response.study_guide}</div>`;
+          } else if (currentAIProcessingType === 'flashcards') {
+            const flashcards = response.flashcards || [];
+            resultContent += `<h3>🎴 Flashcards (${flashcards.length})</h3>`;
+            flashcards.forEach((card, index) => {
+              resultContent += `<div class="flashcard" style="margin-bottom: 16px; padding: 16px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #14807a;">
+                <div style="margin-bottom: 8px;"><strong style="color: #14807a;">Q${index + 1}:</strong> ${card.question}</div>
+                <div><strong style="color: #14807a;">A:</strong> ${card.answer}</div>
+              </div>`;
+            });
+          } else if (currentAIProcessingType === 'key_points') {
+            const keyPoints = response.key_points || [];
+            resultContent += `<h3>📝 Key Points (${keyPoints.length})</h3>`;
+            keyPoints.forEach((point, index) => {
+              resultContent += `<div style="margin-bottom: 12px; padding: 12px; background: var(--bg-primary); border-radius: 8px; border-left: 4px solid #14807a;">
+                <strong style="color: #14807a;">${index + 1}.</strong> ${point}
+              </div>`;
+            });
+          } else if (currentAIProcessingType === 'concept_map') {
+            const conceptMap = response.concept_map || {};
+            resultContent += `<h3>🗺️ Concept Map</h3>`;
+            if (conceptMap.concepts && conceptMap.concepts.length > 0) {
+              resultContent += `<div style="margin-bottom: 16px;"><strong style="color: #14807a;">Key Concepts:</strong></div>`;
+              conceptMap.concepts.forEach((node, index) => {
+                resultContent += `<div style="margin-bottom: 8px; padding: 8px; background: var(--bg-primary); border-radius: 6px;">
+                  <strong>${index + 1}.</strong> ${node.name}
+                </div>`;
+              });
+            }
+          }
+
+          resultContent += `
+            <div style="margin-top: 24px; padding: 16px; background: rgba(20, 128, 122, 0.1); border-radius: 8px; border: 1px solid rgba(20, 128, 122, 0.2);">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
+                <i class="fa-solid fa-save" style="color: #14807a;"></i>
+                <strong style="color: var(--text-primary);">Save to Library</strong>
+              </div>
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <input type="text" id="saveResultTitle" placeholder="Enter a title for this result" style="flex: 1; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-primary);" value="${resultTitle} - ${new Date().toLocaleDateString()}">
+                <button onclick="saveAIResultToLibrary('${currentAIProcessingType}', '${processingTime}')" style="padding: 8px 16px; background: #14807a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                  <i class="fa-solid fa-save"></i> Save
+                </button>
+              </div>
+            </div>
+          `;
+
+          showAIResultsPopup(resultTitle, resultContent);
+          resetAIProcessingButton();
+
+        } catch (error) {
+          console.error('AI processing error:', error);
+          let errorMessage = 'AI processing failed. Please try again.';
+          let showRetry = true;
+
+          if (error.message.includes('timeout')) {
+            errorMessage = 'AI processing timed out. Please try with fewer files or smaller content.';
+          } else if (error.message.includes('network')) {
+            errorMessage = 'Network error. Please check your connection and try again.';
+          } else if (error.message.includes('No valid file content found')) {
+            errorMessage = 'No valid file content found. Please ensure selected files have been processed by AI analysis.';
+            showRetry = false;
+          } else if (error.message.includes('AI service')) {
+            errorMessage = 'AI service temporarily unavailable. Please try again later.';
+          }
+
+          const errorContent = `
+            <div style="color: #dc3545; text-align: center; padding: 20px;">
+              <i class="fa-solid fa-exclamation-triangle" style="font-size: 48px; margin-bottom: 16px;"></i>
+              <h4>Processing Failed</h4>
+              <p style="margin-bottom: 20px;">${errorMessage}</p>
+              ${showRetry ? `
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                  <button onclick="retryAIProcessing()" style="padding: 10px 20px; background: #14807a; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                    <i class="fa-solid fa-rotate-right"></i> Try Again
+                  </button>
+                  <button onclick="closeAIResultsPopup()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                    Cancel
+                  </button>
+                </div>
+              ` : `
+                <button onclick="closeAIResultsPopup()" style="padding: 10px 20px; border: 1px solid #e0e0e0; background: white; border-radius: 6px; cursor: pointer; font-weight: 500;">
+                  Close
+                </button>
+              `}
+            </div>
+          `;
+
+          showAIResultsPopup('Processing Failed', errorContent);
+          resetAIProcessingButton();
+        }
+      }
+
+      function showAIResultsPopup(title, content) {
+        const popup = document.getElementById('aiResultsPopup');
+        const titleElement = document.getElementById('aiResultsTitle');
+        const bodyElement = document.getElementById('aiResultsBody');
+        const actionsElement = document.getElementById('aiResultsActions');
+
+        titleElement.textContent = title;
+        bodyElement.innerHTML = content;
+
+        if (content.includes('Processing Failed')) {
+          actionsElement.style.display = 'none';
+        } else {
+          actionsElement.style.display = 'flex';
+        }
+
+        popup.classList.add('show');
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', handleAIResultsKeydown);
+      }
+
+      function closeAIResultsPopup() {
+        const popup = document.getElementById('aiResultsPopup');
+        popup.classList.remove('show');
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', handleAIResultsKeydown);
+        resetAIProcessingButton();
+      }
+
+      function handleAIResultsKeydown(event) {
+        if (event.key === 'Escape') {
+          closeAIResultsPopup();
+        }
+      }
+
+      async function copyAIResults() {
+        const bodyElement = document.getElementById('aiResultsBody');
+        const copyBtn = document.getElementById('copyResultsBtn');
+
+        try {
+          const textContent = bodyElement.innerText || bodyElement.textContent;
+
+          await navigator.clipboard.writeText(textContent);
+
+          const originalHTML = copyBtn.innerHTML;
+          copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+          copyBtn.classList.add('copied');
+
+          setTimeout(() => {
+            copyBtn.innerHTML = originalHTML;
+            copyBtn.classList.remove('copied');
+          }, 2000);
+
+          showNotification('Results copied to clipboard!', 'success');
+        } catch (error) {
+          console.error('Failed to copy:', error);
+          showNotification('Failed to copy to clipboard', 'error');
+        }
+      }
+
+      async function saveAIResultToLibrary(processingType, timestamp) {
+        const titleInput = document.getElementById('saveResultTitle');
+        const saveBtn = document.querySelector('button[onclick*="saveAIResultToLibrary"]');
+
+        if (!titleInput || !titleInput.value.trim()) {
+          showNotification('Please enter a title for the result', 'warning');
+          return;
+        }
+
+        const title = titleInput.value.trim();
+        const bodyElement = document.getElementById('aiResultsBody');
+
+        try {
+          if (saveBtn) {
+            saveBtn.disabled = true;
+            saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+          }
+
+          const contentToSave = bodyElement.innerText || bodyElement.textContent;
+
+          const formattedContent = `AI Processing Result: ${processingType}
+Generated: ${timestamp}
+Title: ${title}
+
+${contentToSave}`;
+
+          if (window.nbFileManager) {
+            const fileId = await window.nbFileManager.addRecentFile({
+              name: title,
+              type: 'ai-result',
+              content: formattedContent,
+              source: `ai-${processingType}`,
+              timestamp: new Date().toISOString()
+            });
+
+            showNotification(`"${title}" saved to your library!`, 'success');
+            setTimeout(() => {
+              closeAIResultsPopup();
+            }, 1500);
+          } else {
+            showNotification('Unable to save: File manager not available', 'error');
+          }
+
+        } catch (error) {
+          console.error('Failed to save AI result:', error);
+          showNotification('Failed to save result to library', 'error');
+        } finally {
+          if (saveBtn) {
+            saveBtn.disabled = false;
+            saveBtn.innerHTML = '<i class="fa-solid fa-save"></i> Save';
+          }
+        }
+      }
+
+      function retryAIProcessing() {
+        if (selectedAIProcessingFiles.length > 0 && currentAIProcessingType) {
+          processSelectedFiles();
+        } else {
+          showNotification('Unable to retry: No files selected', 'warning');
+          closeAIResultsPopup();
+        }
+      }
+
+      function resetAIProcessingButton() {
+        const processingButtons = document.querySelectorAll('.nb-feature-card.processing');
+        processingButtons.forEach(button => {
+          button.classList.remove('processing');
+        });
+      }
+
+      // Initialize application when DOM is loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Initialize dark mode
+        initializeDarkMode();
+
+        // Initialize file manager
+        window.nbFileManager = new NbFileManager();
+
+        // Load user data and initialize UI
+        loadUserData();
+
+        // Set up event listeners
+        setupEventListeners();
+      });
+
+      async function loadUserData() {
+        try {
+          const response = await apiFetch("/auth/me");
+          const userName = response.user.name || response.user.email.split('@')[0];
+          const plan = response.user.plan || 'free';
+          const accountType = response.user.account_type || 'student';
+          const accountTypeDisplay = accountType.charAt(0).toUpperCase() + accountType.slice(1);
+
+          document.getElementById("user-welcome").innerHTML = `Welcome, ${userName}<br><small style="color: var(--text-secondary); font-size: 0.8em;">${plan.charAt(0).toUpperCase() + plan.slice(1)} Plan • ${accountTypeDisplay} Account</small>`;
+
+          // Load initial data
+          loadRecentFiles();
+          loadFavorites();
+          loadFolders();
+
+        } catch (err) {
+          console.error("Failed to fetch user:", err);
+          handleError(new Error("Failed to load user information. Using default settings."), 'User Info Fetch');
+
+          document.getElementById("user-welcome").innerHTML = `Welcome<br><small style="color: var(--text-secondary); font-size: 0.8em;">Free Plan • Student Account</small>`;
+        }
+      }
+
+      async function loadRecentFiles() {
+        try {
+          const files = await apiFetch('/upload/notes');
+          // Update recent files UI
+          if (window.nbFileManager) {
+            window.nbFileManager.updateRecentFilesUI();
+          }
+        } catch (error) {
+          console.error('Failed to load recent files:', error);
+        }
+      }
+
+      async function loadFavorites() {
+        try {
+          const favorites = await apiFetch('/upload/favorites');
+          // Update favorites UI
+          if (window.nbFileManager) {
+            window.nbFileManager.updateFavoritesUI();
+          }
+        } catch (error) {
+          console.error('Failed to load favorites:', error);
+        }
+      }
+
+      async function loadFolders() {
+        try {
+          const folders = await apiFetch('/upload/folders');
+          // Update folders UI
+          updateFoldersUI(folders);
+        } catch (error) {
+          console.error('Failed to load folders:', error);
+        }
+      }
+
+      function updateFoldersUI(folders) {
+        // Implementation for updating folders UI
+        console.log('Folders loaded:', folders);
+      }
+
+      function setupEventListeners() {
+        // Logout handler
+        const logoutLink = document.querySelector('.dropdown-content a[href="#logout"]');
+        if (logoutLink) {
+          logoutLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            localStorage.removeItem("authToken");
+            window.location.href = "signin.html";
+          });
+        }
+
+        // AI processing buttons
+        document.addEventListener("click", async (e) => {
+          const featureCard = e.target.closest(".nb-feature-card");
+          if (!featureCard) return;
+
+          const action = featureCard.dataset.action;
+          if (!action) return;
+
+          // Handle special cases
+          if (action === 'search') {
+            openSearchInterface();
+            return;
+          }
+
+          if (action === 'statistics') {
+            openStatisticsInterface();
+            return;
+          }
+
+          // Apply processing state
+          featureCard.classList.add('processing');
+
+          // Open file selector for other features
+          openFileSelectorPopup(action);
+        });
+      }
+
+      function handleError(error, context = 'General') {
+        console.error(`[${context}] Error:`, error);
+        showNotification(`${context}: ${error.message}`, 'error');
+      }
+
+      // Utility functions
+      function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+      }
+
+      function getFileTypeIcon(type) {
+        const iconMap = {
+          'pdf': 'pdf',
+          'docx': 'word',
+          'doc': 'word',
+          'txt': 'lines',
+          'notes': 'lines',
+          'mcq': 'question',
+          'image': 'image'
+        };
+        return iconMap[type] || 'lines';
+      }
+
+      // Placeholder functions for features not yet implemented
+      function openSearchInterface() {
+        showNotification('Search interface coming soon!', 'info');
+      }
+
+      function openStatisticsInterface() {
+        showNotification('Statistics interface coming soon!', 'info');
+      }
+    </script>
+
+    <!-- HTML Structure -->
+    <div class="dashboard-wrapper">
+      <aside class="sidebar">
+        <a href="index.html" class="sidebar-header-link">
+          <div class="sidebar-header">
+            <span class="sidebar-logo"><img src="Cleverly AI.png" alt="Cleverly.ai" width="40" /></span>
+            <span class="sidebar-title">Cleverly.ai</span>
+          </div>
+        </a>
+        <nav class="sidebar-nav">
+          <ul>
+            <li>
+              <button class="home-btn">
+                <i class="fa-solid fa-house"></i> Home
+              </button>
+            </li>
+            <li class="nav-section">
+              Core Features
+              <ul>
+                <li>
+                  <a href="#" onclick="switchTab('notes-breakdown')">
+                    <i class="fa-solid fa-file-lines"></i> Notes Breakdown
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="switchTab('ai-images')">
+                    <i class="fa-solid fa-palette"></i> AI Images
+                  </a>
+                </li>
+                <li>
+                  <a href="#" onclick="switchTab('mcq-generator')">
+                    <i class="fa-solid fa-bullseye"></i> MCQ Generator
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <main class="main-content">
+        <header class="dashboard-header">
+          <div class="header-left">
+            <h1 id="page-title">Dashboard</h1>
+          </div>
+          <div class="header-right">
+            <button id="darkModeToggle" class="icon-btn">
+              <i class="fa-solid fa-moon"></i>
+            </button>
+            <div class="user-menu">
+              <button class="user-btn">
+                <i class="fa-solid fa-user"></i>
+                <span id="user-welcome">Welcome</span>
+              </button>
+              <div class="dropdown-content">
+                <a href="#profile"><i class="fa-solid fa-user"></i> Profile</a>
+                <a href="#settings"><i class="fa-solid fa-gear"></i> Settings</a>
+                <a href="#logout"><i class="fa-solid fa-sign-out-alt"></i> Logout</a>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <div class="workspace">
+          <!-- Notes Breakdown Tab -->
+          <div id="notes-breakdown" class="tab-content active">
+            <div class="nb-container">
+              <div class="nb-tabs">
+                <button class="nb-tab-btn active" data-tab="recent">Recent Files</button>
+                <button class="nb-tab-btn" data-tab="favorites">Favorites</button>
+                <button class="nb-tab-btn" data-tab="library">Library</button>
+              </div>
+
+              <div class="nb-tab-content">
+                <!-- Recent Files Tab -->
+                <div id="nb-recent" class="nb-tab-panel active">
+                  <div class="nb-section-header">
+                    <h3>Recent Files</h3>
+                    <button class="nb-upload-btn">
+                      <i class="fa-solid fa-upload"></i> Upload Files
+                    </button>
+                  </div>
+                  <div class="nb-recent-files">
+                    <!-- Files will be loaded here -->
+                  </div>
+                </div>
+
+                <!-- Favorites Tab -->
+                <div id="nb-favorites" class="nb-tab-panel">
+                  <div class="nb-section-header">
+                    <h3>Favorites</h3>
+                  </div>
+                  <div class="nb-favorites-list">
+                    <!-- Favorites will be loaded here -->
+                  </div>
+                </div>
+
+                <!-- Library Tab -->
+                <div id="nb-library" class="nb-tab-panel">
+                  <div class="nb-section-header">
+                    <h3>Library</h3>
+                    <button class="nb-new-folder-btn">
+                      <i class="fa-solid fa-folder-plus"></i> New Folder
+                    </button>
+                  </div>
+                  <div class="nb-library-content">
+                    <!-- Library content will be loaded here -->
+                  </div>
+                </div>
+              </div>
+
+              <!-- AI Processing Section -->
+              <div class="nb-ai-section">
+                <h3>AI Processing</h3>
+                <div class="nb-processing-grid">
+                  <div class="nb-feature-card" data-action="smart_summary">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-file-lines"></i>
+                    </div>
+                    <h4>Smart Summary</h4>
+                    <p>Generate concise summaries from your documents</p>
+                    <small>Perfect for quick reviews</small>
+                  </div>
+
+                  <div class="nb-feature-card" data-action="mind_map">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-diagram-project"></i>
+                    </div>
+                    <h4>Mind Map</h4>
+                    <p>Create visual mind maps from your content</p>
+                    <small>Great for visual learners</small>
+                  </div>
+
+                  <div class="nb-feature-card" data-action="study_guide">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-book"></i>
+                    </div>
+                    <h4>Study Guide</h4>
+                    <p>Generate comprehensive study guides</p>
+                    <small>Complete learning materials</small>
+                  </div>
+
+                  <div class="nb-feature-card" data-action="flashcards">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-cards-blank"></i>
+                    </div>
+                    <h4>Flash Cards</h4>
+                    <p>Create flashcards for effective memorization</p>
+                    <small>Spaced repetition ready</small>
+                  </div>
+
+                  <div class="nb-feature-card" data-action="key_points">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-list-check"></i>
+                    </div>
+                    <h4>Key Points</h4>
+                    <p>Extract the most important points</p>
+                    <small>Focus on what matters</small>
+                  </div>
+
+                  <div class="nb-feature-card" data-action="concept_map">
+                    <div class="nb-feature-icon">
+                      <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <h4>Concept Map</h4>
+                    <p>Build concept maps showing relationships</p>
+                    <small>Understand connections</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Other tabs would go here -->
+        </div>
+      </main>
+    </div>
+
+    <!-- File Selector Popup -->
+    <div id="fileSelectorPopup" class="file-selector-popup">
+      <div class="file-selector-overlay" onclick="closeFileSelectorPopup()"></div>
+      <div class="file-selector-content">
+        <div class="file-selector-header">
+          <h3 id="fileSelectorTitle" class="file-selector-title">Select Files</h3>
+          <button class="file-selector-close" onclick="closeFileSelectorPopup()">&times;</button>
+        </div>
+
+        <div class="file-selector-body">
+          <div class="file-selector-instructions">
+            <i class="fa-solid fa-info-circle"></i>
+            Select one or more files from your library to process with AI. Files must have been previously uploaded and analyzed.
+          </div>
+
+          <div id="fileList" class="file-list">
+            <!-- Files will be loaded here -->
+          </div>
+        </div>
+
+        <div class="file-selector-actions">
+          <button class="file-selector-cancel-btn" onclick="closeFileSelectorPopup()">Cancel</button>
+          <button id="processSelectedFilesBtn" class="file-selector-process-btn" onclick="processSelectedFiles()" disabled>
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Process Selected Files
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Results Popup -->
+    <div id="aiResultsPopup" class="ai-results-popup">
+      <div class="ai-results-overlay" onclick="closeAIResultsPopup()"></div>
+      <div class="ai-results-content">
+        <div class="ai-results-header">
+          <h3 id="aiResultsTitle" class="ai-results-title">AI Processing Results</h3>
+          <button class="ai-results-close" onclick="closeAIResultsPopup()">&times;</button>
+        </div>
+
+        <div id="aiResultsBody" class="ai-results-body">
+          <!-- Results will be displayed here -->
+        </div>
+
+        <div id="aiResultsActions" class="ai-results-actions">
+          <button id="copyResultsBtn" class="ai-results-copy-btn" onclick="copyAIResults()">
+            <i class="fa-solid fa-copy"></i> Copy to Clipboard
+          </button>
+          <button class="ai-results-close-btn" onclick="closeAIResultsPopup()">
+            <i class="fa-solid fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Tab switching functionality
+      function switchTab(tabName) {
+        // Hide all tabs
+        const tabs = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => tab.classList.remove('active'));
+
+        // Show selected tab
+        const selectedTab = document.getElementById(tabName);
+        if (selectedTab) {
+          selectedTab.classList.add('active');
+        }
+
+        // Update page title
+        const titles = {
+          'notes-breakdown': 'Notes Breakdown',
+          'ai-images': 'AI Images',
+          'mcq-generator': 'MCQ Generator'
+        };
+        document.getElementById('page-title').textContent = titles[tabName] || 'Dashboard';
+      }
+
+      // Tab switching for notes breakdown
+      document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('nb-tab-btn')) {
+          const tabName = e.target.dataset.tab;
+
+          // Update tab buttons
+          const tabButtons = document.querySelectorAll('.nb-tab-btn');
+          tabButtons.forEach(btn => btn.classList.remove('active'));
+          e.target.classList.add('active');
+
+          // Update tab panels
+          const tabPanels = document.querySelectorAll('.nb-tab-panel');
+          tabPanels.forEach(panel => panel.classList.remove('active'));
+
+          const selectedPanel = document.getElementById('nb-' + tabName);
+          if (selectedPanel) {
+            selectedPanel.classList.add('active');
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
+

@@ -8,6 +8,7 @@ const path = require('path');
 const xlsx = require('xlsx');
 const sharp = require('sharp');
 const Tesseract = require('tesseract.js');
+const { z } = require('zod');
 
 // Synchronous AI processing function for real-time analysis during upload
 const processAIAnalysisSync = async (extractedText) => {

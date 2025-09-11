@@ -6,6 +6,9 @@ const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama2';
 
 let openai = null;
 let apiKeyConfigured = false;
+let lastHealthCheck = null;
+let healthCheckCache = null;
+const HEALTH_CHECK_CACHE_DURATION = 30000; // 30 seconds
 
 // Configure for Ollama (no API key needed)
 try {
@@ -16,8 +19,82 @@ try {
   apiKeyConfigured = true;
   console.log(`Ollama configured: ${OLLAMA_BASE_URL} with model ${OLLAMA_MODEL}`);
 } catch (error) {
-  console.warn('Ollama configuration failed:', error.message);
-  console.warn('Make sure Ollama is running on the specified port');
+  console.error('Ollama configuration failed:', error.message);
+  console.error('Make sure Ollama is running on the specified port');
+  console.error('Installation instructions:');
+  console.error('1. Download Ollama from https://ollama.ai');
+  console.error('2. Install and start Ollama');
+  console.error('3. Pull the required model: ollama pull llama2');
+  console.error('4. Verify Ollama is running: curl http://localhost:11434/api/tags');
+}
+
+// Health check function for Ollama connectivity
+async function checkOllamaHealth() {
+  // Use cached result if recent
+  if (lastHealthCheck && healthCheckCache && (Date.now() - lastHealthCheck) < HEALTH_CHECK_CACHE_DURATION) {
+    return healthCheckCache;
+  }
+
+  try {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    const models = data.models || [];
+
+    // Check if our required model is available
+    const hasRequiredModel = models.some(model => model.name === OLLAMA_MODEL || model.name.startsWith(OLLAMA_MODEL));
+
+    const healthStatus = {
+      available: true,
+      hasRequiredModel,
+      models: models.map(m => m.name),
+      baseUrl: OLLAMA_BASE_URL,
+      requiredModel: OLLAMA_MODEL
+    };
+
+    // Cache the result
+    lastHealthCheck = Date.now();
+    healthCheckCache = healthStatus;
+
+    return healthStatus;
+  } catch (error) {
+    const healthStatus = {
+      available: false,
+      error: error.message,
+      baseUrl: OLLAMA_BASE_URL,
+      requiredModel: OLLAMA_MODEL
+    };
+
+    // Cache the result
+    lastHealthCheck = Date.now();
+    healthCheckCache = healthStatus;
+
+    return healthStatus;
+  }
+}
+
+// Enhanced error handling function
+function createOllamaError(error, operation = 'AI operation') {
+  if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
+    return new Error(`Cannot connect to Ollama at ${OLLAMA_BASE_URL}. Please ensure Ollama is running and accessible.`);
+  } else if (error.status === 404) {
+    return new Error(`Model '${OLLAMA_MODEL}' not found. Please run: ollama pull ${OLLAMA_MODEL}`);
+  } else if (error.status === 500) {
+    return new Error('Ollama server error. Please check Ollama logs and restart if necessary.');
+  } else if (error.message.includes('timeout')) {
+    return new Error('Ollama request timed out. The model may be too large or the server is overloaded.');
+  } else if (error.message.includes('model') && error.message.includes('not found')) {
+    return new Error(`Required model '${OLLAMA_MODEL}' is not available. Please run: ollama pull ${OLLAMA_MODEL}`);
+  } else {
+    return new Error(`${operation} failed: ${error.message}`);
+  }
 }
 
 const summarizeText = async (text) => {
@@ -42,17 +119,7 @@ const summarizeText = async (text) => {
     return response.choices[0].message.content.trim();
   } catch (error) {
     console.error('Ollama summarize error:', error.message);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service temporarily unavailable. Please try again later.');
-    }
+    throw createOllamaError(error, 'Text summarization');
   }
 };
 
@@ -93,17 +160,7 @@ const generateMCQs = async (text, count = 10, difficulty = 'intermediate') => {
     }
   } catch (error) {
     console.error('Ollama MCQ generation error:', error.message);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate questions. Please try again.');
-    }
+    throw createOllamaError(error, 'MCQ generation');
   }
 };
 
@@ -143,17 +200,7 @@ const generateImage = async (prompt, style = 'modern') => {
     return dataUrl;
   } catch (error) {
     console.error('Ollama image generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate image description. Please try again.');
-    }
+    throw createOllamaError(error, 'Image generation');
   }
 };
 
@@ -233,17 +280,7 @@ ${text}` }
     }
   } catch (error) {
     console.error('Ollama mind map generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate mind map. Please try again.');
-    }
+    throw createOllamaError(error, 'Mind map generation');
   }
 };
 
@@ -269,17 +306,7 @@ const generateStudyGuide = async (text) => {
     return response.choices[0].message.content.trim();
   } catch (error) {
     console.error('Ollama study guide generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate study guide. Please try again.');
-    }
+    throw createOllamaError(error, 'Study guide generation');
   }
 };
 
@@ -367,17 +394,7 @@ Example format:
     }
   } catch (error) {
     console.error('Ollama flashcards generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate flashcards. Please try again.');
-    }
+    throw createOllamaError(error, 'Flashcard generation');
   }
 };
 
@@ -447,17 +464,7 @@ ${text}` }
     }
   } catch (error) {
     console.error('Ollama key points generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to extract key points. Please try again.');
-    }
+    throw createOllamaError(error, 'Key points extraction');
   }
 };
 
@@ -548,18 +555,8 @@ ${text}` }
     }
   } catch (error) {
     console.error('Ollama concept map generation error:', error);
-
-    // Handle Ollama-specific errors
-    if (error.code === 'ECONNREFUSED' || error.message.includes('fetch') || error.message.includes('connect')) {
-      throw new Error('Cannot connect to Ollama. Please make sure Ollama is running on ' + OLLAMA_BASE_URL);
-    } else if (error.status === 404) {
-      throw new Error(`Model '${OLLAMA_MODEL}' not found. Please pull the model first: ollama pull ${OLLAMA_MODEL}`);
-    } else if (error.status === 500) {
-      throw new Error('Ollama server error. Please check Ollama logs.');
-    } else {
-      throw new Error('AI service error: Failed to generate concept map. Please try again.');
-    }
+    throw createOllamaError(error, 'Concept map generation');
   }
 };
 
-module.exports = { summarizeText, generateMCQs, generateImage, generateMindMap, generateStudyGuide, generateFlashcards, generateKeyPoints, generateConceptMap };
+module.exports = { summarizeText, generateMCQs, generateImage, generateMindMap, generateStudyGuide, generateFlashcards, generateKeyPoints, generateConceptMap, checkOllamaHealth };
