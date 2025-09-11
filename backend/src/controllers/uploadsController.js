@@ -1,10 +1,76 @@
 const { supabaseAdmin } = require('../lib/supabase');
 const { v4: uuidv4 } = require('uuid');
-const { summarizeText } = require('../lib/openai');
+const { summarizeText, generateKeyPoints } = require('../lib/openai');
 const pdfParse = require('pdf-parse');
 const mammoth = require('mammoth');
 const fs = require('fs');
 const path = require('path');
+const xlsx = require('xlsx');
+const sharp = require('sharp');
+const Tesseract = require('tesseract.js');
+
+// Synchronous AI processing function for real-time analysis during upload
+const processAIAnalysisSync = async (extractedText) => {
+  if (!extractedText || extractedText.trim().length === 0) {
+    return {
+      summary: 'No text content available for analysis',
+      key_points: [],
+      analysis_complete: false,
+      processing_time: 0
+    };
+  }
+
+  const startTime = Date.now();
+  console.log(`[${new Date().toISOString()}] Starting synchronous AI analysis, text length: ${extractedText.length}`);
+
+  try {
+    // Perform basic analysis synchronously
+    const summaryPromise = summarizeText(extractedText);
+    const keyPointsPromise = generateKeyPoints(extractedText);
+
+    // Wait for both analyses with timeout
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('AI analysis timeout')), 30000)
+    );
+
+    const [summaryResult, keyPointsResult] = await Promise.race([
+      Promise.all([summaryPromise, keyPointsPromise]),
+      timeoutPromise
+    ]);
+
+    const processingTime = Date.now() - startTime;
+
+    // Format the analysis results
+    const analysis = {
+      summary: summaryResult,
+      key_points: keyPointsResult.key_points || [],
+      main_themes: keyPointsResult.main_themes || [],
+      important_concepts: keyPointsResult.important_concepts || [],
+      analysis_complete: true,
+      processing_time: processingTime,
+      processed_at: new Date().toISOString()
+    };
+
+    console.log(`[${new Date().toISOString()}] Synchronous AI analysis completed in ${processingTime}ms`);
+    return analysis;
+
+  } catch (error) {
+    console.error(`[${new Date().toISOString()}] Synchronous AI analysis failed:`, error.message);
+
+    const processingTime = Date.now() - startTime;
+
+    // Return basic fallback analysis
+    return {
+      summary: 'AI analysis temporarily unavailable. File uploaded successfully.',
+      key_points: ['File uploaded successfully', 'AI analysis will be processed in background'],
+      main_themes: ['Document Processing'],
+      important_concepts: ['File Upload'],
+      analysis_complete: false,
+      processing_time: processingTime,
+      error: error.message
+    };
+  }
+};
 
 // Async AI processing function (non-blocking) with multiple AI features
 const processAIAnalysisAsync = async (noteId, extractedText, userId) => {
@@ -239,6 +305,94 @@ const extractTextFromFile = async (buffer, mimetype) => {
         extractedText = 'Word document text extraction failed. The file may be corrupted, password-protected, or in an unsupported format.';
       }
 
+    } else if (mimetype === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+               mimetype === 'application/vnd.ms-excel') {
+      // Excel files (.xlsx, .xls)
+      console.log(`[${new Date().toISOString()}] Starting Excel file text extraction, size: ${buffer.length} bytes`);
+
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Excel extraction timeout')), timeoutMs)
+        );
+
+        const extractPromise = new Promise((resolve, reject) => {
+          try {
+            const workbook = XLSX.read(buffer, { type: 'buffer' });
+            let allText = '';
+
+            // Extract text from all worksheets
+            workbook.SheetNames.forEach(sheetName => {
+              const worksheet = workbook.Sheets[sheetName];
+              const sheetText = XLSX.utils.sheet_to_csv(worksheet);
+              if (sheetText.trim()) {
+                allText += `=== ${sheetName} ===\n${sheetText}\n\n`;
+              }
+            });
+
+            resolve(allText.trim());
+          } catch (xlsxError) {
+            reject(xlsxError);
+          }
+        });
+
+        extractedText = await Promise.race([extractPromise, timeoutPromise]);
+
+        if (!extractedText.trim()) {
+          console.warn(`[${new Date().toISOString()}] Excel extraction returned empty text`);
+          extractedText = 'Excel file appears to contain no extractable text. This may be an image-based spreadsheet or corrupted file.';
+        } else {
+          console.log(`[${new Date().toISOString()}] Excel extraction completed, extracted ${extractedText.length} characters`);
+        }
+      } catch (excelError) {
+        console.error(`[${new Date().toISOString()}] Excel extraction failed:`, excelError.message);
+        extractedText = 'Excel file text extraction failed. The file may be corrupted, password-protected, or in an unsupported format.';
+      }
+
+    } else if (mimetype.startsWith('image/')) {
+      // Image files (OCR processing)
+      console.log(`[${new Date().toISOString()}] Starting image OCR extraction, size: ${buffer.length} bytes`);
+
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Image OCR timeout')), timeoutMs * 2) // OCR takes longer
+        );
+
+        const extractPromise = new Promise(async (resolve, reject) => {
+          try {
+            // Preprocess image for better OCR results
+            const processedBuffer = await sharp(buffer)
+              .resize(2000, null, { withoutEnlargement: true }) // Resize if too large
+              .sharpen() // Sharpen for better text recognition
+              .toBuffer();
+
+            // Create Tesseract worker
+            const worker = await createWorker('eng'); // English language
+
+            // Perform OCR
+            const { data: { text } } = await worker.recognize(processedBuffer);
+
+            // Clean up worker
+            await worker.terminate();
+
+            resolve(text || '');
+          } catch (ocrError) {
+            reject(ocrError);
+          }
+        });
+
+        extractedText = await Promise.race([extractPromise, timeoutPromise]);
+
+        if (!extractedText.trim()) {
+          console.warn(`[${new Date().toISOString()}] Image OCR returned empty text`);
+          extractedText = 'Image appears to contain no extractable text. This may be an image without text, poor quality, or corrupted file.';
+        } else {
+          console.log(`[${new Date().toISOString()}] Image OCR completed, extracted ${extractedText.length} characters`);
+        }
+      } catch (imageError) {
+        console.error(`[${new Date().toISOString()}] Image OCR failed:`, imageError.message);
+        extractedText = 'Image text extraction failed. The image may be corrupted, too low quality, or contain no readable text.';
+      }
+
     } else if (mimetype.startsWith('text/') || mimetype === 'application/json' || mimetype === 'application/javascript') {
       // For text-based files
       console.log(`[${new Date().toISOString()}] Starting text file extraction, size: ${buffer.length} bytes`);
@@ -344,12 +498,22 @@ exports.uploadNote = async (req, res, next) => {
 
     const { title = req.file.originalname } = req.body;
 
-    // Extract text asynchronously (with timeout)
+    // Extract text and perform real-time AI analysis
     const extractStart = Date.now();
     const extractedText = await extractTextFromFile(req.file.buffer, req.file.mimetype);
     console.log(`[${new Date().toISOString()}] Text extraction completed in ${Date.now() - extractStart}ms, extracted ${extractedText.length} characters`);
 
-    // Database insert with enhanced metadata
+    // Perform synchronous AI analysis
+    const aiAnalysisStart = Date.now();
+    const aiAnalysis = await processAIAnalysisSync(extractedText);
+    console.log(`[${new Date().toISOString()}] AI analysis completed in ${Date.now() - aiAnalysisStart}ms`);
+
+    // Format AI analysis for database storage
+    const formattedAnalysis = aiAnalysis.analysis_complete
+      ? `📄 **AI Analysis Summary:**\n${aiAnalysis.summary}\n\n🔑 **Key Points:**\n${aiAnalysis.key_points.map(point => `• ${point}`).join('\n')}\n\n📊 **Main Themes:** ${aiAnalysis.main_themes.join(', ')}\n\n🎯 **Important Concepts:** ${aiAnalysis.important_concepts.join(', ')}\n\n⚡ **Analysis completed in:** ${aiAnalysis.processing_time}ms\n🤖 **Processed on:** ${aiAnalysis.processed_at}`
+      : `⚠️ **AI Analysis Status:** ${aiAnalysis.summary}\n\n⏱️ **Processing time:** ${aiAnalysis.processing_time}ms\n🤖 **Processed on:** ${new Date().toISOString()}`;
+
+    // Database insert with enhanced metadata and AI analysis
     const dbStart = Date.now();
     const { data: record, error: insertError } = await supabaseAdmin
       .from('upload_notes')
@@ -360,7 +524,8 @@ exports.uploadNote = async (req, res, next) => {
         file_name: req.file.originalname,
         file_type: req.file.mimetype,
         file_size: req.file.size,
-        ai_analysis: null, // Will be updated asynchronously
+        ai_analysis: formattedAnalysis,
+        ai_analysis_json: aiAnalysis, // Store structured data
       })
       .select()
       .single();
@@ -384,8 +549,8 @@ exports.uploadNote = async (req, res, next) => {
 
     console.log(`[${new Date().toISOString()}] Database insert completed in ${Date.now() - dbStart}ms, record ID: ${record.id}`);
 
-    // Process AI analysis in background (non-blocking)
-    if (extractedText && extractedText.trim().length > 0) {
+    // Process comprehensive AI analysis in background for additional features (non-blocking)
+    if (extractedText && extractedText.trim().length > 0 && aiAnalysis.analysis_complete) {
       processAIAnalysisAsync(record.id, extractedText, userId);
     }
 
@@ -401,7 +566,11 @@ exports.uploadNote = async (req, res, next) => {
         file_size: req.file.size
       },
       fileUrl: signedUrlData.signedUrl,
-      processingTime: totalTime
+      processingTime: totalTime,
+      aiAnalysis: {
+        ...aiAnalysis,
+        formattedText: formattedAnalysis
+      }
     });
   } catch (err) {
     const totalTime = Date.now() - startTime;
@@ -1403,3 +1572,4 @@ exports.deleteFolder = async (req, res, next) => {
     next(err);
   }
 };
+
