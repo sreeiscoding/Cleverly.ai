@@ -18,6 +18,7 @@
             <span class="search-icon">🔍</span>
         </div>
         <div class="navbar-actions">
+            <button class="navbar-start-btn"><i class="fas fa-play"></i> Start</button>
             <button class="navbar-settings-btn"><i class="fas fa-cog"></i> Settings</button>
             <button class="navbar-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
@@ -32,43 +33,49 @@
                 </div>
                 <span class="crown-icon">👑</span>
             </div>
+            <button class="sidebar-btn active" data-feature="main">
+                <i class="fas fa-home"></i>
+                <h4>Main</h4>
+                <p>Overview of your dashboard</p>
+            </button>
+            <div class="sidebar-divider"></div> <!-- Added partition -->
             <div class="sidebar-row">
-                <button class="sidebar-btn" data-feature="smart-summary">
+                <button class="sidebar-btn" data-feature="smart-summary" data-initial-disabled="true">
                     <i class="fas fa-lightbulb"></i>
                     <h4>Smart Summary</h4>
                     <p>Generate concise chapter summaries and key points</p>
                 </button>
-                <button class="sidebar-btn" data-feature="mind-map">
+                <button class="sidebar-btn" data-feature="mind-map" data-initial-disabled="true">
                     <i class="fas fa-project-diagram"></i>
                     <h4>Mind Map</h4>
                     <p>Create visual concept maps from your notes</p>
                 </button>
-                <button class="sidebar-btn" data-feature="study-guide">
+                <button class="sidebar-btn" data-feature="study-guide" data-initial-disabled="true">
                     <i class="fas fa-book-open"></i>
                     <h4>Study Guide</h4>
                     <p>Generate comprehensive study materials</p>
                 </button>
-                <button class="sidebar-btn" data-feature="flashcards">
+                <button class="sidebar-btn" data-feature="flashcards" data-initial-disabled="true">
                     <i class="fas fa-clone"></i>
                     <h4>Flashcards</h4>
                     <p>Create interactive flashcards for review</p>
                 </button>
-                <button class="sidebar-btn" data-feature="key-points">
+                <button class="sidebar-btn" data-feature="key-points" data-initial-disabled="true">
                     <i class="fas fa-key"></i>
                     <h4>Key Points</h4>
                     <p>Extract and organize key points from your content</p>
                 </button>
-                <button class="sidebar-btn" data-feature="concept-map">
+                <button class="sidebar-btn" data-feature="concept-map" data-initial-disabled="true">
                     <i class="fas fa-sitemap"></i>
                     <h4>Concept Map</h4>
                     <p>Generate detailed concept maps with relationships</p>
                 </button>
-                <button class="sidebar-btn" data-feature="search-notes">
+                <button class="sidebar-btn" data-feature="search-notes" data-initial-disabled="true">
                     <i class="fas fa-search"></i>
                     <h4>Search Notes</h4>
                     <p>Search through all your processed notes</p>
                 </button>
-                <button class="sidebar-btn" data-feature="statistics">
+                <button class="sidebar-btn" data-feature="statistics" data-initial-disabled="true">
                     <i class="fas fa-chart-bar"></i>
                     <h4>Statistics</h4>
                     <p>View processing statistics and insights</p>
@@ -77,26 +84,28 @@
         </aside>
         <main>
             <section id="workspace">
-                <div class="main-content-area">
-                    <div class="announcement">
-                        <span class="new-badge">New</span> Announcing our next round of funding
-                    </div>
-                    <h1 class="main-title">Meet Cleverly AI</h1>
-                    <p class="main-subtitle">An Premium intelligent hub for students, teams, and professionals.</p>
-                </div>
-                <div class="chat-input-area">
-                    <div class="chat-input-left-actions">
-                        <button class="chat-action-btn menu-btn"><i class="fas fa-plus"></i></button>
-                        <!-- Custom selector and attach button will be dynamically shown/hidden by JS -->
-                        <div class="custom-selector-container" style="display: none;">
-                            <!-- Placeholder for custom selector content -->
-                            <button class="attach-btn">Attach</button>
+                <div id="main-content-area" class="content-area">
+                    <div class="main-content-inner"> <!-- Renamed to avoid ID conflict -->
+                        <div class="announcement">
+                            <span class="new-badge">New</span> Announcing our next round of funding
                         </div>
+                        <h1 class="main-title">Meet Cleverly AI</h1>
+                        <p class="main-subtitle">An Premium intelligent hub for students, teams, and professionals.</p>
                     </div>
-                    <textarea class="chat-input" placeholder="Type your message..."></textarea>
-                    <div class="chat-input-right-actions">
-                        <button class="chat-action-btn mic-btn"><i class="fas fa-microphone"></i></button>
-                        <button class="chat-action-btn send-btn"><i class="fas fa-paper-plane"></i></button>
+                    <div class="chat-input-area">
+                        <div class="chat-input-left-actions">
+                            <button class="chat-action-btn menu-btn"><i class="fas fa-plus"></i></button>
+                            <!-- Custom selector and attach button will be dynamically shown/hidden by JS -->
+                            <div class="custom-selector-container" style="display: none;">
+                                <!-- Placeholder for custom selector content -->
+                                <button class="attach-btn">Attach</button>
+                            </div>
+                        </div>
+                        <textarea class="chat-input" placeholder="Type your message..."></textarea>
+                        <div class="chat-input-right-actions">
+                            <button class="chat-action-btn mic-btn"><i class="fas fa-microphone"></i></button>
+                            <button class="chat-action-btn send-btn"><i class="fas fa-paper-plane"></i></button>
+                        </div>
                     </div>
                 </div>
             </section>

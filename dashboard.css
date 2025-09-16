@@ -73,6 +73,36 @@ body {
     font-size: 0.9rem;
 }
 
+.navbar-start-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: white; /* Default white background */
+    border: none;
+    border-radius: 20px;
+    color: teal; /* Default teal text */
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Poppins', sans-serif;
+    margin-right: 1rem;
+}
+
+.navbar-start-btn:hover {
+    background-color: #f0f0f0; /* Light grey on hover for default state */
+    color: teal;
+}
+
+.navbar-start-btn.active {
+    background-color: teal; /* Active state: teal background */
+    color: white; /* Active state: white text */
+}
+
+.navbar-start-btn i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
 .top-navbar .logo {
     display: flex;
     align-items: center;
@@ -190,6 +220,17 @@ body {
     color: white;
 }
 
+/* Styles for initially disabled sidebar buttons */
+.sidebar-btn[data-initial-disabled="true"] {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none; /* Prevent click events */
+}
+
+.sidebar-btn[data-initial-disabled="true"]:hover {
+    background-color: #f9f9f9; /* Keep original background on hover for disabled state */
+}
+
 .sidebar-btn i {
     margin-right: 0.75rem; /* Add spacing between icon and text */
     font-size: 1.1rem; /* Adjust icon size for better visibility */
@@ -208,6 +249,12 @@ body {
 
 .sidebar-btn.active p {
     color: #e0e0e0;
+}
+
+.sidebar-divider {
+    height: 1px;
+    background-color: #eee;
+    margin: 1.5rem 0; /* Add some vertical spacing */
 }
 
 .sidebar-actions {
@@ -254,10 +301,15 @@ main {
     flex-direction: column; /* Keep as column for content area */
 }
 
-.main-content-area {
+.content-area {
+    display: none; /* Hidden by default */
     max-width: 900px;
     margin: 0 auto;
     flex-grow: 1;
+}
+
+.content-area#main-content-area {
+    display: block; /* Main content area is visible by default */
 }
 
 .announcement {
@@ -553,4 +605,201 @@ main {
     color: #888; /* Grey color */
     margin-left: 0.5rem; /* Add some spacing from the username */
     font-weight: normal; /* Ensure it's not bold like the username */
+}
+
+/* Styles for the new Upload Tab Content */
+#upload-tab-content {
+    display: none; /* Hidden by default, shown by JS */
+    padding: 2rem;
+    background-color: #f8f8f8;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+    max-width: 700px;
+    margin: 2rem auto;
+}
+
+.upload-container {
+    background-color: white;
+    padding: 3rem 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.upload-container h2 {
+    font-size: 2rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.upload-container p {
+    font-size: 1rem;
+    color: #777;
+    margin-bottom: 1.5rem;
+    max-width: 500px;
+}
+
+.file-upload-section {
+    width: 100%;
+    max-width: 400px;
+    min-height: 180px; /* Ensure consistent height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative; /* For absolute positioning of children if needed */
+}
+
+.file-upload-area {
+    border: 2px dashed #e0e0e0;
+    border-radius: 10px;
+    padding: 1.5rem 2rem;
+    background-color: #f9f9f9;
+    width: 100%;
+    height: 100%; /* Take full height of parent */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
+
+.file-upload-area.drag-over {
+    border-color: teal;
+    background-color: #e6fffa; /* Light teal background */
+}
+
+.drop-zone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.upload-icon {
+    font-size: 2.5rem;
+    color: #b0b0b0;
+    margin-bottom: 0.5rem;
+}
+
+.file-upload-area p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #777;
+}
+
+.upload-button {
+    background-color: teal;
+    color: white;
+    padding: 0.6rem 1.2rem; /* Slightly smaller padding */
+    border-radius: 20px; /* Slightly less rounded */
+    cursor: pointer;
+    font-size: 0.9rem; /* Slightly smaller font */
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.5rem; /* Space above the button */
+}
+
+.upload-button:hover {
+    background-color: #008080;
+}
+
+/* File Preview Area Styles */
+.file-preview-area {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 1rem 1.5rem;
+    width: 100%;
+    max-width: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.file-icon {
+    font-size: 2rem;
+    color: #6a5acd; /* A distinct color for file icons */
+}
+
+.file-details {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.preview-file-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 180px; /* Limit width */
+}
+
+.preview-file-type,
+.preview-file-size {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.remove-file-button {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.remove-file-button:hover {
+    color: #e74c3c; /* Red color on hover */
+}
+
+.file-name {
+    font-size: 0.95rem;
+    color: #555;
+    flex-grow: 1;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px; /* Limit width to prevent overflow */
+}
+
+.process-button {
+    background-color: #6a5acd; /* A distinct color for processing */
+    color: white;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 25px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 600;
+    transition: background-color 0.2s ease;
+    margin-top: 1rem;
+}
+
+.process-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.process-button:hover:not(:disabled) {
+    background-color: #5a4bb0;
 }
