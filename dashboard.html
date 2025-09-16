@@ -5,64 +5,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="dashboard.css">
 </head>
 <body>
-    <header>
-        <h1>Dashboard</h1>
-        <nav>
-            <ul>
-                <li><a href="#">Home</a></li>
-                <li><a href="#">Profile</a></li>
-                <li><a href="#">Settings</a></li>
-            </ul>
-        </nav>
-    </header>
-    <aside class="sidebar">
-        <div class="sidebar-row">
-            <button class="sidebar-btn active" data-feature="smart-summary">
-                <h4>Smart Summary</h4>
-                <p>Generate concise chapter summaries and key points</p>
-            </button>
-            <button class="sidebar-btn" data-feature="mind-map">
-                <h4>Mind Map</h4>
-                <p>Create visual concept maps from your notes</p>
-            </button>
-            <button class="sidebar-btn" data-feature="study-guide">
-                <h4>Study Guide</h4>
-                <p>Generate comprehensive study materials</p>
-            </button>
-            <button class="sidebar-btn" data-feature="flashcards">
-                <h4>Flashcards</h4>
-                <p>Create interactive flashcards for review</p>
-            </button>
-            <button class="sidebar-btn" data-feature="key-points">
-                <h4>Key Points</h4>
-                <p>Extract and organize key points from your content</p>
-            </button>
-            <button class="sidebar-btn" data-feature="concept-map">
-                <h4>Concept Map</h4>
-                <p>Generate detailed concept maps with relationships</p>
-            </button>
-            <button class="sidebar-btn" data-feature="search-notes">
-                <h4>Search Notes</h4>
-                <p>Search through all your processed notes</p>
-            </button>
-            <button class="sidebar-btn" data-feature="statistics">
-                <h4>Statistics</h4>
-                <p>View processing statistics and insights</p>
-            </button>
+    <header class="top-navbar">
+        <div class="logo">
+            <img src="Cleverly AI.png" alt="Staff Optima Logo">
         </div>
-    </aside>
-    <main>
-        <section id="workspace">
-            <h2>Workspace</h2>
-            <div class="card">
-                <h3>Stats</h3>
-                <p>Some stats here.</p>
+        <div class="search-bar">
+            <input type="text" placeholder="Search all candidates using keywords...">
+            <span class="search-icon">🔍</span>
+        </div>
+        <div class="navbar-actions">
+            <button class="navbar-settings-btn"><i class="fas fa-cog"></i> Settings</button>
+            <button class="navbar-logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </header>
+    <div class="content-wrapper">
+        <aside class="sidebar">
+            <div class="user-profile">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="avatar">
+                <div class="user-info">
+                    <h4>Rico Oktananda <span class="auth-status"></span></h4>
+                    <p>Lead recruiter</p>
+                </div>
+                <span class="crown-icon">👑</span>
             </div>
-        </section>
-    </main>
+            <div class="sidebar-row">
+                <button class="sidebar-btn" data-feature="smart-summary">
+                    <i class="fas fa-lightbulb"></i>
+                    <h4>Smart Summary</h4>
+                    <p>Generate concise chapter summaries and key points</p>
+                </button>
+                <button class="sidebar-btn" data-feature="mind-map">
+                    <i class="fas fa-project-diagram"></i>
+                    <h4>Mind Map</h4>
+                    <p>Create visual concept maps from your notes</p>
+                </button>
+                <button class="sidebar-btn" data-feature="study-guide">
+                    <i class="fas fa-book-open"></i>
+                    <h4>Study Guide</h4>
+                    <p>Generate comprehensive study materials</p>
+                </button>
+                <button class="sidebar-btn" data-feature="flashcards">
+                    <i class="fas fa-clone"></i>
+                    <h4>Flashcards</h4>
+                    <p>Create interactive flashcards for review</p>
+                </button>
+                <button class="sidebar-btn" data-feature="key-points">
+                    <i class="fas fa-key"></i>
+                    <h4>Key Points</h4>
+                    <p>Extract and organize key points from your content</p>
+                </button>
+                <button class="sidebar-btn" data-feature="concept-map">
+                    <i class="fas fa-sitemap"></i>
+                    <h4>Concept Map</h4>
+                    <p>Generate detailed concept maps with relationships</p>
+                </button>
+                <button class="sidebar-btn" data-feature="search-notes">
+                    <i class="fas fa-search"></i>
+                    <h4>Search Notes</h4>
+                    <p>Search through all your processed notes</p>
+                </button>
+                <button class="sidebar-btn" data-feature="statistics">
+                    <i class="fas fa-chart-bar"></i>
+                    <h4>Statistics</h4>
+                    <p>View processing statistics and insights</p>
+                </button>
+            </div>
+        </aside>
+        <main>
+            <section id="workspace">
+                <div class="main-content-area">
+                    <div class="announcement">
+                        <span class="new-badge">New</span> Announcing our next round of funding
+                    </div>
+                    <h1 class="main-title">Meet Cleverly AI</h1>
+                    <p class="main-subtitle">An Premium intelligent hub for students, teams, and professionals.</p>
+                </div>
+                <div class="chat-input-area">
+                    <div class="chat-input-left-actions">
+                        <button class="chat-action-btn menu-btn"><i class="fas fa-plus"></i></button>
+                        <!-- Custom selector and attach button will be dynamically shown/hidden by JS -->
+                        <div class="custom-selector-container" style="display: none;">
+                            <!-- Placeholder for custom selector content -->
+                            <button class="attach-btn">Attach</button>
+                        </div>
+                    </div>
+                    <textarea class="chat-input" placeholder="Type your message..."></textarea>
+                    <div class="chat-input-right-actions">
+                        <button class="chat-action-btn mic-btn"><i class="fas fa-microphone"></i></button>
+                        <button class="chat-action-btn send-btn"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
     <script src="dashboard.js"></script>
+    <div id="custom-popup" class="custom-popup">
+        <div class="popup-content">
+            <span class="close-button">&times;</span>
+            <h3 id="popup-title" class="popup-title"></h3>
+            <p id="popup-description" class="popup-description"></p>
+        </div>
+    </div>
 </body>
 </html>

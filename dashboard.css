@@ -1,66 +1,164 @@
-@import url('https://fonts.googleapis.com/css2?family=Alumni+Sans:ital,wght@0,100..900;1,100..900&family=Geist:wght@100..900&family=Instrument+Serif:ital@0;1&family=Jacques+Francois+Shadow&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
 body {
     font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f4f4f4;
+    background-color: #f8f8f8;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
 }
 
-header {
-    background-color: white;
-    color: #333;
-    padding: 0.75rem 1rem;
+.top-navbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    padding: 0.75rem 1.5rem;
+    background-color: white;
+    border-bottom: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    flex-shrink: 0;
+}
+
+.top-navbar .navbar-actions {
+    display: flex;
+    align-items: center;
+}
+
+.navbar-settings-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 20px;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Poppins', sans-serif;
+    margin-right: 1rem; /* Added spacing */
+}
+
+.navbar-settings-btn:hover {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+.navbar-settings-btn i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.navbar-logout-btn {
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 1rem;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 20px;
+    color: #333;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-family: 'Poppins', sans-serif;
+}
+
+.navbar-logout-btn:hover {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+.navbar-logout-btn i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.top-navbar .logo {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.top-navbar .logo img {
+    height: 30px;
+    margin-right: 0.5rem;
+}
+
+.top-navbar .search-bar {
+    flex-grow: 1;
+    margin: 0 2rem;
+    position: relative;
+    max-width: 500px;
+}
+
+.top-navbar .search-bar input {
+    width: 100%;
+    padding: 0.6rem 1rem 0.6rem 2.5rem;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+    font-size: 0.9rem;
+    background-color: #f0f0f0;
+}
+
+.top-navbar .search-bar .search-icon {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #888;
+}
+
+
+.content-wrapper {
+    display: flex;
+    flex: 1;
+}
+
+.sidebar {
+    width: 300px;
+    height: 100%;
+    background-color: white;
+    border-right: 1px solid #e0e0e0;
+    padding: 1.5rem 1rem;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+}
+
+.sidebar .user-profile {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
     border-bottom: 1px solid #eee;
 }
 
-nav ul {
-    list-style: none;
-    display: flex;
+.sidebar .user-profile .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 0.8rem;
+}
+.sidebar .user-profile .user-info h4 {
     margin: 0;
-    padding: 0;
-}
-
-nav li {
-    margin-right: 1rem;
-}
-
-nav a {
+    font-size: 1rem;
     color: #333;
-    text-decoration: none;
-    font-weight: 500;
 }
 
-nav a:hover {
-    color: teal;
+.sidebar .user-profile .user-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #777;
 }
 
-main {
-    margin-left: 320px;
-    padding: 1rem;
-}
-
-.card {
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 1rem;
-    margin: 1rem 0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-
-.sidebar {
-    float: left;
-    width: 300px;
-    height: auto;
-    background-color: #fafafa;
-    border-right: 1px solid #e0e0e0;
-    padding: 1rem;
-    overflow-y: auto;
+.sidebar .user-profile .crown-icon {
+    margin-left: auto;
+    font-size: 1.2rem;
+    color: gold;
 }
 
 .sidebar-row {
@@ -73,13 +171,14 @@ main {
 .sidebar-btn {
     margin: 0;
     padding: 0.5rem;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
     cursor: pointer;
     text-align: left;
-    transition: background-color 0.3s;
+    transition: all 0.3s;
     font-family: "Poppins", sans-serif;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
 .sidebar-btn:hover {
@@ -89,6 +188,11 @@ main {
 .sidebar-btn.active {
     background-color: teal;
     color: white;
+}
+
+.sidebar-btn i {
+    margin-right: 0.75rem; /* Add spacing between icon and text */
+    font-size: 1.1rem; /* Adjust icon size for better visibility */
 }
 
 .sidebar-btn h4 {
@@ -104,4 +208,349 @@ main {
 
 .sidebar-btn.active p {
     color: #e0e0e0;
+}
+
+.sidebar-actions {
+    margin-top: auto; /* Pushes actions to the bottom */
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.sidebar-action-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    margin-bottom: 0.3rem;
+    background: none;
+    border: none;
+    color: #555;
+    text-decoration: none;
+    border-radius: 6px;
+    transition: background-color 0.2s, color 0.2s;
+    cursor: pointer;
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+}
+
+.sidebar-action-btn:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.sidebar-action-btn i { /* Changed from .icon to i */
+    margin-right: 0.8rem;
+    font-size: 1rem;
+}
+
+main {
+    flex: 1;
+    padding: 2rem;
+    padding-bottom: 6rem; /* Added padding-bottom to account for absolutely positioned chat input */
+    background-color: #f8f8f8;
+    overflow-y: auto;
+    position: relative; /* Added for absolute positioning of children */
+    display: flex; /* Keep as flex for content area */
+    flex-direction: column; /* Keep as column for content area */
+}
+
+.main-content-area {
+    max-width: 900px;
+    margin: 0 auto;
+    flex-grow: 1;
+}
+
+.announcement {
+    background: linear-gradient(to right, #e0e7ff, #f0e0ff); /* Light purple gradient */
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #6a5acd;
+    margin-bottom: 2rem;
+    width: fit-content; /* Make the div only as wide as its content */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.announcement .new-badge {
+    background-color: #6a5acd;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    margin-right: 0.5rem;
+    font-weight: 500;
+}
+
+.main-title {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 0.5rem;
+    text-align: center; /* Center the title */
+}
+
+.main-subtitle {
+    font-size: 1.2rem;
+    color: #777;
+    margin-bottom: 3rem;
+    text-align: center; /* Center the subtitle */
+}
+
+.feature-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.feature-card {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.feature-card .card-icon {
+    font-size: 1.5rem;
+    margin-right: 1rem;
+    color: #6a5acd;
+}
+
+.feature-card h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.feature-card .card-arrow {
+    margin-left: auto;
+    font-size: 1.2rem;
+    color: #888;
+}
+
+.why-section h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2rem;
+}
+
+/* Chat Input Area */
+.chat-input-area {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1rem;
+    background-color: white;
+    border-radius: 50px;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.05);
+    position: absolute; /* Position absolutely within main */
+    bottom: 6rem; /* Distance from the bottom of main */
+    left: 2rem; /* Align with main's left padding */
+    right: 2rem; /* Align with main's right padding */
+    width: calc(100% - 4rem); /* Adjust width to account for left/right padding */
+    max-width: 860px; /* Max width to align with .main-content-area (900px - 2*20px padding) */
+    margin: 0 auto; /* Center the input area horizontally */
+}
+
+.chat-input-left-actions,
+.chat-input-right-actions {
+    display: flex;
+    align-items: center;
+}
+
+.chat-action-btn {
+    background: none;
+    border: none;
+    font-size: 1.1rem; /* Slightly smaller icon */
+    color: #777;
+    cursor: pointer;
+    padding: 0.4rem; /* Slightly smaller padding */
+    border-radius: 50%;
+    transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-action-btn:hover {
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+.chat-input {
+    flex-grow: 1;
+    margin: 0 0.75rem; /* Adjusted margin */
+    padding: 0.7rem 1rem; /* Adjusted padding */
+    border: none; /* Removed individual border, now handled by parent */
+    border-radius: 50px;
+    outline: none;
+    font-size: 0.9rem;
+    resize: none; /* Prevent textarea from being resized by user */
+    min-height: 40px;
+    max-height: 100px; /* Limit height to prevent it from growing too large */
+    overflow-y: auto;
+    background-color: #f9f9f9; /* Slightly different background for input field */
+    font-family: 'Poppins', sans-serif;
+}
+
+.chat-input::placeholder {
+    line-height: 40px; /* Vertically center the placeholder text */
+}
+
+.chat-input-left-actions .menu-btn {
+    margin-right: 0.5rem;
+}
+
+.chat-input-right-actions .mic-btn {
+    margin-right: 0.5rem;
+}
+
+.attach-btn {
+    background-color: teal;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    transition: background-color 0.2s;
+}
+
+.attach-btn:hover {
+    background-color: #008080; /* Darker teal */
+}
+
+.custom-selector-container {
+    /* Basic styling for the container, will be toggled by JS */
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 1rem;
+    position: absolute; /* Position relative to its parent .chat-input-area or main */
+    bottom: 70px; /* Adjust as needed */
+    left: 1rem; /* Adjust as needed */
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.why-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.why-card {
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.why-card .why-icon {
+    font-size: 1.5rem;
+    color: #6a5acd;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.why-card h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+}
+
+.why-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #777;
+    line-height: 1.5;
+}
+
+/* Custom Popup Box */
+.custom-popup {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 100; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    align-items: center;
+    justify-content: center;
+}
+
+.popup-content {
+    background-color: #fefefe;
+    margin: auto;
+    padding: 25px; /* Increased padding */
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 500px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    position: relative;
+    text-align: left; /* Align content to the left */
+}
+
+.popup-title {
+    font-size: 1.2rem; /* Reduced font size */
+    font-weight: 600;
+    color: #333;
+    margin: 0 0 10px 0; /* Top-left positioning */
+    padding: 5px 10px;
+    background-color: teal; /* Changed to teal */
+    color: white; /* Added for better contrast with teal background */
+    border-radius: 15px; /* More rounded border */
+    display: inline-block; /* Shrink background to text size */
+}
+
+.popup-description {
+    font-size: 0.9rem; /* Reduced font size */
+    color: #555;
+    margin-top: 10px; /* Space after title */
+    line-height: 1.5;
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.sidebar .user-profile .user-info h4 .auth-status {
+    font-size: 0.75rem; /* Smaller font size */
+    color: #888; /* Grey color */
+    margin-left: 0.5rem; /* Add some spacing from the username */
+    font-weight: normal; /* Ensure it's not bold like the username */
 }
