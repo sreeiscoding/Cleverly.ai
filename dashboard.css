@@ -621,13 +621,15 @@ main {
 
 .upload-container {
     background-color: white;
-    padding: 3rem 2rem;
+    padding: 2rem; /* Reduced padding */
     border-radius: 12px;
     box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1.5rem;
+    flex: 1; /* Allow it to grow within the wrapper */
+    min-width: 450px; /* Minimum width for the upload section */
 }
 
 .upload-container h2 {
@@ -641,6 +643,70 @@ main {
     color: #777;
     margin-bottom: 1.5rem;
     max-width: 500px;
+}
+
+.upload-wrapper {
+    display: flex;
+    gap: 2rem; /* Space between upload container and tabs */
+    width: 100%;
+    max-width: 1200px; /* Adjust overall width as needed */
+    margin-top: 1.5rem;
+    justify-content: center;
+}
+
+.upload-tabs-right {
+    flex: 0 0 300px; /* Fixed width for the right tabs section */
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: inset 0 0 5px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+}
+
+.tab-links-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.tab-link-right {
+    background-color: #e0e0e0;
+    border: none;
+    padding: 0.7rem 1rem;
+    border-radius: 6px;
+    text-align: left;
+    font-size: 0.95rem;
+    color: #555;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.tab-link-right:hover {
+    background-color: #d0d0d0;
+}
+
+.tab-link-right.active {
+    background-color: teal;
+    color: white;
+}
+
+.tab-content-area-right {
+    flex-grow: 1;
+    background-color: white;
+    border-radius: 6px;
+    padding: 1rem;
+    border: 1px solid #eee;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.tab-pane-right {
+    display: none; /* Hidden by default */
+}
+
+.tab-pane-right.active {
+    display: block; /* Active tab content */
 }
 
 .file-upload-section {

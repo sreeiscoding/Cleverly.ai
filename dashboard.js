@@ -130,12 +130,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 startButton.classList.remove('active');
             }
 
-            // If a sidebar button other than 'main' is clicked, disable the 8 links again
-            if (this.dataset.feature !== 'main') {
-                document.querySelectorAll('.sidebar-btn[data-initial-disabled]').forEach(btnToDisable => {
-                    btnToDisable.setAttribute('data-initial-disabled', 'true');
-                });
-            }
+            // When any sidebar button is clicked, disable the 8 links again
+            document.querySelectorAll('.sidebar-btn[data-initial-disabled]').forEach(btnToDisable => {
+                btnToDisable.setAttribute('data-initial-disabled', 'true');
+            });
 
             const feature = this.dataset.feature;
             console.log('Selected feature:', feature);
@@ -238,11 +236,6 @@ document.addEventListener('DOMContentLoaded', async function() {
                 btnToEnable.removeAttribute('data-initial-disabled');
             });
 
-            // Enable the 8 sidebar links
-            document.querySelectorAll('.sidebar-btn[data-initial-disabled="true"]').forEach(btnToEnable => {
-                btnToEnable.removeAttribute('data-initial-disabled');
-            });
-
             // Create the new upload tab content
             const uploadTabContent = document.createElement('div');
             uploadTabContent.id = 'upload-tab-content';
@@ -250,47 +243,82 @@ document.addEventListener('DOMContentLoaded', async function() {
             uploadTabContent.style.display = 'block'; // Make it visible
 
             uploadTabContent.innerHTML = `
-                <div class="upload-container">
-                    <h2>Upload Your Notes</h2>
-                    <p>Select a file to upload or drag and drop it here.</p>
-                    <div class="file-upload-section">
-                        <div class="file-upload-area" id="drop-zone">
-                            <div class="drop-zone-content">
-                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
-                                <p>Drag & Drop your file here or</p>
-                                <input type="file" id="notes-file-input" accept=".pdf,.docx,.txt" style="display: none;">
-                                <label for="notes-file-input" class="upload-button">
-                                    Choose File
-                                </label>
-                            </div>
-                        </div>
-                        <div class="file-preview-area" id="file-preview-area" style="display: none;">
-                            <div class="file-info">
-                                <i id="file-icon" class="file-icon"></i>
-                                <div class="file-details">
-                                    <span id="preview-file-name" class="preview-file-name"></span>
-                                    <span id="preview-file-type" class="preview-file-type"></span>
-                                    <span id="preview-file-size" class="preview-file-size"></span>
+                <div class="upload-wrapper">
+                    <div class="upload-container">
+                        <h2>Upload Your Notes</h2>
+                        <p>Select a file to upload or drag and drop it here.</p>
+                        <div class="file-upload-section">
+                            <div class="file-upload-area" id="drop-zone">
+                                <div class="drop-zone-content">
+                                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                    <p>Drag & Drop your file here or</p>
+                                    <input type="file" id="notes-file-input" accept=".pdf,.docx,.txt" style="display: none;">
+                                    <label for="notes-file-input" class="upload-button">
+                                        Choose File
+                                    </label>
                                 </div>
                             </div>
-                            <button id="remove-file-btn" class="remove-file-button"><i class="fas fa-times"></i></button>
+                            <div class="file-preview-area" id="file-preview-area" style="display: none;">
+                                <div class="file-info">
+                                    <i id="file-icon" class="file-icon"></i>
+                                    <div class="file-details">
+                                        <span id="preview-file-name" class="preview-file-name"></span>
+                                        <span id="preview-file-type" class="preview-file-type"></span>
+                                        <span id="preview-file-size" class="preview-file-size"></span>
+                                    </div>
+                                </div>
+                                <button id="remove-file-btn" class="remove-file-button"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>
+                        <button id="process-notes-btn" class="process-button" disabled>Process Notes</button>
+                    </div>
+                    <div class="upload-tabs-right">
+                        <div class="tab-links-right">
+                            <button class="tab-link-right active" data-tab-right="recent">Recent</button>
+                            <button class="tab-link-right" data-tab-right="favorites">Favorites</button>
+                            <button class="tab-link-right" data-tab-right="library">Library</button>
+                        </div>
+                        <div class="tab-content-area-right">
+                            <div id="recent-tab-content-right" class="tab-pane-right active">
+                                <p>No recent files.</p>
+                            </div>
+                            <div id="favorites-tab-content-right" class="tab-pane-right">
+                                <p>No favorite files.</p>
+                            </div>
+                            <div id="library-tab-content-right" class="tab-pane-right">
+                                <p>Your library is empty.</p>
+                            </div>
                         </div>
                     </div>
-                    <button id="process-notes-btn" class="process-button" disabled>Process Notes</button>
                 </div>
             `;
             workspace.appendChild(uploadTabContent);
 
-            const notesFileInput = document.getElementById('notes-file-input');
-            const processNotesBtn = document.getElementById('process-notes-btn');
-            const dropZone = document.getElementById('drop-zone');
-            const fileUploadArea = document.querySelector('.file-upload-area');
-            const filePreviewArea = document.getElementById('file-preview-area');
-            const fileIcon = document.getElementById('file-icon');
-            const previewFileName = document.getElementById('preview-file-name');
-            const previewFileType = document.getElementById('preview-file-type');
-            const previewFileSize = document.getElementById('preview-file-size');
-            const removeFileBtn = document.getElementById('remove-file-btn');
+            const notesFileInput = uploadTabContent.querySelector('#notes-file-input');
+            const processNotesBtn = uploadTabContent.querySelector('#process-notes-btn');
+            const dropZone = uploadTabContent.querySelector('#drop-zone');
+            const fileUploadArea = uploadTabContent.querySelector('.file-upload-area');
+            const filePreviewArea = uploadTabContent.querySelector('#file-preview-area');
+            const fileIcon = uploadTabContent.querySelector('#file-icon');
+            const previewFileName = uploadTabContent.querySelector('#preview-file-name');
+            const previewFileType = uploadTabContent.querySelector('#preview-file-type');
+            const previewFileSize = uploadTabContent.querySelector('#preview-file-size');
+            const removeFileBtn = uploadTabContent.querySelector('#remove-file-btn');
+
+            // Tab functionality for right sidebar
+            const tabLinksRight = uploadTabContent.querySelectorAll('.tab-link-right');
+            const tabPanesRight = uploadTabContent.querySelectorAll('.tab-pane-right');
+
+            tabLinksRight.forEach(link => {
+                link.addEventListener('click', function() {
+                    tabLinksRight.forEach(l => l.classList.remove('active'));
+                    this.classList.add('active');
+
+                    tabPanesRight.forEach(pane => pane.classList.remove('active'));
+                    const targetTab = this.dataset.tabRight;
+                    uploadTabContent.querySelector(`#${targetTab}-tab-content-right`).classList.add('active');
+                });
+            });
 
             // Function to format file size
             function formatFileSize(bytes) {
