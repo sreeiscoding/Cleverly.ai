@@ -121,6 +121,352 @@ document.addEventListener('DOMContentLoaded', async function() {
     const popupDescription = document.getElementById('popup-description');
     const closeButton = document.querySelector('.close-button');
 
+    // Function to populate file selects
+    async function populateFileSelects() {
+        const uploads = await fetchUserUploads();
+        const selects = [
+            'smart-summary-file-select',
+            'mind-map-file-select',
+            'study-guide-file-select',
+            'flashcards-file-select',
+            'key-points-file-select',
+            'concept-map-file-select'
+        ];
+
+        selects.forEach(selectId => {
+            const select = document.getElementById(selectId);
+            if (select) {
+                select.innerHTML = '<option value="">Choose a file...</option>';
+                uploads.forEach(upload => {
+                    const option = document.createElement('option');
+                    option.value = upload.id;
+                    option.textContent = upload.filename || upload.name;
+                    select.appendChild(option);
+                });
+            }
+        
+            // Feature button event listeners
+            document.addEventListener('DOMContentLoaded', function() {
+                // Smart Summary
+                const smartSummaryBtn = document.getElementById('generate-smart-summary-btn');
+                if (smartSummaryBtn) {
+                    smartSummaryBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('smart-summary-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Generating...';
+        
+                        try {
+                            // First, get file content (assuming we have an endpoint to get file content)
+                            const fileResponse = await fetch(`${API_BASE_URL}/upload/${fileId}/download`, {
+                                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                            });
+        
+                            if (!fileResponse.ok) throw new Error('Failed to fetch file content');
+        
+                            const fileContent = await fileResponse.text();
+        
+                            // Then summarize
+                            const response = await fetch(`${API_BASE_URL}/ai/summarize`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ text: fileContent })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('smart-summary-results').innerHTML = `<pre>${result.summary}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to generate summary');
+                            }
+                        } catch (error) {
+                            console.error('Smart Summary error:', error);
+                            document.getElementById('smart-summary-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Generate Summary';
+                        }
+                    });
+                }
+        
+                // Mind Map
+                const mindMapBtn = document.getElementById('generate-mind-map-btn');
+                if (mindMapBtn) {
+                    mindMapBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('mind-map-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Generating...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/notes-breakdown/mind-map`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ fileId })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('mind-map-results').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to generate mind map');
+                            }
+                        } catch (error) {
+                            console.error('Mind Map error:', error);
+                            document.getElementById('mind-map-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Generate Mind Map';
+                        }
+                    });
+                }
+        
+                // Study Guide
+                const studyGuideBtn = document.getElementById('generate-study-guide-btn');
+                if (studyGuideBtn) {
+                    studyGuideBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('study-guide-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Generating...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/notes-breakdown/study-guide`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ fileId })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('study-guide-results').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to generate study guide');
+                            }
+                        } catch (error) {
+                            console.error('Study Guide error:', error);
+                            document.getElementById('study-guide-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Generate Study Guide';
+                        }
+                    });
+                }
+        
+                // Flashcards
+                const flashcardsBtn = document.getElementById('generate-flashcards-btn');
+                if (flashcardsBtn) {
+                    flashcardsBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('flashcards-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Generating...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/notes-breakdown/flashcards`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ fileId })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('flashcards-results').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to generate flashcards');
+                            }
+                        } catch (error) {
+                            console.error('Flashcards error:', error);
+                            document.getElementById('flashcards-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Generate Flashcards';
+                        }
+                    });
+                }
+        
+                // Key Points
+                const keyPointsBtn = document.getElementById('generate-key-points-btn');
+                if (keyPointsBtn) {
+                    keyPointsBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('key-points-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Extracting...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/notes-breakdown/key-points`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ fileId })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('key-points-results').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to extract key points');
+                            }
+                        } catch (error) {
+                            console.error('Key Points error:', error);
+                            document.getElementById('key-points-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Extract Key Points';
+                        }
+                    });
+                }
+        
+                // Concept Map
+                const conceptMapBtn = document.getElementById('generate-concept-map-btn');
+                if (conceptMapBtn) {
+                    conceptMapBtn.addEventListener('click', async function() {
+                        const fileSelect = document.getElementById('concept-map-file-select');
+                        const fileId = fileSelect.value;
+                        if (!fileId) {
+                            alert('Please select a file first.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Generating...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/notes-breakdown/concept-map`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                },
+                                body: JSON.stringify({ fileId })
+                            });
+        
+                            const result = await response.json();
+                            if (response.ok) {
+                                document.getElementById('concept-map-results').innerHTML = `<pre>${JSON.stringify(result, null, 2)}</pre>`;
+                            } else {
+                                throw new Error(result.message || 'Failed to generate concept map');
+                            }
+                        } catch (error) {
+                            console.error('Concept Map error:', error);
+                            document.getElementById('concept-map-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Generate Concept Map';
+                        }
+                    });
+                }
+        
+                // Search Notes
+                const searchNotesBtn = document.getElementById('search-notes-btn');
+                if (searchNotesBtn) {
+                    searchNotesBtn.addEventListener('click', async function() {
+                        const query = document.getElementById('search-notes-input').value.trim();
+                        if (!query) {
+                            alert('Please enter a search query.');
+                            return;
+                        }
+        
+                        this.disabled = true;
+                        this.textContent = 'Searching...';
+        
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/upload/notes/search?q=${encodeURIComponent(query)}`, {
+                                headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                            });
+        
+                            const results = await response.json();
+                            if (response.ok) {
+                                const resultsHtml = results.map(result => `
+                                    <div class="search-result">
+                                        <h4>${result.filename}</h4>
+                                        <p>${result.snippet || 'No preview available'}</p>
+                                    </div>
+                                `).join('');
+                                document.getElementById('search-notes-results').innerHTML = resultsHtml || '<p>No results found.</p>';
+                            } else {
+                                throw new Error(results.message || 'Search failed');
+                            }
+                        } catch (error) {
+                            console.error('Search error:', error);
+                            document.getElementById('search-notes-results').innerHTML = `<p>Error: ${error.message}</p>`;
+                        } finally {
+                            this.disabled = false;
+                            this.textContent = 'Search';
+                        }
+                    });
+                }
+        
+                // Statistics
+                const statisticsArea = document.getElementById('statistics-results');
+                if (statisticsArea) {
+                    // Load statistics on page load or when statistics tab is shown
+                    fetch(`${API_BASE_URL}/notes-breakdown/stats/summary`, {
+                        headers: { 'Authorization': `Bearer ${localStorage.getItem('authToken')}` }
+                    })
+                    .then(response => response.json())
+                    .then(stats => {
+                        statisticsArea.innerHTML = `
+                            <div class="stats-grid">
+                                <div class="stat-item"><h3>Total Files</h3><p>${stats.totalFiles || 0}</p></div>
+                                <div class="stat-item"><h3>Processed Files</h3><p>${stats.processedFiles || 0}</p></div>
+                                <div class="stat-item"><h3>Mind Maps Generated</h3><p>${stats.mindMaps || 0}</p></div>
+                                <div class="stat-item"><h3>Study Guides Created</h3><p>${stats.studyGuides || 0}</p></div>
+                            </div>
+                        `;
+                    })
+                    .catch(error => {
+                        console.error('Statistics error:', error);
+                        statisticsArea.innerHTML = '<p>Failed to load statistics.</p>';
+                    });
+                }
+            });
+        });
+    }
+
+    // Call populateFileSelects when DOM is loaded
+    populateFileSelects();
+
     sidebarBtns.forEach(btn => {
         btn.addEventListener('click', function() {
             // Prevent clicking if disabled
@@ -145,15 +491,12 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             if (feature === 'main') {
                 showContentArea('main');
+            } else if (feature === 'search-notes' || feature === 'statistics') {
+                // For search and statistics, show content area directly
+                showContentArea(feature);
             } else {
-                // For other 8 links, show popup
-                const customPopup = document.getElementById('custom-popup');
-                const popupTitle = document.getElementById('popup-title');
-                const popupDescription = document.getElementById('popup-description');
-
-                popupTitle.textContent = this.querySelector('h4').textContent;
-                popupDescription.textContent = this.querySelector('p').textContent;
-                customPopup.style.display = 'flex';
+                // For other features, show content area with file selection
+                showContentArea(feature);
             }
         });
     });
@@ -386,14 +729,181 @@ document.addEventListener('DOMContentLoaded', async function() {
                 handleFileSelection(null); // Clear the selected file
             });
 
+            // Function to fetch user uploads
+            async function fetchUserUploads() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/user/uploads`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const uploads = await response.json();
+                        return uploads;
+                    } else {
+                        console.error('Failed to fetch uploads:', response.statusText);
+                        return [];
+                    }
+                } catch (error) {
+                    console.error('Error fetching uploads:', error);
+                    return [];
+                }
+            }
+
+            // Function to fetch favorite files
+            async function fetchFavoriteFiles() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/favorites`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const favorites = await response.json();
+                        return favorites;
+                    } else {
+                        console.error('Failed to fetch favorites:', response.statusText);
+                        return [];
+                    }
+                } catch (error) {
+                    console.error('Error fetching favorites:', error);
+                    return [];
+                }
+            }
+
+            // Function to populate tab content
+            function populateTabContent(tabId, files) {
+                const tabContent = uploadTabContent.querySelector(`#${tabId}`);
+                if (!tabContent) return;
+
+                if (files.length === 0) {
+                    tabContent.innerHTML = '<p>No files found.</p>';
+                    return;
+                }
+
+                const fileList = files.map(file => `
+                    <div class="file-item" data-file-id="${file.id}" data-file-name="${file.filename}" data-file-url="${file.url || ''}">
+                        <i class="${getFileIconClass(file.filetype || file.type)}"></i>
+                        <span class="file-name">${file.filename || file.name}</span>
+                        <span class="file-date">${new Date(file.created_at).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+
+                tabContent.innerHTML = fileList;
+
+                // Add click handlers for file items
+                tabContent.querySelectorAll('.file-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        // Highlight selected file
+                        tabContent.querySelectorAll('.file-item').forEach(i => i.classList.remove('selected'));
+                        this.classList.add('selected');
+
+                        // Store selected file info
+                        const fileId = this.dataset.fileId;
+                        const fileName = this.dataset.fileName;
+                        const fileUrl = this.dataset.fileUrl;
+
+                        // Enable process button if a file is selected
+                        processNotesBtn.disabled = false;
+                        processNotesBtn.textContent = `Process ${fileName}`;
+
+                        // Store selected file for processing
+                        selectedFileForProcessing = { id: fileId, name: fileName, url: fileUrl };
+                    });
+                });
+            }
+
+            // Load initial data for tabs
+            fetchUserUploads().then(uploads => {
+                populateTabContent('recent-tab-content-right', uploads.slice(0, 10)); // Recent 10
+                populateTabContent('library-tab-content-right', uploads); // All for library
+            });
+
+            fetchFavoriteFiles().then(favorites => {
+                populateTabContent('favorites-tab-content-right', favorites);
+            });
+
+            let selectedFileForProcessing = null;
+
+            // Function to show custom notification popup
+            function showNotificationPopup(message, title = 'Success!', type = 'success') {
+                const customPopup = document.getElementById('custom-popup');
+                const popupTitle = document.getElementById('popup-title');
+                const popupDescription = document.getElementById('popup-description');
+
+                // Remove previous type classes
+                popupTitle.classList.remove('success', 'error', 'info');
+                // Add current type class
+                popupTitle.classList.add(type);
+
+                popupTitle.textContent = title;
+                popupDescription.textContent = message;
+                customPopup.style.display = 'flex';
+
+                // Auto-hide after 4 seconds for success, 5 seconds for errors
+                const hideDelay = type === 'error' ? 5000 : 4000;
+                setTimeout(() => {
+                    customPopup.style.display = 'none';
+                }, hideDelay);
+            }
+
             processNotesBtn.addEventListener('click', async function() {
-                if (notesFileInput.files && notesFileInput.files.length > 0) {
-                    const file = notesFileInput.files[0];
-                    console.log('Processing file:', file.name);
+                if (selectedFileForProcessing) {
+                    const file = selectedFileForProcessing;
+                    console.log('Processing existing file:', file.name);
 
                     // Show loading state
                     processNotesBtn.disabled = true;
-                    processNotesBtn.textContent = 'Processing...';
+                    processNotesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+                    try {
+                        // For existing files, we might need to process via notesBreakdown
+                        // Assuming we call /notesBreakdown/process-upload with file ID
+                        const response = await fetch(`${API_BASE_URL}/notes-breakdown/process-upload`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                            },
+                            body: JSON.stringify({ fileId: file.id })
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            console.log('Processing successful:', result);
+                            showNotificationPopup(`File "${file.name}" is being processed! AI analysis will be available shortly.`, 'Processing Started!', 'success');
+
+                            // Clear selection
+                            selectedFileForProcessing = null;
+                            processNotesBtn.disabled = true;
+                            processNotesBtn.textContent = 'Process Notes';
+
+                            // Remove selection highlight
+                            uploadTabContent.querySelectorAll('.file-item.selected').forEach(item => item.classList.remove('selected'));
+                        } else {
+                            console.error('Processing failed:', result);
+                            showNotificationPopup(`Processing failed: ${result.message || 'Unknown error'}`, 'Processing Failed', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Processing error:', error);
+                        showNotificationPopup('Processing failed. Please try again.', 'Processing Error', 'error');
+                    } finally {
+                        // Reset button state
+                        processNotesBtn.disabled = false;
+                        processNotesBtn.innerHTML = 'Process Notes';
+                    }
+                } else if (notesFileInput.files && notesFileInput.files.length > 0) {
+                    const file = notesFileInput.files[0];
+                    console.log('Uploading new file:', file.name);
+
+                    // Show loading state
+                    processNotesBtn.disabled = true;
+                    processNotesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
 
                     try {
                         // Create FormData for file upload
@@ -402,7 +912,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                         formData.append('title', file.name); // Use filename as title
 
                         // Send file to backend
-                        const response = await fetch(`${API_BASE_URL}/uploads/notes`, {
+                        const response = await fetch(`${API_BASE_URL}/upload/notes`, {
                             method: 'POST',
                             headers: {
                                 'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -414,27 +924,34 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                         if (response.ok) {
                             console.log('Upload successful:', result);
-                            alert(`File "${file.name}" uploaded successfully! AI analysis will be available shortly.`);
+                            showNotificationPopup(`File "${file.name}" has been uploaded successfully to the database! AI analysis will be available shortly.`, 'Upload Successful!', 'success');
 
                             // Clear the file input and reset UI
                             handleFileSelection(null);
 
-                            // Optionally refresh the file list or update UI
-                            // You could call a function to refresh the Recent tab here
+                            // Refresh the file lists
+                            fetchUserUploads().then(uploads => {
+                                populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
+                                populateTabContent('library-tab-content-right', uploads);
+                            });
+
+                            fetchFavoriteFiles().then(favorites => {
+                                populateTabContent('favorites-tab-content-right', favorites);
+                            });
                         } else {
                             console.error('Upload failed:', result);
-                            alert(`Upload failed: ${result.message || 'Unknown error'}`);
+                            showNotificationPopup(`Upload failed: ${result.message || 'Unknown error'}`, 'Upload Failed', 'error');
                         }
                     } catch (error) {
                         console.error('Upload error:', error);
-                        alert('Upload failed. Please try again.');
+                        showNotificationPopup('Upload failed. Please check your connection and try again.', 'Upload Error', 'error');
                     } finally {
                         // Reset button state
                         processNotesBtn.disabled = false;
-                        processNotesBtn.textContent = 'Process Notes';
+                        processNotesBtn.innerHTML = 'Process Notes';
                     }
                 } else {
-                    alert('Please select a file first.');
+                    showNotificationPopup('Please select a file first by choosing from the tabs or uploading a new file.', 'No File Selected', 'info');
                 }
             });
         });

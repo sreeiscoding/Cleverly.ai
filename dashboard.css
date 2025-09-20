@@ -576,6 +576,18 @@ main {
     display: inline-block; /* Shrink background to text size */
 }
 
+.popup-title.success {
+    background-color: #28a745; /* Green for success */
+}
+
+.popup-title.error {
+    background-color: #dc3545; /* Red for error */
+}
+
+.popup-title.info {
+    background-color: #17a2b8; /* Blue for info */
+}
+
 .popup-description {
     font-size: 0.9rem; /* Reduced font size */
     color: #555;
@@ -868,4 +880,137 @@ main {
 
 .process-button:hover:not(:disabled) {
     background-color: #5a4bb0;
+}
+
+/* New styles for integrated features */
+.file-select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    margin-bottom: 1rem;
+}
+
+.results-area {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.results-area pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: #f9f9f9;
+    margin-bottom: 1rem;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-item {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    text-align: center;
+    border: 1px solid #eee;
+}
+
+.stat-item h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.stat-item p {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: teal;
+}
+
+.search-result {
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    background-color: #f9f9f9;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+}
+
+.search-result h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.search-result p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #777;
+    line-height: 1.4;
+}
+
+.file-item {
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+    background-color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.file-item:hover {
+    background-color: #f0f0f0;
+}
+
+.file-item.selected {
+    background-color: #e6fffa;
+    border-color: teal;
+}
+
+.file-item i {
+    margin-right: 0.8rem;
+    font-size: 1.2rem;
+    color: #6a5acd;
+}
+
+.file-date {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #777;
+}
+
+/* Spinner animation for loading states */
+.fa-spinner {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
