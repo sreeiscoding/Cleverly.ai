@@ -11,18 +11,50 @@ exports.register = async (req, res, next) => {
     });
     const { email, password, name, account_type } = schema.parse(req.body);
 
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    console.log(`[${new Date().toISOString()}] Registering user: ${email}`);
+
+    // Add timeout for registration
+    const registerTimeout = 15000; // 15 seconds
+    const registerPromise = supabaseAdmin.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
       user_metadata: { name }
     });
-    if (error) return res.status(400).json({ error: error.message });
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Registration timed out')), registerTimeout)
+    );
 
-    await supabaseAdmin.from('users_app').insert({ id: data.id, email, name, plan: 'free', account_type });
+    const { data, error } = await Promise.race([registerPromise, timeoutPromise]);
 
+    if (error) {
+      console.error(`[${new Date().toISOString()}] Registration error for ${email}:`, error.message);
+      return res.status(400).json({ error: error.message });
+    }
+
+    console.log(`[${new Date().toISOString()}] User created in auth, inserting profile for ${email}`);
+
+    // Insert user profile with timeout
+    const profileInsertPromise = supabaseAdmin.from('users_app').insert({
+      id: data.id,
+      email,
+      name,
+      plan: 'free',
+      account_type
+    });
+    const profileTimeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('Profile creation timed out')), 10000)
+    );
+
+    await Promise.race([profileInsertPromise, profileTimeoutPromise]);
+
+    console.log(`[${new Date().toISOString()}] Registration successful for ${email}`);
     res.status(201).json({ message: 'User registered successfully', user: { id: data.id, email, name, account_type } });
   } catch (err) {
+    console.error(`[${new Date().toISOString()}] Registration failed:`, err.message);
+    if (err.message.includes('timed out')) {
+      return res.status(504).json({ error: 'Registration service temporarily unavailable. Please try again later.' });
+    }
     next(err);
   }
 };
@@ -36,27 +68,74 @@ exports.login = async (req, res, next) => {
 
     const { email, password } = schema.parse(req.body);
 
-    const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
-    if (error) return res.status(401).json({ error: error.message });
+    // Add timeout and retry for auth operations
+    const authTimeout = 15000; // 15 seconds
+    const maxRetries = 2;
 
-    // Fetch user profile from users_app to get account_type
-    const { data: userProfile, error: profileError } = await supabaseAdmin
-      .from('users_app')
-      .select('account_type')
-      .eq('id', data.user.id)
-      .single();
+    let lastError;
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`[${new Date().toISOString()}] Login attempt ${attempt + 1}/${maxRetries + 1} for ${email}`);
 
-    if (profileError) {
-      console.error('Error fetching user profile:', profileError);
-      // Continue without account_type if error
+        const authPromise = supabaseClient.auth.signInWithPassword({ email, password });
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Authentication timed out')), authTimeout)
+        );
+
+        const { data, error } = await Promise.race([authPromise, timeoutPromise]);
+
+        if (error) {
+          console.error(`[${new Date().toISOString()}] Auth error on attempt ${attempt + 1}:`, error.message);
+          lastError = error;
+          if (attempt < maxRetries && (error.message.includes('timeout') || error.message.includes('network'))) {
+            const delay = Math.min(1000 * Math.pow(2, attempt), 5000); // Exponential backoff
+            console.log(`[${new Date().toISOString()}] Retrying login in ${delay}ms...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
+          }
+          return res.status(401).json({ error: error.message });
+        }
+
+        console.log(`[${new Date().toISOString()}] Login successful for ${email} on attempt ${attempt + 1}`);
+
+        // Fetch user profile from users_app to get account_type
+        const { data: userProfile, error: profileError } = await supabaseAdmin
+          .from('users_app')
+          .select('account_type')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profileError) {
+          console.error('Error fetching user profile:', profileError);
+          // Continue without account_type if error
+        }
+
+        const userWithAccountType = {
+          ...data.user,
+          account_type: userProfile?.account_type || 'student'
+        };
+
+        res.json({ token: data.session.access_token, user: userWithAccountType });
+        return; // Exit the function on success
+
+      } catch (err) {
+        console.error(`[${new Date().toISOString()}] Unexpected error on attempt ${attempt + 1}:`, err.message);
+        lastError = err;
+        if (attempt < maxRetries && (err.message.includes('timeout') || err.message.includes('network'))) {
+          const delay = Math.min(1000 * Math.pow(2, attempt), 5000);
+          console.log(`[${new Date().toISOString()}] Retrying after unexpected error in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        // If we've exhausted retries or it's not a retryable error, break out of loop
+        break;
+      }
     }
 
-    const userWithAccountType = {
-      ...data.user,
-      account_type: userProfile?.account_type || 'student'
-    };
+    // If we get here, all retries failed
+    console.error(`[${new Date().toISOString()}] Login failed after ${maxRetries + 1} attempts for ${email}`);
+    return res.status(500).json({ error: 'Authentication service temporarily unavailable. Please try again later.' });
 
-    res.json({ token: data.session.access_token, user: userWithAccountType });
   } catch (err) {
     next(err);
   }

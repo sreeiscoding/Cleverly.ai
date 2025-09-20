@@ -123,6 +123,11 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     sidebarBtns.forEach(btn => {
         btn.addEventListener('click', function() {
+            // Prevent clicking if disabled
+            if (this.hasAttribute('data-initial-disabled')) {
+                return;
+            }
+
             sidebarBtns.forEach(b => b.classList.remove('active'));
             this.classList.add('active');
             // Remove active class from start button if it has it
@@ -131,7 +136,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             }
 
             // When any sidebar button is clicked, disable the 8 links again
-            document.querySelectorAll('.sidebar-btn[data-initial-disabled]').forEach(btnToDisable => {
+            document.querySelectorAll('.sidebar-btn:not([data-feature="main"])').forEach(btnToDisable => {
                 btnToDisable.setAttribute('data-initial-disabled', 'true');
             });
 
@@ -145,16 +150,10 @@ document.addEventListener('DOMContentLoaded', async function() {
                 const customPopup = document.getElementById('custom-popup');
                 const popupTitle = document.getElementById('popup-title');
                 const popupDescription = document.getElementById('popup-description');
-                
+
                 popupTitle.textContent = this.querySelector('h4').textContent;
                 popupDescription.textContent = this.querySelector('p').textContent;
                 customPopup.style.display = 'flex';
-                
-                // Ensure upload tab is hidden when a sidebar button is clicked
-                const uploadTabContent = document.getElementById('upload-tab-content');
-                if (uploadTabContent) {
-                    uploadTabContent.style.display = 'none';
-                }
             }
         });
     });
@@ -391,10 +390,49 @@ document.addEventListener('DOMContentLoaded', async function() {
                 if (notesFileInput.files && notesFileInput.files.length > 0) {
                     const file = notesFileInput.files[0];
                     console.log('Processing file:', file.name);
-                    // Here you would typically send the file to the backend
-                    // For now, we'll just show an alert
-                    alert(`File "${file.name}" is being processed!`);
-                    // You might want to add a loading state here
+
+                    // Show loading state
+                    processNotesBtn.disabled = true;
+                    processNotesBtn.textContent = 'Processing...';
+
+                    try {
+                        // Create FormData for file upload
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('title', file.name); // Use filename as title
+
+                        // Send file to backend
+                        const response = await fetch(`${API_BASE_URL}/uploads/notes`, {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                            },
+                            body: formData
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            console.log('Upload successful:', result);
+                            alert(`File "${file.name}" uploaded successfully! AI analysis will be available shortly.`);
+
+                            // Clear the file input and reset UI
+                            handleFileSelection(null);
+
+                            // Optionally refresh the file list or update UI
+                            // You could call a function to refresh the Recent tab here
+                        } else {
+                            console.error('Upload failed:', result);
+                            alert(`Upload failed: ${result.message || 'Unknown error'}`);
+                        }
+                    } catch (error) {
+                        console.error('Upload error:', error);
+                        alert('Upload failed. Please try again.');
+                    } finally {
+                        // Reset button state
+                        processNotesBtn.disabled = false;
+                        processNotesBtn.textContent = 'Process Notes';
+                    }
                 } else {
                     alert('Please select a file first.');
                 }
