@@ -140,11 +140,11 @@ document.addEventListener('DOMContentLoaded', async function() {
                 uploads.forEach(upload => {
                     const option = document.createElement('option');
                     option.value = upload.id;
-                    option.textContent = upload.filename || upload.name;
+                    option.textContent = upload.file_name || upload.name;
                     select.appendChild(option);
                 });
             }
-        
+
             // Feature button event listeners
             document.addEventListener('DOMContentLoaded', function() {
                 // Smart Summary
@@ -419,7 +419,7 @@ document.addEventListener('DOMContentLoaded', async function() {
                             if (response.ok) {
                                 const resultsHtml = results.map(result => `
                                     <div class="search-result">
-                                        <h4>${result.filename}</h4>
+                                        <h4>${result.file_name}</h4>
                                         <p>${result.snippet || 'No preview available'}</p>
                                     </div>
                                 `).join('');
@@ -732,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             // Function to fetch user uploads
             async function fetchUserUploads() {
                 try {
-                    const response = await fetch(`${API_BASE_URL}/upload/user/uploads`, {
+                    const response = await fetch(`${API_BASE_URL}/upload/notes`, {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${localStorage.getItem('authToken')}`
@@ -775,6 +775,478 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
             }
 
+            // Function to fetch user folders
+            async function fetchUserFolders() {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/folders`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const folders = await response.json();
+                        return folders;
+                    } else {
+                        console.error('Failed to fetch folders:', response.statusText);
+                        return [];
+                    }
+                } catch (error) {
+                    console.error('Error fetching folders:', error);
+                    return [];
+                }
+            }
+
+            // Function to create a new folder
+            async function createNewFolder(folderName, description = '', color = '#14807a') {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/folders`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        },
+                        body: JSON.stringify({ name: folderName, description, color })
+                    });
+
+                    if (response.ok) {
+                        const folder = await response.json();
+                        return folder;
+                    } else {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to create folder');
+                    }
+                } catch (error) {
+                    console.error('Error creating folder:', error);
+                    throw error;
+                }
+            }
+
+            // Function to add file to folder
+            async function addFileToFolder(fileId, folderId) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/folders/add-file`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        },
+                        body: JSON.stringify({ noteId: fileId, folderId })
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.message || 'Failed to add file to folder');
+                    }
+                } catch (error) {
+                    console.error('Error adding file to folder:', error);
+                    throw error;
+                }
+            }
+
+            // Function to get folder files
+            async function getFolderFiles(folderId) {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/upload/folders/${folderId}/files`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                        }
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        return data.files || [];
+                    } else {
+                        console.error('Failed to fetch folder files:', response.statusText);
+                        return [];
+                    }
+                } catch (error) {
+                    console.error('Error fetching folder files:', error);
+                    return [];
+                }
+            }
+
+            // Function to populate Library tab with folders and files
+            async function populateLibraryTab(files) {
+                const tabContent = uploadTabContent.querySelector('#library-tab-content-right');
+                if (!tabContent) return;
+
+                // Get folders
+                const folders = await fetchUserFolders();
+
+                // Separate files with and without folders
+                const filesInFolders = files.filter(file => file.folder_id);
+                const filesWithoutFolders = files.filter(file => !file.folder_id);
+
+                // Create Library tab content
+                let content = `
+                    <div class="library-header">
+                        <button class="create-folder-btn">
+                            <i class="fas fa-folder-plus"></i>
+                            Create Folder
+                        </button>
+                    </div>
+                `;
+
+                // Folders section
+                if (folders.length > 0) {
+                    content += `
+                        <div class="library-section">
+                            <h4 class="section-title">
+                                <i class="fas fa-folder"></i>
+                                Folders (${folders.length})
+                            </h4>
+                            <div class="folders-grid">
+                                ${folders.map(folder => `
+                                    <div class="folder-item" data-folder-id="${folder.id}" data-folder-name="${folder.name}">
+                                        <div class="folder-icon" style="background-color: ${folder.color}">
+                                            <i class="fas fa-folder"></i>
+                                        </div>
+                                        <div class="folder-info">
+                                            <span class="folder-name">${folder.name}</span>
+                                            <span class="folder-count">${filesInFolders.filter(f => f.folder_id === folder.id).length} files</span>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Files section
+                content += `
+                    <div class="library-section">
+                        <h4 class="section-title">
+                            <i class="fas fa-file"></i>
+                            Files (${filesWithoutFolders.length})
+                        </h4>
+                        <div class="files-list">
+                `;
+
+                if (filesWithoutFolders.length === 0) {
+                    content += '<p class="no-files">No files in library.</p>';
+                } else {
+                    content += filesWithoutFolders.map(file => `
+                        <div class="file-item" data-file-id="${file.id}" data-file-name="${file.file_name}" data-file-url="${file.url || ''}">
+                            <i class="${getFileIconClass(file.file_type || file.type)}"></i>
+                            <span class="file-name">${file.file_name || file.name}</span>
+                            <span class="file-date">${new Date(file.created_at).toLocaleDateString()}</span>
+                            <i class="move-to-folder fas fa-folder" data-file-id="${file.id}" data-file-name="${file.file_name}" title="Move to folder"></i>
+                            <i class="favorite-star ${file.is_favorite ? 'fas fa-star' : 'far fa-star'}" data-file-id="${file.id}"></i>
+                            <i class="delete-file fas fa-trash-alt" data-file-id="${file.id}" data-file-name="${file.file_name}"></i>
+                        </div>
+                    `).join('');
+                }
+
+                content += `
+                        </div>
+                    </div>
+                `;
+
+                tabContent.innerHTML = content;
+
+                // Add event listeners
+                addLibraryEventListeners(tabContent, files);
+            }
+
+            // Function to add event listeners for library tab
+            function addLibraryEventListeners(tabContent, allFiles) {
+                // Create folder button
+                const createFolderBtn = tabContent.querySelector('.create-folder-btn');
+                if (createFolderBtn) {
+                    createFolderBtn.addEventListener('click', async () => {
+                        const folderName = await showCreateFolderPopup('Create New Folder');
+                        if (folderName && folderName.trim()) {
+                            try {
+                                await createNewFolder(folderName.trim());
+                                showNotificationPopup(`Folder "${folderName}" created successfully!`, 'Folder Created', 'success');
+
+                                // Refresh library
+                                fetchUserUploads().then(uploads => {
+                                    populateLibraryTab(uploads);
+                                });
+                            } catch (error) {
+                                showNotificationPopup(error.message, 'Folder Creation Failed', 'error');
+                            }
+                        }
+                    });
+                }
+
+                // Folder click handlers
+                tabContent.querySelectorAll('.folder-item').forEach(folder => {
+                    folder.addEventListener('click', async function() {
+                        const folderId = this.dataset.folderId;
+                        const folderName = this.dataset.folderName;
+
+                        // Show folder contents in a popup or expand
+                        const folderFiles = await getFolderFiles(folderId);
+
+                        if (folderFiles.length === 0) {
+                            showNotificationPopup(`Folder "${folderName}" is empty.`, 'Folder Contents', 'info');
+                            return;
+                        }
+
+                        // Create folder contents popup
+                        const popup = document.createElement('div');
+                        popup.id = 'folder-popup';
+                        popup.className = 'custom-popup';
+                        popup.innerHTML = `
+                            <div class="popup-content folder-popup-content">
+                                <span class="close-button" id="folder-close">&times;</span>
+                                <h2>Folder: ${folderName}</h2>
+                                <div class="folder-files-list">
+                                    ${folderFiles.map(file => `
+                                        <div class="file-item" data-file-id="${file.id}" data-file-name="${file.file_name}">
+                                            <i class="${getFileIconClass(file.file_type || file.type)}"></i>
+                                            <span class="file-name">${file.file_name || file.name}</span>
+                                            <span class="file-date">${new Date(file.created_at).toLocaleDateString()}</span>
+                                            <button class="remove-from-folder-btn" data-file-id="${file.id}" data-file-name="${file.file_name}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+
+                        document.body.appendChild(popup);
+                        popup.style.display = 'flex';
+
+                        // Close button
+                        popup.querySelector('#folder-close').addEventListener('click', () => {
+                            document.body.removeChild(popup);
+                        });
+
+                        // Remove from folder buttons
+                        popup.querySelectorAll('.remove-from-folder-btn').forEach(btn => {
+                            btn.addEventListener('click', async function() {
+                                const fileId = this.dataset.fileId;
+                                const fileName = this.dataset.fileName;
+
+                                const confirmed = await showConfirmationPopup(
+                                    `Remove "${fileName}" from folder "${folderName}"?`,
+                                    'Remove from Folder'
+                                );
+
+                                if (confirmed) {
+                                    try {
+                                        // Remove file from folder (set folder_id to null)
+                                        await fetch(`${API_BASE_URL}/upload/notes/${fileId}`, {
+                                            method: 'PATCH',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                            },
+                                            body: JSON.stringify({ folder_id: null })
+                                        });
+
+                                        showNotificationPopup(`File removed from folder successfully!`, 'File Removed', 'success');
+                                        document.body.removeChild(popup);
+
+                                        // Refresh library
+                                        fetchUserUploads().then(uploads => {
+                                            populateLibraryTab(uploads);
+                                        });
+                                    } catch (error) {
+                                        showNotificationPopup('Failed to remove file from folder.', 'Error', 'error');
+                                    }
+                                }
+                            });
+                        });
+
+                        // File click in folder popup
+                        popup.querySelectorAll('.file-item').forEach(item => {
+                            item.addEventListener('click', function(e) {
+                                if (!e.target.closest('.remove-from-folder-btn')) {
+                                    const fileId = this.dataset.fileId;
+                                    const fileName = this.dataset.fileName;
+
+                                    // Select file for processing
+                                    uploadTabContent.querySelectorAll('.file-item').forEach(i => i.classList.remove('selected'));
+                                    this.classList.add('selected');
+
+                                    processNotesBtn.disabled = false;
+                                    processNotesBtn.textContent = `Process ${fileName}`;
+                                    selectedFileForProcessing = { id: fileId, name: fileName };
+                                }
+                            });
+                        });
+                    });
+                });
+
+                // File item click handlers (for files not in folders)
+                tabContent.querySelectorAll('.files-list .file-item').forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        if (!e.target.closest('.favorite-star, .delete-file')) {
+                            // Highlight selected file
+                            tabContent.querySelectorAll('.file-item').forEach(i => i.classList.remove('selected'));
+                            this.classList.add('selected');
+
+                            // Store selected file info
+                            const fileId = this.dataset.fileId;
+                            const fileName = this.dataset.fileName;
+
+                            // Enable process button if a file is selected
+                            processNotesBtn.disabled = false;
+                            processNotesBtn.textContent = `Process ${fileName}`;
+
+                            // Store selected file for processing
+                            selectedFileForProcessing = { id: fileId, name: fileName };
+                        }
+                    });
+                });
+
+                // Favorite star handlers
+                tabContent.querySelectorAll('.favorite-star').forEach(star => {
+                    star.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+
+                        const fileId = this.dataset.fileId;
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/upload/notes/${fileId}/favorite`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                this.classList.toggle('fas');
+                                this.classList.toggle('far');
+
+                                // Refresh all tabs
+                                fetchUserUploads().then(uploads => {
+                                    populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
+                                    populateLibraryTab(uploads);
+                                });
+
+                                fetchFavoriteFiles().then(favorites => {
+                                    populateTabContent('favorites-tab-content-right', favorites);
+                                });
+                            }
+                        } catch (error) {
+                            console.error('Error toggling favorite:', error);
+                        }
+                    });
+                });
+
+                // Move to folder handlers
+                tabContent.querySelectorAll('.move-to-folder').forEach(moveBtn => {
+                    moveBtn.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+
+                        const fileId = this.dataset.fileId;
+                        const fileName = this.dataset.fileName;
+
+                        // Get available folders
+                        const folders = await fetchUserFolders();
+
+                        if (folders.length === 0) {
+                            showNotificationPopup('No folders available. Create a folder first.', 'No Folders', 'info');
+                            return;
+                        }
+
+                        // Create folder selection popup
+                        const popup = document.createElement('div');
+                        popup.id = 'folder-select-popup';
+                        popup.className = 'custom-popup';
+                        popup.innerHTML = `
+                            <div class="popup-content">
+                                <span class="close-button" id="folder-select-close">&times;</span>
+                                <h2>Move "${fileName}" to Folder</h2>
+                                <div class="folder-selection">
+                                    ${folders.map(folder => `
+                                        <div class="folder-option" data-folder-id="${folder.id}" data-folder-name="${folder.name}">
+                                            <div class="folder-option-icon" style="background-color: ${folder.color}">
+                                                <i class="fas fa-folder"></i>
+                                            </div>
+                                            <span class="folder-option-name">${folder.name}</span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `;
+
+                        document.body.appendChild(popup);
+                        popup.style.display = 'flex';
+
+                        // Handle folder selection
+                        popup.querySelectorAll('.folder-option').forEach(option => {
+                            option.addEventListener('click', async function() {
+                                const folderId = this.dataset.folderId;
+                                const folderName = this.dataset.folderName;
+
+                                try {
+                                    await addFileToFolder(fileId, folderId);
+                                    showNotificationPopup(`File moved to "${folderName}" successfully!`, 'File Moved', 'success');
+                                    document.body.removeChild(popup);
+
+                                    // Refresh library
+                                    fetchUserUploads().then(uploads => {
+                                        populateLibraryTab(uploads);
+                                    });
+                                } catch (error) {
+                                    showNotificationPopup('Failed to move file to folder.', 'Error', 'error');
+                                }
+                            });
+                        });
+
+                        // Close button
+                        popup.querySelector('#folder-select-close').addEventListener('click', () => {
+                            document.body.removeChild(popup);
+                        });
+                    });
+                });
+
+                // Delete handlers
+                tabContent.querySelectorAll('.delete-file').forEach(deleteBtn => {
+                    deleteBtn.addEventListener('click', async function(e) {
+                        e.stopPropagation();
+
+                        const fileId = this.dataset.fileId;
+                        const fileName = this.dataset.fileName;
+
+                        const confirmed = await showConfirmationPopup(
+                            `Are you sure you want to delete "${fileName}"? This action cannot be undone.`,
+                            'Confirm Delete'
+                        );
+
+                        if (!confirmed) return;
+
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/upload/notes/${fileId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                showNotificationPopup(`File "${fileName}" has been deleted successfully.`, 'File Deleted', 'success');
+
+                                // Refresh all tabs
+                                fetchUserUploads().then(uploads => {
+                                    populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
+                                    populateLibraryTab(uploads);
+                                });
+
+                                fetchFavoriteFiles().then(favorites => {
+                                    populateTabContent('favorites-tab-content-right', favorites);
+                                });
+                            } else {
+                                const errorData = await response.json();
+                                showNotificationPopup(`Failed to delete file: ${errorData.message || 'Unknown error'}`, 'Delete Failed', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting file:', error);
+                            showNotificationPopup('Failed to delete file. Please try again.', 'Delete Error', 'error');
+                        }
+                    });
+                });
+            }
+
             // Function to populate tab content
             function populateTabContent(tabId, files) {
                 const tabContent = uploadTabContent.querySelector(`#${tabId}`);
@@ -786,10 +1258,12 @@ document.addEventListener('DOMContentLoaded', async function() {
                 }
 
                 const fileList = files.map(file => `
-                    <div class="file-item" data-file-id="${file.id}" data-file-name="${file.filename}" data-file-url="${file.url || ''}">
-                        <i class="${getFileIconClass(file.filetype || file.type)}"></i>
-                        <span class="file-name">${file.filename || file.name}</span>
+                    <div class="file-item" data-file-id="${file.id}" data-file-name="${file.file_name}" data-file-url="${file.url || ''}">
+                        <i class="${getFileIconClass(file.file_type || file.type)}"></i>
+                        <span class="file-name">${file.file_name || file.name}</span>
                         <span class="file-date">${new Date(file.created_at).toLocaleDateString()}</span>
+                        <i class="favorite-star ${file.is_favorite ? 'fas fa-star' : 'far fa-star'}" data-file-id="${file.id}"></i>
+                        <i class="delete-file fas fa-trash-alt" data-file-id="${file.id}" data-file-name="${file.file_name}"></i>
                     </div>
                 `).join('');
 
@@ -815,12 +1289,101 @@ document.addEventListener('DOMContentLoaded', async function() {
                         selectedFileForProcessing = { id: fileId, name: fileName, url: fileUrl };
                     });
                 });
+
+                // Add click handlers for favorite stars
+                tabContent.querySelectorAll('.favorite-star').forEach(star => {
+                    star.addEventListener('click', async function(e) {
+                        e.stopPropagation(); // Prevent triggering file item click
+
+                        const fileId = this.dataset.fileId;
+                        const isCurrentlyFavorite = this.classList.contains('fas');
+
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/upload/notes/${fileId}/favorite`, {
+                                method: 'POST',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                // Toggle the star appearance
+                                this.classList.toggle('fas');
+                                this.classList.toggle('far');
+
+                                // Refresh all tabs to show updated favorite status
+                                fetchUserUploads().then(uploads => {
+                                    populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
+                                    populateTabContent('library-tab-content-right', uploads);
+                                });
+
+                                fetchFavoriteFiles().then(favorites => {
+                                    populateTabContent('favorites-tab-content-right', favorites);
+                                });
+                            } else {
+                                console.error('Failed to toggle favorite');
+                            }
+                        } catch (error) {
+                            console.error('Error toggling favorite:', error);
+                        }
+                    });
+                });
+
+                // Add click handlers for delete buttons
+                tabContent.querySelectorAll('.delete-file').forEach(deleteBtn => {
+                    deleteBtn.addEventListener('click', async function(e) {
+                        e.stopPropagation(); // Prevent triggering file item click
+
+                        const fileId = this.dataset.fileId;
+                        const fileName = this.dataset.fileName;
+
+                        // Show custom confirmation dialog
+                        const confirmed = await showConfirmationPopup(
+                            `Are you sure you want to delete "${fileName}"? This action cannot be undone.`,
+                            'Confirm Delete'
+                        );
+
+                        if (!confirmed) {
+                            return;
+                        }
+
+                        try {
+                            const response = await fetch(`${API_BASE_URL}/upload/notes/${fileId}`, {
+                                method: 'DELETE',
+                                headers: {
+                                    'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+                                }
+                            });
+
+                            if (response.ok) {
+                                // Show success notification
+                                showNotificationPopup(`File "${fileName}" has been deleted successfully.`, 'File Deleted', 'success');
+
+                                // Refresh all tabs to remove the deleted file
+                                fetchUserUploads().then(uploads => {
+                                    populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
+                                    populateTabContent('library-tab-content-right', uploads);
+                                });
+
+                                fetchFavoriteFiles().then(favorites => {
+                                    populateTabContent('favorites-tab-content-right', favorites);
+                                });
+                            } else {
+                                const errorData = await response.json();
+                                showNotificationPopup(`Failed to delete file: ${errorData.message || 'Unknown error'}`, 'Delete Failed', 'error');
+                            }
+                        } catch (error) {
+                            console.error('Error deleting file:', error);
+                            showNotificationPopup('Failed to delete file. Please try again.', 'Delete Error', 'error');
+                        }
+                    });
+                });
             }
 
             // Load initial data for tabs
             fetchUserUploads().then(uploads => {
                 populateTabContent('recent-tab-content-right', uploads.slice(0, 10)); // Recent 10
-                populateTabContent('library-tab-content-right', uploads); // All for library
+                populateLibraryTab(uploads); // Special handling for library with folders
             });
 
             fetchFavoriteFiles().then(favorites => {
@@ -849,6 +1412,131 @@ document.addEventListener('DOMContentLoaded', async function() {
                 setTimeout(() => {
                     customPopup.style.display = 'none';
                 }, hideDelay);
+            }
+
+            // Function to show custom confirmation popup
+            function showConfirmationPopup(message, title = 'Confirm Action') {
+                return new Promise((resolve) => {
+                    // Create confirmation popup elements
+                    const confirmPopup = document.createElement('div');
+                    confirmPopup.id = 'confirm-popup';
+                    confirmPopup.className = 'custom-popup';
+                    confirmPopup.innerHTML = `
+                        <div class="popup-content">
+                            <span class="close-button" id="confirm-close">&times;</span>
+                            <h2 id="confirm-title">${title}</h2>
+                            <p id="confirm-description">${message}</p>
+                            <div class="confirm-buttons">
+                                <button class="confirm-btn confirm-yes">Yes, Delete</button>
+                                <button class="confirm-btn confirm-no">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(confirmPopup);
+
+                    // Handle button clicks
+                    const yesBtn = confirmPopup.querySelector('.confirm-yes');
+                    const noBtn = confirmPopup.querySelector('.confirm-no');
+                    const closeBtn = confirmPopup.querySelector('#confirm-close');
+
+                    const cleanup = () => {
+                        document.body.removeChild(confirmPopup);
+                    };
+
+                    yesBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve(true);
+                    });
+
+                    noBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve(false);
+                    });
+
+                    closeBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve(false);
+                    });
+
+                    // Show popup
+                    confirmPopup.style.display = 'flex';
+                });
+            }
+
+            // Function to show custom create folder popup
+            function showCreateFolderPopup(title = 'Create New Folder') {
+                return new Promise((resolve) => {
+                    // Create folder creation popup elements
+                    const createPopup = document.createElement('div');
+                    createPopup.id = 'create-folder-popup';
+                    createPopup.className = 'custom-popup';
+                    createPopup.innerHTML = `
+                        <div class="popup-content">
+                            <span class="close-button" id="create-close">&times;</span>
+                            <h2>${title}</h2>
+                            <div class="input-group">
+                                <label for="folder-name-input">Folder Name:</label>
+                                <input type="text" id="folder-name-input" placeholder="Enter folder name..." maxlength="50">
+                            </div>
+                            <div class="create-buttons">
+                                <button class="create-btn create-folder-btn">Create Folder</button>
+                                <button class="create-btn cancel-btn">Cancel</button>
+                            </div>
+                        </div>
+                    `;
+
+                    document.body.appendChild(createPopup);
+
+                    // Get input element
+                    const input = createPopup.querySelector('#folder-name-input');
+                    const createBtn = createPopup.querySelector('.create-folder-btn');
+                    const cancelBtn = createPopup.querySelector('.cancel-btn');
+                    const closeBtn = createPopup.querySelector('#create-close');
+
+                    const cleanup = () => {
+                        document.body.removeChild(createPopup);
+                    };
+
+                    // Handle input enter key
+                    input.addEventListener('keypress', (e) => {
+                        if (e.key === 'Enter') {
+                            const folderName = input.value.trim();
+                            if (folderName) {
+                                cleanup();
+                                resolve(folderName);
+                            }
+                        }
+                    });
+
+                    // Focus input
+                    setTimeout(() => input.focus(), 100);
+
+                    createBtn.addEventListener('click', () => {
+                        const folderName = input.value.trim();
+                        if (folderName) {
+                            cleanup();
+                            resolve(folderName);
+                        } else {
+                            input.focus();
+                            input.style.borderColor = '#dc3545';
+                            setTimeout(() => input.style.borderColor = '#ddd', 1000);
+                        }
+                    });
+
+                    cancelBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve(null);
+                    });
+
+                    closeBtn.addEventListener('click', () => {
+                        cleanup();
+                        resolve(null);
+                    });
+
+                    // Show popup
+                    createPopup.style.display = 'flex';
+                });
             }
 
             processNotesBtn.addEventListener('click', async function() {

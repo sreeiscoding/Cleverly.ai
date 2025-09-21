@@ -996,13 +996,384 @@ main {
 .file-item i {
     margin-right: 0.8rem;
     font-size: 1.2rem;
-    color: #6a5acd;
+    color: teal;
 }
 
 .file-date {
     margin-left: auto;
     font-size: 0.8rem;
     color: #777;
+}
+
+.favorite-star {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: teal;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.favorite-star.fas {
+    color: teal; /* Teal color for filled star */
+}
+
+.favorite-star:hover {
+    color: teal;
+}
+
+.delete-file {
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: #dc3545; /* Red color for delete */
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.delete-file:hover {
+    color: #c82333; /* Darker red on hover */
+}
+
+/* Confirmation Popup Styles */
+.confirm-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.confirm-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.confirm-yes {
+    background-color: #dc3545;
+    color: white;
+}
+
+.confirm-yes:hover {
+    background-color: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+}
+
+.confirm-no {
+    background-color: #6c757d;
+    color: white;
+}
+
+.confirm-no:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Library Tab Styles */
+.library-header {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.create-folder-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.25rem;
+    background-color: teal;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+}
+
+.create-folder-btn:hover {
+    background-color: #008080;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 128, 128, 0.3);
+}
+
+.create-folder-btn i {
+    font-size: 1rem;
+}
+
+.library-section {
+    margin-bottom: 2rem;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #eee;
+}
+
+.section-title i {
+    color: teal;
+    font-size: 1.2rem;
+}
+
+.folders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.folder-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.folder-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+    border-color: teal;
+}
+
+.folder-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.folder-info {
+    flex: 1;
+    text-align: right;
+}
+
+.folder-name {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.25rem;
+}
+
+.folder-count {
+    font-size: 0.8rem;
+    color: #777;
+}
+
+.files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.no-files {
+    text-align: center;
+    color: #777;
+    font-style: italic;
+    padding: 2rem;
+}
+
+/* Folder Popup Styles */
+.folder-popup-content {
+    max-width: 600px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.folder-popup-content h2 {
+    margin-bottom: 1.5rem;
+    color: teal;
+}
+
+.folder-files-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.folder-files-list .file-item {
+    padding: 0.75rem;
+    border-radius: 6px;
+    position: relative;
+}
+
+.remove-from-folder-btn {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #dc3545;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0.25rem;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+
+.remove-from-folder-btn:hover {
+    background-color: #f8d7da;
+    color: #c82333;
+}
+
+.move-to-folder {
+    margin-right: 0.5rem;
+    font-size: 0.8rem;
+    color: #6a5acd;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.move-to-folder:hover {
+    color: #5a4bb0;
+}
+
+/* Folder Selection Popup */
+.folder-selection {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.folder-option {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.folder-option:hover {
+    background-color: #f8f9fa;
+    border-color: teal;
+    transform: translateY(-1px);
+}
+
+.folder-option-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1rem;
+}
+
+.folder-option-name {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Create Folder Popup Styles */
+.input-group {
+    margin: 1.5rem 0;
+}
+
+.input-group label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease;
+    box-sizing: border-box;
+}
+
+.input-group input:focus {
+    border-color: teal;
+    box-shadow: 0 0 0 3px rgba(0, 128, 128, 0.1);
+}
+
+.input-group input::placeholder {
+    color: #999;
+}
+
+.create-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
+.create-btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: 'Poppins', sans-serif;
+    min-width: 120px;
+}
+
+.create-folder-btn {
+    background-color: teal;
+    color: white;
+}
+
+.create-folder-btn:hover {
+    background-color: #008080;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 128, 128, 0.3);
+}
+
+.cancel-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Center align text in confirmation and notification popups */
+#confirm-popup .popup-content,
+#custom-popup .popup-content {
+    text-align: center;
 }
 
 /* Spinner animation for loading states */
