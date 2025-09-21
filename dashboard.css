@@ -678,7 +678,7 @@ main {
 
 .tab-links-right {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 0.5rem;
     margin-bottom: 1rem;
 }
@@ -693,6 +693,8 @@ main {
     color: #555;
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
+    display: flex;
+    align-items: center;
 }
 
 .tab-link-right:hover {
@@ -701,6 +703,29 @@ main {
 
 .tab-link-right.active {
     background-color: teal;
+    color: white;
+}
+
+.tab-link-right i {
+    margin-right: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.tab-count {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: inherit;
+    padding: 0.2rem 0.5rem;
+    border-radius: 10px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+.tab-link-right.active .tab-count {
+    background-color: rgba(255, 255, 255, 0.3);
     color: white;
 }
 
@@ -995,7 +1020,7 @@ main {
 
 .file-item i {
     margin-right: 0.8rem;
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: teal;
 }
 

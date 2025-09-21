@@ -616,9 +616,9 @@ document.addEventListener('DOMContentLoaded', async function() {
                     </div>
                     <div class="upload-tabs-right">
                         <div class="tab-links-right">
-                            <button class="tab-link-right active" data-tab-right="recent">Recent</button>
-                            <button class="tab-link-right" data-tab-right="favorites">Favorites</button>
-                            <button class="tab-link-right" data-tab-right="library">Library</button>
+                            <button class="tab-link-right active" data-tab-right="recent"><i class="fas fa-clock"></i> Recent <span class="tab-count" id="recent-count">0</span></button>
+                            <button class="tab-link-right" data-tab-right="favorites"><i class="fas fa-star"></i> Favorites <span class="tab-count" id="favorites-count">0</span></button>
+                            <button class="tab-link-right" data-tab-right="library"><i class="fas fa-folder"></i> Library</button>
                         </div>
                         <div class="tab-content-area-right">
                             <div id="recent-tab-content-right" class="tab-pane-right active">
@@ -965,6 +965,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                                 // Refresh library
                                 fetchUserUploads().then(uploads => {
+                                    document.getElementById('recent-count').textContent = uploads.length;
                                     populateLibraryTab(uploads);
                                 });
                             } catch (error) {
@@ -1047,6 +1048,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                                         // Refresh library
                                         fetchUserUploads().then(uploads => {
+                                            document.getElementById('recent-count').textContent = uploads.length;
                                             populateLibraryTab(uploads);
                                         });
                                     } catch (error) {
@@ -1313,11 +1315,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                                 // Refresh all tabs to show updated favorite status
                                 fetchUserUploads().then(uploads => {
+                                    document.getElementById('recent-count').textContent = uploads.length;
                                     populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
                                     populateTabContent('library-tab-content-right', uploads);
                                 });
 
                                 fetchFavoriteFiles().then(favorites => {
+                                    document.getElementById('favorites-count').textContent = favorites.length;
                                     populateTabContent('favorites-tab-content-right', favorites);
                                 });
                             } else {
@@ -1361,11 +1365,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                                 // Refresh all tabs to remove the deleted file
                                 fetchUserUploads().then(uploads => {
+                                    document.getElementById('recent-count').textContent = uploads.length;
                                     populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
                                     populateTabContent('library-tab-content-right', uploads);
                                 });
 
                                 fetchFavoriteFiles().then(favorites => {
+                                    document.getElementById('favorites-count').textContent = favorites.length;
                                     populateTabContent('favorites-tab-content-right', favorites);
                                 });
                             } else {
@@ -1382,11 +1388,15 @@ document.addEventListener('DOMContentLoaded', async function() {
 
             // Load initial data for tabs
             fetchUserUploads().then(uploads => {
+                // Update Recent tab count (total files, not just displayed)
+                document.getElementById('recent-count').textContent = uploads.length;
                 populateTabContent('recent-tab-content-right', uploads.slice(0, 10)); // Recent 10
                 populateLibraryTab(uploads); // Special handling for library with folders
             });
 
             fetchFavoriteFiles().then(favorites => {
+                // Update Favorites tab count
+                document.getElementById('favorites-count').textContent = favorites.length;
                 populateTabContent('favorites-tab-content-right', favorites);
             });
 
@@ -1619,11 +1629,13 @@ document.addEventListener('DOMContentLoaded', async function() {
 
                             // Refresh the file lists
                             fetchUserUploads().then(uploads => {
+                                document.getElementById('recent-count').textContent = uploads.length;
                                 populateTabContent('recent-tab-content-right', uploads.slice(0, 10));
                                 populateTabContent('library-tab-content-right', uploads);
                             });
 
                             fetchFavoriteFiles().then(favorites => {
+                                document.getElementById('favorites-count').textContent = favorites.length;
                                 populateTabContent('favorites-tab-content-right', favorites);
                             });
                         } else {
